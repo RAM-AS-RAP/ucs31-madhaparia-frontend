@@ -20,6 +20,24 @@ export async function loginPatient(email, password) {
   return response.data
 }
 
+export async function getCurrentUser() {
+  const token = getAuthToken()
+
+  if (!token) {
+    throw new Error(
+      'Authentication token is unavailable.',
+    )
+  }
+
+  const response = await api.get('/auth/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  return response.data
+}
+
 export function saveAuthToken(token) {
   sessionStorage.setItem(TOKEN_KEY, token)
 }

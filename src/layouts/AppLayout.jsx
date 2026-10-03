@@ -1,6 +1,26 @@
-import { Link, Outlet } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useNavigate,
+} from 'react-router-dom'
+
+import { useAuth } from '../context/useAuth'
 
 function AppLayout() {
+  const navigate = useNavigate()
+
+  const {
+    isAdmin,
+    isAuthenticated,
+    logout,
+    user,
+  } = useAuth()
+
+  function handleLogout() {
+    logout()
+    navigate('/')
+  }
+
   return (
     <div className="app-shell">
       <header className="navbar">
@@ -24,29 +44,71 @@ function AppLayout() {
               Home
             </Link>
 
-            <span className="nav-placeholder">
-              Health Awareness
-            </span>
+            {isAuthenticated && (
+              <Link to="/dashboard">
+                Dashboard
+              </Link>
+            )}
 
-            <span className="nav-placeholder">
-              About
-            </span>
+            {isAdmin && (
+              <Link to="/admin">
+                Admin
+              </Link>
+            )}
+
+            {!isAuthenticated && (
+              <>
+                <span className="nav-placeholder">
+                  Health Awareness
+                </span>
+
+                <span className="nav-placeholder">
+                  About
+                </span>
+              </>
+            )}
           </nav>
 
           <div className="nav-actions">
-            <Link
-              to="/login"
-              className="button button-ghost"
-            >
-              Log in
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <div className="nav-user">
+                  <span>
+                    {isAdmin
+                      ? 'Admin'
+                      : 'Patient'}
+                  </span>
 
-            <Link
-              to="/register"
-              className="button button-primary"
-            >
-              Get started
-            </Link>
+                  <strong>
+                    {user?.email}
+                  </strong>
+                </div>
+
+                <button
+                  type="button"
+                  className="button button-ghost"
+                  onClick={handleLogout}
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="button button-ghost"
+                >
+                  Log in
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="button button-primary"
+                >
+                  Get started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
