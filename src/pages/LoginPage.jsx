@@ -1,38 +1,54 @@
 import { useState } from 'react'
 import {
   Link,
+  Navigate,
   useLocation,
+  useNavigate,
 } from 'react-router-dom'
 
-import {
-  clearAuthToken,
-  hasAuthToken,
-  loginPatient,
-  saveAuthToken,
-} from '../services/auth'
+import { useAuth } from '../context/useAuth'
 
 function LoginPage() {
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const {
+    isAuthenticated,
+    login,
+    user,
+  } = useAuth()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] =
+    useState(false)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(
+
+  const accountCreated =
     location.state?.accountCreated
-        ? 'Your account was created successfully. You can now log in.'
-        : '',
-  )
-  const [signedIn, setSignedIn] = useState(
-    hasAuthToken(),
-  )
+
+  const authenticationRequired =
+    location.state?.authenticationRequired
+
+  if (isAuthenticated) {
+    return (
+      <Navigate
+        to={
+          user?.role === 'admin'
+            ? '/admin'
+            : '/dashboard'
+        }
+        replace
+      />
+    )
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
 
     setError('')
-    setSuccess('')
 
     if (!email.trim() || !password) {
       setError(
@@ -44,17 +60,29 @@ function LoginPage() {
     setLoading(true)
 
     try {
-      const data = await loginPatient(
+      const currentUser = await login(
         email.trim(),
         password,
       )
 
-      saveAuthToken(data.access_token)
-      setSignedIn(true)
+      const requestedRoute =
+        location.state?.from
 
-      setSuccess(
-        'Login successful. Your RespiraCare session is ready.',
-      )
+      if (requestedRoute) {
+        navigate(requestedRoute, {
+          replace: true,
+        })
+      } else if (
+        currentUser.role === 'admin'
+      ) {
+        navigate('/admin', {
+          replace: true,
+        })
+      } else {
+        navigate('/dashboard', {
+          replace: true,
+        })
+      }
     } catch (requestError) {
       const status =
         requestError.response?.status
@@ -78,15 +106,6 @@ function LoginPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  function handleLogout() {
-    clearAuthToken()
-
-    setSignedIn(false)
-    setPassword('')
-    setSuccess('You have been logged out.')
-    setError('')
   }
 
   return (
@@ -168,9 +187,16 @@ function LoginPage() {
             </p>
           </div>
 
-          {success && (
+          {accountCreated && (
             <div className="form-message success-message">
-              {success}
+              Your account was created successfully.
+              You can now log in.
+            </div>
+          )}
+
+          {authenticationRequired && (
+            <div className="form-message info-message">
+              Please log in to access that page.
             </div>
           )}
 
@@ -180,111 +206,78 @@ function LoginPage() {
             </div>
           )}
 
-          {signedIn ? (
-            <div className="signed-in-panel">
-              <div className="signed-in-icon">
-                ✓
-              </div>
+          <form
+            className="auth-form"
+            onSubmit={handleSubmit}
+          >
+            <label>
+              <span>Email address</span>
 
-              <h3>You are signed in</h3>
+              <input
+                type="email"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
+              />
+            </label>
 
-              <p>
-                Authentication state and protected
-                patient pages will be connected in the
-                next development stage.
-              </p>
+            <label>
+              <span>Password</span>
 
-              <Link
-                to="/"
-                className="button button-primary auth-full-button"
-              >
-                Return home
-              </Link>
-
-              <button
-                type="button"
-                className="button button-secondary auth-full-button"
-                onClick={handleLogout}
-              >
-                Log out
-              </button>
-            </div>
-          ) : (
-            <form
-              className="auth-form"
-              onSubmit={handleSubmit}
-            >
-              <label>
-                <span>Email address</span>
-
+              <div className="password-field">
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(event) =>
-                    setEmail(event.target.value)
+                  type={
+                    showPassword
+                      ? 'text'
+                      : 'password'
                   }
-                  placeholder="you@example.com"
-                  autoComplete="email"
+                  value={password}
+                  onChange={(event) =>
+                    setPassword(
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
                   required
                 />
-              </label>
 
-              <label>
-                <span>Password</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPassword(
+                      (current) => !current,
+                    )
+                  }
+                >
+                  {showPassword
+                    ? 'Hide'
+                    : 'Show'}
+                </button>
+              </div>
+            </label>
 
-                <div className="password-field">
-                  <input
-                    type={
-                      showPassword
-                        ? 'text'
-                        : 'password'
-                    }
-                    value={password}
-                    onChange={(event) =>
-                      setPassword(
-                        event.target.value,
-                      )
-                    }
-                    placeholder="Enter your password"
-                    autoComplete="current-password"
-                    required
-                  />
+            <button
+              type="submit"
+              className="button button-primary auth-submit"
+              disabled={loading}
+            >
+              {loading
+                ? 'Logging in...'
+                : 'Log in'}
+            </button>
+          </form>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowPassword(
-                        (current) => !current,
-                      )
-                    }
-                  >
-                    {showPassword
-                      ? 'Hide'
-                      : 'Show'}
-                  </button>
-                </div>
-              </label>
-
-              <button
-                type="submit"
-                className="button button-primary auth-submit"
-                disabled={loading}
-              >
-                {loading
-                  ? 'Logging in...'
-                  : 'Log in'}
-              </button>
-            </form>
-          )}
-
-          {!signedIn && (
-            <p className="auth-switch">
-              New to RespiraCare?{' '}
-              <Link to="/register">
-                Create an account
-              </Link>
-            </p>
-          )}
+          <p className="auth-switch">
+            New to RespiraCare?{' '}
+            <Link to="/register">
+              Create an account
+            </Link>
+          </p>
 
           <div className="auth-disclaimer">
             RespiraCare provides health-awareness
