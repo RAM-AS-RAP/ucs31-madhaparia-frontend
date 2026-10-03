@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function HomePage() {
   return (
     <>
@@ -21,13 +23,12 @@ function HomePage() {
             </p>
 
             <div className="hero-actions">
-              <button
-                type="button"
+              <Link
+                to="/register"
                 className="button button-primary button-large"
-                disabled
               >
                 Check your symptoms
-              </button>
+              </Link>
 
               <a
                 href="#how-it-works"

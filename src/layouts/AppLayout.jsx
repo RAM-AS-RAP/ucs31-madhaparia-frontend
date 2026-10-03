@@ -34,21 +34,19 @@ function AppLayout() {
           </nav>
 
           <div className="nav-actions">
-            <button
-              type="button"
+            <Link
+              to="/login"
               className="button button-ghost"
-              disabled
             >
               Log in
-            </button>
+            </Link>
 
-            <button
-              type="button"
+            <Link
+              to="/register"
               className="button button-primary"
-              disabled
             >
               Get started
-            </button>
+            </Link>
           </div>
         </div>
       </header>
