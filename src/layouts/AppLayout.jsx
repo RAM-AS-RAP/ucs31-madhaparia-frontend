@@ -1,4 +1,9 @@
 import {
+  clearSymptomConfirmation,
+  clearSymptomMapping,
+} from '../services/symptoms'
+
+import {
   Link,
   Outlet,
   useNavigate,
@@ -17,6 +22,9 @@ function AppLayout() {
   } = useAuth()
 
   function handleLogout() {
+    clearSymptomMapping()
+    clearSymptomConfirmation()
+
     logout()
     navigate('/')
   }
