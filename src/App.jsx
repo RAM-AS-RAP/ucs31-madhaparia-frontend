@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PatientDashboardPage from './pages/PatientDashboardPage'
 import RegisterPage from './pages/RegisterPage'
+import SymptomInputPage from './pages/SymptomInputPage'
 
 function App() {
   return (
@@ -35,6 +36,15 @@ function App() {
           element={
             <ProtectedRoute>
               <PatientDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/symptoms"
+          element={
+            <ProtectedRoute>
+              <SymptomInputPage />
             </ProtectedRoute>
           }
         />

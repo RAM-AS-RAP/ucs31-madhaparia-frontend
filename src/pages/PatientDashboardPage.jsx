@@ -1,4 +1,5 @@
 import { useAuth } from '../context/useAuth'
+import { Link } from 'react-router-dom'
 
 function PatientDashboardPage() {
   const { user } = useAuth()
@@ -38,9 +39,12 @@ function PatientDashboardPage() {
               Kiswahili or mixed-language text.
             </p>
 
-            <span className="coming-soon">
-              Coming in Issue #4
-            </span>
+           <Link
+            to="/symptoms"
+            className="dashboard-card-link"
+           >
+            Check symptoms
+           </Link>
           </article>
 
           <article className="dashboard-card">
