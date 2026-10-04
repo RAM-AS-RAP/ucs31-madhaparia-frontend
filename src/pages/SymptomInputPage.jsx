@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
+  clearSymptomConfirmation,
   clearSymptomMapping,
   mapSymptoms,
   saveSymptomMapping,
@@ -36,6 +37,7 @@ function SymptomInputPage() {
       setError(
         'Please describe at least one symptom before continuing.',
       )
+
       return
     }
 
@@ -43,6 +45,10 @@ function SymptomInputPage() {
 
     try {
       const result = await mapSymptoms(cleanedText)
+
+      // A new NLP analysis invalidates any older
+      // symptom confirmation result.
+      clearSymptomConfirmation()
 
       setMapping(result)
       saveSymptomMapping(result)
@@ -74,19 +80,19 @@ function SymptomInputPage() {
     setError('')
 
     clearSymptomMapping()
+    clearSymptomConfirmation()
   }
 
   function handleTextChange(event) {
     setText(event.target.value)
+    setError('')
 
     if (mapping) {
       setMapping(null)
       clearSymptomMapping()
     }
 
-    if (error) {
-      setError('')
-    }
+    clearSymptomConfirmation()
   }
 
   function loadExample(exampleText) {
@@ -95,6 +101,7 @@ function SymptomInputPage() {
     setError('')
 
     clearSymptomMapping()
+    clearSymptomConfirmation()
   }
 
   const recognised =
@@ -527,13 +534,12 @@ function SymptomInputPage() {
                 </p>
               </div>
 
-              <button
-                type="button"
+              <Link
+                to="/symptoms/confirm"
                 className="button button-primary"
-                disabled
               >
                 Continue to confirmation
-              </button>
+              </Link>
             </div>
           </section>
         )}

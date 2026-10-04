@@ -11,6 +11,7 @@ import NotFoundPage from './pages/NotFoundPage'
 import PatientDashboardPage from './pages/PatientDashboardPage'
 import RegisterPage from './pages/RegisterPage'
 import SymptomInputPage from './pages/SymptomInputPage'
+import SymptomConfirmationPage from './pages/SymptomConfirmationPage'
 
 function App() {
   return (
@@ -45,6 +46,15 @@ function App() {
           element={
             <ProtectedRoute>
               <SymptomInputPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/symptoms/confirm"
+          element={
+            <ProtectedRoute>
+              <SymptomConfirmationPage />
             </ProtectedRoute>
           }
         />
