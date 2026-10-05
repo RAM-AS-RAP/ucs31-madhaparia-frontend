@@ -61,9 +61,12 @@ function PatientDashboardPage() {
               health-awareness sessions.
             </p>
 
-            <span className="coming-soon">
-              Coming later
-            </span>
+            <Link
+              to="/history"
+              className="dashboard-card-link"
+            >
+              View prediction history
+            </Link>
           </article>
 
           <article className="dashboard-card">

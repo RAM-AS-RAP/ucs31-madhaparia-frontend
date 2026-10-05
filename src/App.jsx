@@ -13,6 +13,8 @@ import RegisterPage from './pages/RegisterPage'
 import SymptomInputPage from './pages/SymptomInputPage'
 import SymptomConfirmationPage from './pages/SymptomConfirmationPage'
 import PredictionPage from './pages/PredictionPage'
+import PatientHistoryPage from './pages/PatientHistoryPage'
+import PatientHistoryDetailPage from './pages/PatientHistoryDetailPage'
 
 function App() {
   return (
@@ -91,7 +93,23 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <PatientHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/history/:predictionId"
+          element={
+            <ProtectedRoute>
+              <PatientHistoryDetailPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   )
