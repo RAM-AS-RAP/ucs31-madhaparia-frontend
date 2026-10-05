@@ -7,6 +7,7 @@ import {
 import AuthContext from './AuthContextBase'
 
 import {
+  AUTH_EXPIRED_EVENT,
   clearAuthToken,
   getAuthToken,
   getCurrentUser,
@@ -14,9 +15,14 @@ import {
   saveAuthToken,
 } from '../services/auth'
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+export function AuthProvider({
+  children,
+}) {
+  const [user, setUser] =
+    useState(null)
+
+  const [loading, setLoading] =
+    useState(true)
 
   useEffect(() => {
     async function restoreSession() {
@@ -28,7 +34,9 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const currentUser = await getCurrentUser()
+        const currentUser =
+          await getCurrentUser()
+
         setUser(currentUser)
       } catch {
         clearAuthToken()
@@ -41,16 +49,42 @@ export function AuthProvider({ children }) {
     restoreSession()
   }, [])
 
-  async function login(email, password) {
-    const loginData = await loginPatient(
-      email,
-      password,
+  useEffect(() => {
+    function handleExpiredSession() {
+      setUser(null)
+      setLoading(false)
+    }
+
+    window.addEventListener(
+      AUTH_EXPIRED_EVENT,
+      handleExpiredSession,
     )
 
-    saveAuthToken(loginData.access_token)
+    return () => {
+      window.removeEventListener(
+        AUTH_EXPIRED_EVENT,
+        handleExpiredSession,
+      )
+    }
+  }, [])
+
+  async function login(
+    email,
+    password,
+  ) {
+    const loginData =
+      await loginPatient(
+        email,
+        password,
+      )
+
+    saveAuthToken(
+      loginData.access_token,
+    )
 
     try {
-      const currentUser = await getCurrentUser()
+      const currentUser =
+        await getCurrentUser()
 
       setUser(currentUser)
 
@@ -74,14 +108,18 @@ export function AuthProvider({ children }) {
       loading,
       login,
       logout,
-      isAuthenticated: Boolean(user),
-      isAdmin: user?.role === 'admin',
+      isAuthenticated:
+        Boolean(user),
+      isAdmin:
+        user?.role === 'admin',
     }),
     [user, loading],
   )
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={value}
+    >
       {children}
     </AuthContext.Provider>
   )
