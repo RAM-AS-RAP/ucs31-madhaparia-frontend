@@ -12,6 +12,8 @@ import {
   getPatientHistoryItem,
 } from '../services/history'
 
+import PredictionFeedback from '../components/PredictionFeedback'
+
 function formatDate(value) {
   if (!value) {
     return 'Unknown date'
@@ -376,6 +378,11 @@ function PatientHistoryDetailPage() {
             {session.prediction_id}
           </code>
         </div>
+
+        <PredictionFeedback
+          key={session.prediction_id}
+          predictionId={session.prediction_id}
+        />
 
         <div className="symptom-safety-footer">
           <strong>
