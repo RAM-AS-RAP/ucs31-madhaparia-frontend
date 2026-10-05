@@ -2,9 +2,59 @@
 
 Frontend application for the **Respiratory Health Awareness and Prediction System**.
 
-RespiraCare provides a patient-friendly interface for respiratory symptom entry, symptom confirmation, health-awareness prediction results, patient history and administrator access.
+RespiraCare is a health-awareness web application that allows users to enter respiratory symptoms, review recognised symptoms, confirm them, receive respiratory condition pattern predictions, view previous prediction sessions and provide feedback.
 
-The application is built using React and communicates with the FastAPI backend through REST API endpoints.
+The application is intended for **health-awareness and educational purposes only**. It does not provide a medical diagnosis.
+
+---
+
+## Features
+
+### Patient Features
+
+- Patient account registration
+- Secure patient login
+- Session-based authentication
+- Protected patient routes
+- Respiratory symptom entry
+- English, Kiswahili and mixed-language symptom input
+- NLP symptom mapping
+- Recognised symptom review
+- Symptom confirmation
+- Red-flag symptom handling
+- Respiratory prediction workflow
+- Ranked prediction results
+- Prediction confidence information
+- Patient-specific prediction history
+- Prediction history detail view
+- Prediction feedback submission
+- Automatic expired-session handling
+- Friendly network and API error states
+
+### Administrator Features
+
+- Administrator-only route protection
+- Administrator dashboard
+- Prediction session statistics
+- Normal and urgent-review session counts
+- Patient feedback statistics
+- Cross-user prediction history review
+- Prediction session detail view
+- Urgent-review session inspection
+- Patient feedback review
+
+### Application Quality
+
+- Shared Axios API client
+- Automatic Bearer token authentication
+- Centralised expired-session handling
+- Protected route validation
+- Administrator access-control validation
+- Automated frontend tests
+- Responsive interface
+- Production build support
+
+---
 
 ## Technology Stack
 
@@ -14,38 +64,400 @@ The application is built using React and communicates with the FastAPI backend t
 - React Router
 - Axios
 - CSS
+- Vitest
+- React Testing Library
+- jsdom
 - Oxlint
 
-## Current Features
+The frontend communicates with the RespiraCare FastAPI backend through REST API endpoints.
 
-The current frontend foundation includes:
+---
 
-- React + Vite project structure
-- React Router configuration
-- Shared application layout
-- RespiraCare navigation
-- Responsive landing page
-- Health-awareness disclaimer
-- 404 page
-- Axios API client
-- Environment-based backend API URL
-- Responsive styling
+## Repository
 
-Authentication, prediction workflows, patient history and administrator features will be added in later development issues.
+Frontend repository:
+
+```text
+ucs31-madhaparia-frontend
+
+```
+
+Backend repository:
+
+```text
+ucs31-madhaparia-backend
+```
+
+---
+
+## Prerequisites
+
+Before running RespiraCare, install:
+
+- Node.js
+- npm
+- Git
+
+The FastAPI backend must also be available for API-dependent features.
+
+---
+
+## Installation
+
+Clone the frontend repository:
+
+```bash
+git clone https://github.com/RAM-AS-RAP/ucs31-madhaparia-frontend.git
+```
+
+Enter the project:
+
+```bash
+cd ucs31-madhaparia-frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+---
+
+## Environment Configuration
+
+RespiraCare uses the following frontend environment variable:
+
+```text
+VITE_API_BASE_URL
+```
+
+The provided `.env.example` contains:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+For local development, create a `.env` file using the same configuration when required.
+
+---
+
+## Running the Backend
+
+From the backend repository:
+
+```powershell
+cd ucs31-madhaparia-backend
+```
+
+Activate the virtual environment:
+
+```powershell
+(Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& .\.venv\Scripts\Activate.ps1)
+```
+
+Start FastAPI:
+
+```powershell
+python -m uvicorn app.main:app --reload
+```
+
+The backend normally runs at:
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+## Running the Frontend
+
+From the frontend repository:
+
+```bash
+npm run dev
+```
+
+The frontend normally runs at:
+
+```text
+http://localhost:5173
+```
+
+Keep both backend and frontend terminals running when testing the complete application.
+
+---
+
+## Application Routes
+
+### Public Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Landing page |
+| `/login` | User login |
+| `/register` | Patient registration |
+
+### Patient Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/dashboard` | Patient dashboard |
+| `/symptoms` | Enter respiratory symptoms |
+| `/symptoms/confirm` | Confirm recognised symptoms |
+| `/prediction` | Prediction workflow and results |
+| `/history` | Patient prediction history |
+| `/history/:predictionId` | Prediction session detail |
+| `/access-denied` | Access-control information |
+
+### Administrator Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/admin` | Administrator dashboard |
+| `/admin/history/:predictionId` | Administrator prediction detail |
+
+Unknown routes display the 404 page.
+
+---
+
+## Authentication and Access Control
+
+Authentication tokens are stored in browser session storage.
+
+The shared Axios API client automatically adds the Bearer token to authenticated requests.
+
+If a token expires or becomes invalid, RespiraCare:
+
+1. Detects the authentication error.
+2. Removes the invalid token.
+3. Clears the active user session.
+4. Redirects protected access to the login page.
+
+Patients cannot access administrator-only routes.
+
+Administrator roles are controlled by the backend. Public registration creates patient accounts.
+
+---
+
+## RespiraCare Workflow
+
+```text
+Login
+  |
+  v
+Enter symptoms
+  |
+  v
+NLP symptom mapping
+  |
+  v
+Review recognised symptoms
+  |
+  v
+Confirm symptoms
+  |
+  v
+Red-flag safety check
+  |
+  v
+Prediction result
+  |
+  v
+Prediction history
+  |
+  v
+Optional feedback
+```
+
+RespiraCare supports supported English, Kiswahili and mixed-language symptom wording.
+
+For normal sessions, ranked respiratory condition patterns and confidence information are displayed.
+
+When a red-flag safety rule is triggered, urgent-review guidance is shown instead of treating the result as a routine prediction.
+
+---
+
+## Automated Testing
+
+The frontend uses:
+
+- Vitest
+- React Testing Library
+- jest-dom
+- jsdom
+
+Run the automated tests:
+
+```bash
+npm test
+```
+
+The current access-control test suite validates:
+
+- Protected route loading state
+- Unauthenticated user redirect
+- Authenticated patient access
+- Administrator route loading state
+- Unauthenticated administrator-route redirect
+- Patient rejection from administrator pages
+- Administrator access to administrator pages
+
+Current result:
+
+```text
+2 test files
+7 automated tests
+```
+
+---
+
+## Linting
+
+Run:
+
+```bash
+npm run lint
+```
+
+Expected result:
+
+```text
+0 warnings
+0 errors
+```
+
+---
+
+## Production Build
+
+Run:
+
+```bash
+npm run build
+```
+
+Production files are generated in:
+
+```text
+dist/
+```
+
+Preview the production build with:
+
+```bash
+npm run preview
+```
+
+---
+
+## Reproducing the Frontend
+
+A clean environment can be reproduced with:
+
+```bash
+git clone https://github.com/RAM-AS-RAP/ucs31-madhaparia-frontend.git
+cd ucs31-madhaparia-frontend
+npm install
+```
+
+Configure:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+Start the backend, then run:
+
+```bash
+npm run dev
+```
+
+Validate the installation using:
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+Expected:
+
+```text
+7 automated tests pass
+0 lint warnings
+0 lint errors
+Production build succeeds
+```
+
+---
 
 ## Project Structure
 
 ```text
 src/
-├── components/
-├── layouts/
-│   └── AppLayout.jsx
-├── pages/
-│   ├── HomePage.jsx
-│   └── NotFoundPage.jsx
-├── services/
-│   └── api.js
-├── styles/
-│   └── global.css
-├── App.jsx
-└── main.jsx
+|-- assets/
+|-- components/
+|   |-- __tests__/
+|   |-- AdminRoute.jsx
+|   `-- ProtectedRoute.jsx
+|-- context/
+|   |-- AuthContext.jsx
+|   |-- AuthContextBase.js
+|   `-- useAuth.js
+|-- layouts/
+|   `-- AppLayout.jsx
+|-- pages/
+|   |-- HomePage.jsx
+|   |-- LoginPage.jsx
+|   |-- RegisterPage.jsx
+|   |-- PatientDashboardPage.jsx
+|   |-- SymptomInputPage.jsx
+|   |-- SymptomConfirmationPage.jsx
+|   |-- PredictionPage.jsx
+|   |-- PatientHistoryPage.jsx
+|   |-- PatientHistoryDetailPage.jsx
+|   |-- AdminDashboardPage.jsx
+|   |-- AdminHistoryDetailPage.jsx
+|   |-- AccessDeniedPage.jsx
+|   `-- NotFoundPage.jsx
+|-- services/
+|   |-- api.js
+|   |-- auth.js
+|   |-- authToken.js
+|   |-- symptoms.js
+|   |-- predictions.js
+|   |-- history.js
+|   |-- feedback.js
+|   `-- admin.js
+|-- styles/
+|   `-- global.css
+|-- test/
+|   `-- setup.js
+|-- App.jsx
+`-- main.jsx
+```
+
+---
+
+## Available Commands
+
+```bash
+npm run dev
+npm test
+npm run lint
+npm run build
+npm run preview
+```
+
+---
+
+## Health and Safety Disclaimer
+
+RespiraCare is a respiratory health-awareness and educational system.
+
+It does not provide medical diagnosis, treatment or emergency medical advice.
+
+Users should seek appropriate professional medical care for concerning, severe, persistent or emergency symptoms.
+
+Prediction outputs represent health-awareness patterns generated by the system and should not be treated as confirmation of a medical condition.
