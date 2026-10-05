@@ -1,5 +1,4 @@
 import api from './api'
-import { getAuthToken } from './auth'
 
 const PREDICTION_KEY =
   'respiracare_prediction_result'
@@ -10,14 +9,6 @@ export async function createPrediction({
   text,
   confirmedCodes,
 }) {
-  const token = getAuthToken()
-
-  if (!token) {
-    throw new Error(
-      'Authentication token is unavailable.',
-    )
-  }
-
   const response = await api.post(
     '/predict',
     {
@@ -25,11 +16,6 @@ export async function createPrediction({
       sex,
       text,
       confirmed_codes: confirmedCodes,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     },
   )
 
@@ -47,7 +33,9 @@ export function savePredictionResult(
 
 export function getSavedPredictionResult() {
   const stored =
-    sessionStorage.getItem(PREDICTION_KEY)
+    sessionStorage.getItem(
+      PREDICTION_KEY,
+    )
 
   if (!stored) {
     return null

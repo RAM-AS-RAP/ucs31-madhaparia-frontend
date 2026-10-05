@@ -1,19 +1,4 @@
 import api from './api'
-import { getAuthToken } from './auth'
-
-function authHeaders() {
-  const token = getAuthToken()
-
-  if (!token) {
-    throw new Error(
-      'Authentication token is unavailable.',
-    )
-  }
-
-  return {
-    Authorization: `Bearer ${token}`,
-  }
-}
 
 export async function getPatientHistory(
   limit = 20,
@@ -24,7 +9,6 @@ export async function getPatientHistory(
       params: {
         limit,
       },
-      headers: authHeaders(),
     },
   )
 
@@ -36,9 +20,6 @@ export async function getPatientHistoryItem(
 ) {
   const response = await api.get(
     `/history/${predictionId}`,
-    {
-      headers: authHeaders(),
-    },
   )
 
   return response.data
