@@ -16,6 +16,8 @@ import {
   savePredictionResult,
 } from '../services/predictions'
 
+import PredictionFeedback from '../components/PredictionFeedback'
+
 function confidenceClass(index) {
   if (index === 0) {
     return 'prediction-primary'
@@ -517,6 +519,11 @@ function PredictionPage() {
                 {result.disclaimer}
               </p>
             </section>
+
+            <PredictionFeedback
+              key={result.prediction_id}
+              predictionId={result.prediction_id}
+            />
 
             <div className="prediction-reference">
               <span>
