@@ -12,6 +12,7 @@ import PatientDashboardPage from './pages/PatientDashboardPage'
 import RegisterPage from './pages/RegisterPage'
 import SymptomInputPage from './pages/SymptomInputPage'
 import SymptomConfirmationPage from './pages/SymptomConfirmationPage'
+import PredictionPage from './pages/PredictionPage'
 
 function App() {
   return (
@@ -81,6 +82,16 @@ function App() {
           path="*"
           element={<NotFoundPage />}
         />
+
+        <Route
+          path="/prediction"
+          element={
+            <ProtectedRoute>
+              <PredictionPage />
+            </ProtectedRoute>
+          }
+        />
+        
       </Route>
     </Routes>
   )

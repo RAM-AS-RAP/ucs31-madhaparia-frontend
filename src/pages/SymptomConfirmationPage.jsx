@@ -11,6 +11,10 @@ import {
   saveSymptomConfirmation,
 } from '../services/symptoms'
 
+import {
+  clearPredictionResult,
+} from '../services/predictions'  
+
 function SymptomConfirmationPage() {
   const mapping = getSavedSymptomMapping()
 
@@ -47,6 +51,7 @@ function SymptomConfirmationPage() {
     setResult(null)
 
     clearSymptomConfirmation()
+    clearPredictionResult()
 
     setSelectedCodes((current) => {
       if (current.includes(code)) {
@@ -111,6 +116,7 @@ function SymptomConfirmationPage() {
     setError('')
 
     clearSymptomConfirmation()
+    clearPredictionResult()
   }
 
   const confirmed =
@@ -444,13 +450,12 @@ function SymptomConfirmationPage() {
                 </p>
               </div>
 
-              <button
-                type="button"
+              <Link
+                to="/prediction"
                 className="button button-primary"
-                disabled
               >
                 Continue to prediction
-              </button>
+              </Link>
             </div>
 
             <button
