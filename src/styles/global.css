@@ -38,16 +38,44 @@
   box-sizing: border-box;
 }
 
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+main,
+section,
+header,
+footer,
+nav {
+  max-width: 100%;
+}
+
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  width: 100%;
+  max-width: 100%;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
   background: var(--background);
   color: var(--text);
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 body,
@@ -72,7 +100,7 @@ button:disabled {
 }
 
 .container {
-  width: min(1180px, calc(100% - 48px));
+  width: min(1440px, calc(100% - 48px));
   margin: 0 auto;
 }
 
@@ -5537,4 +5565,2249 @@ button:disabled {
   .feedback-actions .button {
     width: 100%;
   }
+}
+
+/* Administrator dashboard */
+
+.admin-page {
+  min-height: 75vh;
+  padding: 72px 0 95px;
+
+  background:
+    radial-gradient(
+      circle at 92% 6%,
+      rgba(53, 198, 200, 0.14),
+      transparent 27%
+    ),
+    linear-gradient(
+      180deg,
+      #f9fefe,
+      #edf7f8
+    );
+}
+
+.admin-layout {
+  max-width: 1120px;
+}
+
+.admin-heading {
+  max-width: 780px;
+  margin-bottom: 32px;
+}
+
+.admin-heading > span,
+.admin-detail-heading > div > span {
+  color: var(--teal-dark);
+
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.admin-heading h1,
+.admin-detail-heading h1 {
+  margin: 10px 0 12px;
+
+  color: var(--navy);
+
+  font-size:
+    clamp(38px, 5vw, 54px);
+
+  line-height: 1.08;
+  letter-spacing: -2px;
+}
+
+.admin-heading h1 strong {
+  color: var(--teal-dark);
+}
+
+.admin-heading p,
+.admin-detail-heading p {
+  margin: 0;
+
+  color: var(--text-soft);
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.admin-stat-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 14px;
+
+  margin-bottom: 25px;
+}
+
+.admin-stat-card {
+  padding: 20px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 16px;
+
+  background: white;
+
+  box-shadow:
+    0 12px 30px
+    rgba(11, 41, 66, 0.05);
+}
+
+.admin-stat-card > span {
+  color: #718993;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-stat-card > strong {
+  display: block;
+
+  margin-top: 7px;
+
+  color: var(--navy);
+
+  font-size: 29px;
+}
+
+.admin-stat-card p {
+  margin: 6px 0 0;
+
+  color: var(--text-soft);
+
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.admin-stat-warning {
+  border-color: #efd1a8;
+
+  background: #fffaf3;
+}
+
+.admin-stat-warning > strong {
+  color: #a56621;
+}
+
+.admin-tabs {
+  display: inline-flex;
+
+  gap: 5px;
+
+  margin-bottom: 17px;
+
+  padding: 5px;
+
+  border:
+    1px solid
+    #d6e5e7;
+
+  border-radius: 13px;
+
+  background: white;
+}
+
+.admin-tab {
+  padding: 10px 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: transparent;
+
+  color: #5e7682;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.admin-tab span {
+  min-width: 23px;
+
+  padding: 3px 6px;
+
+  border-radius: 999px;
+
+  background: #edf5f6;
+
+  text-align: center;
+
+  font-size: 8px;
+}
+
+.admin-tab.active {
+  background: var(--navy);
+
+  color: white;
+}
+
+.admin-tab.active span {
+  background:
+    rgba(255, 255, 255, 0.16);
+
+  color: white;
+}
+
+.admin-panel,
+.admin-detail-card,
+.admin-prediction-panel {
+  padding: 26px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 20px;
+
+  background: white;
+
+  box-shadow:
+    0 16px 40px
+    rgba(11, 41, 66, 0.06);
+}
+
+.admin-panel-heading {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+.admin-panel-heading > div:first-child > span {
+  color: var(--teal-dark);
+
+  font-size: 9px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-panel-heading h2 {
+  margin: 5px 0;
+
+  color: var(--navy);
+
+  font-size: 24px;
+}
+
+.admin-panel-heading p {
+  margin: 0;
+
+  color: var(--text-soft);
+
+  font-size: 10px;
+}
+
+.admin-history-list,
+.admin-feedback-list,
+.admin-prediction-list {
+  display: grid;
+
+  gap: 14px;
+}
+
+.admin-history-card,
+.admin-feedback-card {
+  padding: 19px;
+
+  border:
+    1px solid
+    #dbe8e9;
+
+  border-radius: 15px;
+
+  background: #fbfefe;
+}
+
+.admin-history-warning {
+  border-color: #efd0a5;
+
+  background: #fffaf3;
+}
+
+.admin-history-top,
+.admin-feedback-top {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 18px;
+}
+
+.admin-history-top > div > span,
+.admin-feedback-top > div > span {
+  color: #81969f;
+
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.admin-history-top h3,
+.admin-feedback-top h3 {
+  margin: 4px 0 0;
+
+  color: var(--navy);
+
+  font-size: 17px;
+}
+
+.admin-status,
+.admin-feedback-result {
+  padding: 7px 10px;
+
+  border-radius: 999px;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-status.normal {
+  background: #e6f8f2;
+  color: #28745c;
+}
+
+.admin-status.urgent {
+  background: #fff0df;
+  color: #9d5b1d;
+}
+
+.admin-session-owner,
+.admin-owner-card {
+  margin-top: 14px;
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+  background: #f2f7f8;
+}
+
+.admin-session-owner span,
+.admin-owner-card span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #80949d;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-session-owner code,
+.admin-owner-card code {
+  color: #526f7b;
+
+  font-size: 9px;
+
+  overflow-wrap: anywhere;
+}
+
+.admin-history-text {
+  margin-top: 12px;
+
+  padding: 13px;
+
+  border-radius: 10px;
+
+  background: white;
+}
+
+.admin-history-text span,
+.admin-detail-description span {
+  color: #81949d;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-history-text p,
+.admin-detail-description p {
+  margin: 5px 0 0;
+
+  color: var(--navy);
+
+  font-size: 10px;
+}
+
+.admin-history-meta {
+  margin-top: 12px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 8px;
+}
+
+.admin-history-meta > div,
+.admin-detail-meta > div {
+  padding: 10px;
+
+  border-radius: 9px;
+
+  background: #f5f9fa;
+}
+
+.admin-history-meta span,
+.admin-detail-meta span,
+.admin-history-meta strong,
+.admin-detail-meta strong {
+  display: block;
+}
+
+.admin-history-meta span,
+.admin-detail-meta span {
+  color: #82959e;
+
+  font-size: 7px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-history-meta strong,
+.admin-detail-meta strong {
+  margin-top: 3px;
+
+  color: #334e68;
+
+  font-size: 10px;
+}
+
+.admin-history-footer,
+.admin-feedback-footer {
+  margin-top: 14px;
+
+  padding-top: 13px;
+
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 14px;
+
+  border-top:
+    1px solid
+    #e5eeee;
+}
+
+.admin-history-footer code,
+.admin-feedback-footer code {
+  color: #81949d;
+
+  font-size: 8px;
+
+  overflow-wrap: anywhere;
+}
+
+.admin-feedback-summary {
+  display: grid;
+
+  grid-template-columns:
+    auto auto;
+
+  gap: 4px 12px;
+
+  padding: 12px 15px;
+
+  border-radius: 12px;
+
+  background: #f4f9f9;
+}
+
+.admin-feedback-summary span {
+  color: #778e98;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.admin-feedback-summary strong {
+  color: var(--navy);
+
+  font-size: 11px;
+}
+
+.admin-feedback-result.helpful {
+  background: #e7f8f2;
+  color: #28745c;
+}
+
+.admin-feedback-result.not-helpful {
+  background: #fff0ea;
+  color: #a35037;
+}
+
+.admin-feedback-reference {
+  margin-top: 13px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 9px;
+}
+
+.admin-feedback-reference > div {
+  padding: 11px;
+
+  border-radius: 9px;
+
+  background: #f5f9fa;
+}
+
+.admin-feedback-reference span {
+  display: block;
+
+  color: #80949d;
+
+  font-size: 7px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-feedback-reference code {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #57707b;
+
+  font-size: 8px;
+
+  overflow-wrap: anywhere;
+}
+
+.admin-feedback-comment {
+  margin-top: 12px;
+
+  padding: 13px;
+
+  border-radius: 10px;
+
+  background: white;
+}
+
+.admin-feedback-comment span {
+  color: #81949d;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-feedback-comment p {
+  margin: 5px 0 0;
+
+  color: #425e6d;
+
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.admin-feedback-footer a {
+  color: var(--teal-dark);
+
+  font-size: 9px;
+  font-weight: 850;
+
+  text-decoration: none;
+}
+
+.admin-empty-state,
+.admin-state-card {
+  padding: 40px 25px;
+
+  border:
+    1px dashed
+    #cfdfe1;
+
+  border-radius: 14px;
+
+  background: #fafdfd;
+
+  text-align: center;
+}
+
+.admin-empty-state strong,
+.admin-state-card h2 {
+  color: var(--navy);
+}
+
+.admin-empty-state p,
+.admin-state-card p {
+  margin: 7px auto 0;
+
+  max-width: 520px;
+
+  color: var(--text-soft);
+
+  font-size: 10px;
+}
+
+.admin-state-error > div {
+  width: 42px;
+  height: 42px;
+
+  margin: 0 auto 12px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  background: #fff0e7;
+
+  color: #a95335;
+
+  font-weight: 900;
+}
+
+.admin-disclaimer {
+  margin-top: 20px;
+
+  padding: 16px;
+
+  display: flex;
+  gap: 14px;
+
+  border:
+    1px solid
+    #dce7e8;
+
+  border-radius: 13px;
+
+  background:
+    rgba(255, 255, 255, 0.78);
+}
+
+.admin-disclaimer strong {
+  color: var(--navy);
+
+  font-size: 9px;
+}
+
+.admin-disclaimer p {
+  margin: 0;
+
+  color: var(--text-soft);
+
+  font-size: 9px;
+}
+
+/* Admin history detail */
+
+.admin-detail-heading {
+  margin-bottom: 24px;
+
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-end;
+
+  gap: 20px;
+}
+
+.admin-detail-heading h1 {
+  margin-bottom: 5px;
+}
+
+.admin-detail-status {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 15px;
+}
+
+.admin-detail-status > div > span,
+.admin-detail-status > div > strong {
+  display: block;
+}
+
+.admin-detail-status > div > span {
+  color: #82959e;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-detail-status > div > strong {
+  margin-top: 4px;
+
+  color: var(--navy);
+
+  font-size: 19px;
+}
+
+.admin-detail-description {
+  margin-top: 18px;
+
+  padding: 15px;
+
+  border-radius: 12px;
+
+  background: #f5fafb;
+}
+
+.admin-detail-meta {
+  margin-top: 14px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 9px;
+}
+
+.admin-confirmed-codes {
+  margin-top: 18px;
+}
+
+.admin-confirmed-codes > span {
+  color: #7e929c;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-confirmed-codes > div {
+  margin-top: 8px;
+
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+}
+
+.admin-confirmed-codes div > span {
+  padding: 7px 10px;
+
+  border-radius: 999px;
+
+  background: var(--mint);
+
+  color: var(--teal-dark);
+
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.admin-urgent-card {
+  margin-top: 20px;
+
+  padding: 21px;
+
+  display: flex;
+
+  gap: 15px;
+
+  border:
+    1px solid
+    #efc797;
+
+  border-radius: 16px;
+
+  background: #fff8ee;
+}
+
+.admin-urgent-card > div:first-child {
+  flex: 0 0 42px;
+
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  background: #e49c3e;
+
+  color: white;
+
+  font-weight: 900;
+}
+
+.admin-urgent-card span {
+  color: #99601e;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-urgent-card h2 {
+  margin: 5px 0;
+
+  color: var(--navy);
+}
+
+.admin-urgent-card p {
+  margin: 0;
+
+  color: #765f47;
+
+  font-size: 10px;
+}
+
+.admin-prediction-panel {
+  margin-top: 20px;
+}
+
+.admin-prediction-card {
+  padding: 15px;
+
+  display: flex;
+
+  gap: 14px;
+
+  border:
+    1px solid
+    #dae7e8;
+
+  border-radius: 13px;
+
+  background: #fbfefe;
+}
+
+.admin-rank {
+  flex: 0 0 44px;
+
+  height: 44px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 11px;
+
+  background: var(--mint);
+
+  text-align: center;
+}
+
+.admin-rank span,
+.admin-rank strong {
+  display: block;
+}
+
+.admin-rank span {
+  color: #718e93;
+
+  font-size: 7px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-rank strong {
+  color: var(--teal-dark);
+
+  font-size: 16px;
+}
+
+.admin-prediction-content {
+  flex: 1;
+}
+
+.admin-prediction-content > div {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.admin-prediction-content h3 {
+  margin: 0;
+
+  color: var(--navy);
+
+  font-size: 14px;
+}
+
+.admin-prediction-content > div > strong {
+  color: var(--teal-dark);
+
+  font-size: 13px;
+}
+
+.admin-prediction-content p {
+  margin: 7px 0 0;
+
+  color: var(--text-soft);
+
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.admin-session-reference {
+  margin-top: 20px;
+
+  padding: 16px;
+
+  border:
+    1px solid
+    #dce8e9;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.8);
+}
+
+.admin-session-reference span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #80939d;
+
+  font-size: 8px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+}
+
+.admin-session-reference code {
+  color: #5e7580;
+
+  font-size: 9px;
+
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 850px) {
+  .admin-stat-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .admin-page {
+    padding: 55px 0 75px;
+  }
+
+  .admin-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-panel,
+  .admin-detail-card,
+  .admin-prediction-panel {
+    padding: 19px;
+  }
+
+  .admin-tabs {
+    display: flex;
+
+    width: 100%;
+  }
+
+  .admin-tab {
+    flex: 1;
+
+    justify-content: center;
+  }
+
+  .admin-panel-heading,
+  .admin-history-top,
+  .admin-feedback-top,
+  .admin-history-footer,
+  .admin-feedback-footer,
+  .admin-detail-heading,
+  .admin-detail-status,
+  .admin-prediction-content > div {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .admin-history-meta,
+  .admin-detail-meta,
+  .admin-feedback-reference {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================================================
+   Global viewport + readability refinement
+   Keeps the full site inside the browser width and improves
+   readability on prediction/history/admin/feedback screens.
+   ========================================================= */
+
+/* Prevent flex/grid children and long IDs from widening the page */
+.container,
+.navbar-content,
+.hero-grid,
+.auth-grid,
+.dashboard-grid,
+.symptom-workspace,
+.recognised-grid,
+.prediction-fields,
+.history-meta,
+.history-detail-meta,
+.admin-stat-grid,
+.admin-history-meta,
+.admin-detail-meta,
+.admin-feedback-reference {
+  min-width: 0;
+}
+
+.container > *,
+.navbar-content > *,
+.hero-grid > *,
+.auth-grid > *,
+.dashboard-grid > *,
+.symptom-workspace > *,
+.recognised-grid > *,
+.prediction-fields > *,
+.history-meta > *,
+.history-detail-meta > *,
+.admin-stat-grid > *,
+.admin-history-meta > *,
+.admin-detail-meta > *,
+.admin-feedback-reference > * {
+  min-width: 0;
+}
+
+code,
+pre,
+.admin-session-owner code,
+.admin-owner-card code,
+.admin-history-footer code,
+.admin-feedback-footer code,
+.admin-feedback-reference code,
+.admin-session-reference code,
+.history-card-footer code,
+.history-reference-card code,
+.prediction-reference code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* Keep decorative homepage cards inside the viewport */
+@media (min-width: 951px) {
+  .floating-card-top {
+    right: 0;
+  }
+
+  .floating-card-bottom {
+    left: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   Prediction results readability
+   --------------------------------------------------------- */
+
+.prediction-form-header > div:first-child > span,
+.prediction-result-intro > div:first-child > span,
+.prediction-guidance-card > span,
+.prediction-reference span {
+  font-size: 11px;
+}
+
+.prediction-form-header p,
+.prediction-result-intro p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.prediction-confirmed-summary > span,
+.prediction-field label,
+.prediction-input-note strong,
+.prediction-warning strong,
+.prediction-confidence-note strong {
+  font-size: 12px;
+}
+
+.prediction-symptom-chip,
+.prediction-input-note p,
+.prediction-warning p,
+.prediction-confidence-note p,
+.prediction-guidance-card p,
+.prediction-disclaimer strong {
+  font-size: 12px;
+}
+
+.prediction-rank span {
+  font-size: 9px;
+}
+
+.prediction-rank strong {
+  font-size: 21px;
+}
+
+.prediction-card-heading > div:first-child > span,
+.prediction-confidence span {
+  font-size: 10px;
+}
+
+.prediction-card h3 {
+  font-size: 19px;
+}
+
+.prediction-card-content > p {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.prediction-confidence strong {
+  font-size: 20px;
+}
+
+.prediction-disclaimer p,
+.prediction-reference code,
+.prediction-urgent-result p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.prediction-urgent-result span {
+  font-size: 10px;
+}
+
+/* ---------------------------------------------------------
+   Patient history readability
+   --------------------------------------------------------- */
+
+.history-summary span,
+.history-date {
+  font-size: 11px;
+}
+
+.history-summary p {
+  font-size: 12px;
+}
+
+.history-card h2 {
+  font-size: 22px;
+}
+
+.history-status {
+  font-size: 10px;
+  padding: 8px 11px;
+}
+
+.history-input-text span,
+.history-detail-description span,
+.history-meta span,
+.history-detail-meta span,
+.history-top-result > span,
+.history-detail-status > div span,
+.history-confirmed-codes > span,
+.history-section-heading > span,
+.history-reference-card span {
+  font-size: 10px;
+}
+
+.history-input-text p,
+.history-detail-description p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.history-meta strong,
+.history-detail-meta strong {
+  font-size: 13px;
+}
+
+.history-top-result strong {
+  font-size: 14px;
+}
+
+.history-top-result div > span,
+.history-red-flag-note strong,
+.history-urgent-detail span {
+  font-size: 11px;
+}
+
+.history-red-flag-note p,
+.history-state-card p,
+.history-urgent-detail p,
+.history-section-heading p,
+.history-prediction-content p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.history-card-footer code,
+.history-reference-card code {
+  font-size: 11px;
+}
+
+.history-detail-status > div strong {
+  font-size: 22px;
+}
+
+.history-confirmed-codes div > span {
+  font-size: 11px;
+}
+
+.history-prediction-rank span {
+  font-size: 9px;
+}
+
+.history-prediction-rank strong {
+  font-size: 18px;
+}
+
+.history-prediction-content h3 {
+  font-size: 17px;
+}
+
+.history-prediction-content > div > strong {
+  font-size: 16px;
+}
+
+/* ---------------------------------------------------------
+   Feedback readability
+   --------------------------------------------------------- */
+
+.feedback-heading > span,
+.feedback-success span,
+.feedback-existing span {
+  font-size: 10px;
+}
+
+.feedback-heading h3 {
+  font-size: 21px;
+}
+
+.feedback-heading p,
+.feedback-choice small,
+.feedback-actions p,
+.feedback-success p,
+.feedback-existing p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.feedback-choice strong {
+  font-size: 14px;
+}
+
+.feedback-comment-label {
+  font-size: 12px;
+}
+
+.feedback-comment-label > span {
+  font-size: 11px;
+}
+
+.feedback-comment-field textarea {
+  font-size: 13px;
+}
+
+.feedback-success h3,
+.feedback-existing h3 {
+  font-size: 18px;
+}
+
+/* ---------------------------------------------------------
+   Administrator dashboard + session detail readability
+   --------------------------------------------------------- */
+
+.admin-heading > span,
+.admin-detail-heading > div > span {
+  font-size: 11px;
+}
+
+.admin-heading p,
+.admin-detail-heading p {
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.admin-stat-card > span {
+  font-size: 10px;
+}
+
+.admin-stat-card > strong {
+  font-size: 32px;
+}
+
+.admin-stat-card p {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.admin-tab {
+  font-size: 12px;
+  padding: 11px 15px;
+}
+
+.admin-tab span {
+  font-size: 10px;
+}
+
+.admin-panel-heading > div:first-child > span {
+  font-size: 10px;
+}
+
+.admin-panel-heading h2 {
+  font-size: 27px;
+}
+
+.admin-panel-heading p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.admin-history-top > div > span,
+.admin-feedback-top > div > span {
+  font-size: 11px;
+}
+
+.admin-history-top h3,
+.admin-feedback-top h3 {
+  font-size: 20px;
+}
+
+.admin-status,
+.admin-feedback-result {
+  font-size: 10px;
+  padding: 8px 11px;
+}
+
+.admin-session-owner span,
+.admin-owner-card span,
+.admin-history-text span,
+.admin-detail-description span,
+.admin-history-meta span,
+.admin-detail-meta span,
+.admin-feedback-summary span,
+.admin-feedback-reference span,
+.admin-feedback-comment span,
+.admin-detail-status > div > span,
+.admin-confirmed-codes > span,
+.admin-urgent-card span,
+.admin-session-reference span {
+  font-size: 10px;
+}
+
+.admin-session-owner code,
+.admin-owner-card code,
+.admin-history-footer code,
+.admin-feedback-footer code,
+.admin-feedback-reference code,
+.admin-session-reference code {
+  font-size: 11px;
+}
+
+.admin-history-text p,
+.admin-detail-description p,
+.admin-feedback-comment p,
+.admin-empty-state p,
+.admin-state-card p,
+.admin-urgent-card p,
+.admin-prediction-content p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.admin-history-meta strong,
+.admin-detail-meta strong,
+.admin-feedback-summary strong {
+  font-size: 13px;
+}
+
+.admin-feedback-footer a {
+  font-size: 12px;
+}
+
+.admin-disclaimer strong,
+.admin-disclaimer p {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.admin-detail-status > div > strong {
+  font-size: 22px;
+}
+
+.admin-confirmed-codes div > span {
+  font-size: 11px;
+}
+
+.admin-rank span {
+  font-size: 9px;
+}
+
+.admin-rank strong {
+  font-size: 18px;
+}
+
+.admin-prediction-content h3 {
+  font-size: 17px;
+}
+
+.admin-prediction-content > div > strong {
+  font-size: 16px;
+}
+
+/* Keep wide desktop sections comfortably inside the screen */
+.history-layout,
+.admin-layout,
+.prediction-layout,
+.confirmation-layout,
+.symptom-layout {
+  width: 100%;
+  max-width: min(1120px, 100%);
+}
+
+@media (max-width: 650px) {
+  .history-card h2,
+  .admin-history-top h3,
+  .admin-feedback-top h3 {
+    font-size: 18px;
+  }
+
+  .history-input-text p,
+  .history-detail-description p,
+  .admin-history-text p,
+  .admin-detail-description p,
+  .admin-feedback-comment p {
+    font-size: 13px;
+  }
+}
+
+/* ---------------------------------------------------------
+   Site-wide desktop width refinement
+   --------------------------------------------------------- */
+
+.symptom-layout,
+.confirmation-layout,
+.prediction-layout,
+.history-layout,
+.admin-layout {
+  width: 100%;
+  max-width: 1380px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dashboard-page .container {
+  max-width: 1440px;
+}
+
+.auth-page .container {
+  max-width: 1380px;
+}
+
+.hero .container,
+.how-it-works .container,
+.safety-section .container {
+  max-width: 1440px;
+}
+
+@media (max-width: 1500px) {
+  .container {
+    width: calc(100% - 48px);
+  }
+}
+
+@media (max-width: 650px) {
+  .container {
+    width: calc(100% - 30px);
+  }
+
+  .symptom-layout,
+  .confirmation-layout,
+  .prediction-layout,
+  .history-layout,
+  .admin-layout {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   RESPIRACARE - SITE-WIDE READABILITY FIX
+   Applies to ALL pages
+   ========================================================= */
+
+/* General website text */
+
+body {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Normal paragraph text */
+
+p {
+  line-height: 1.65;
+}
+
+/* Navbar */
+
+.brand-subtitle {
+  font-size: 12px;
+}
+
+.nav-links {
+  font-size: 15px;
+}
+
+.nav-user span {
+  font-size: 11px;
+}
+
+.nav-user strong {
+  font-size: 12px;
+}
+
+/* Buttons */
+
+.button {
+  font-size: 14px;
+}
+
+/* =========================================================
+   Authentication
+   ========================================================= */
+
+.auth-card-label,
+.auth-eyebrow {
+  font-size: 12px;
+}
+
+.auth-card-header p,
+.auth-benefits p,
+.auth-switch {
+  font-size: 14px;
+}
+
+.auth-form label > span {
+  font-size: 13px;
+}
+
+.auth-form input {
+  font-size: 15px;
+}
+
+.password-field button {
+  font-size: 12px;
+}
+
+.auth-disclaimer {
+  font-size: 12px;
+}
+
+.patient-role-note p {
+  font-size: 13px;
+}
+
+.form-message {
+  font-size: 13px;
+}
+
+/* =========================================================
+   Dashboard
+   ========================================================= */
+
+.dashboard-welcome > span {
+  font-size: 13px;
+}
+
+.dashboard-welcome p {
+  font-size: 16px;
+}
+
+.dashboard-card h2 {
+  font-size: 21px;
+}
+
+.dashboard-card p {
+  font-size: 14px;
+}
+
+.dashboard-card-icon {
+  font-size: 12px;
+}
+
+.dashboard-card-link,
+.coming-soon,
+.account-role {
+  font-size: 12px;
+}
+
+/* =========================================================
+   Symptom input
+   ========================================================= */
+
+.symptom-eyebrow {
+  font-size: 12px;
+}
+
+.symptom-heading p {
+  font-size: 16px;
+}
+
+.symptom-card-heading span {
+  font-size: 12px;
+}
+
+.language-badge {
+  font-size: 11px;
+}
+
+.symptom-form > label {
+  font-size: 13px;
+}
+
+.symptom-form textarea {
+  font-size: 15px;
+}
+
+.symptom-form-footer {
+  font-size: 12px;
+}
+
+.symptom-examples > span {
+  font-size: 11px;
+}
+
+.symptom-examples button {
+  font-size: 12px;
+}
+
+.symptom-help-card > p {
+  font-size: 14px;
+}
+
+.help-example span {
+  font-size: 11px;
+}
+
+.help-example p {
+  font-size: 13px;
+}
+
+.help-note {
+  font-size: 12px;
+}
+
+/* =========================================================
+   NLP mapping results
+   ========================================================= */
+
+.mapping-results-header > div:first-child > span {
+  font-size: 11px;
+}
+
+.mapping-results-header p {
+  font-size: 14px;
+}
+
+.recognised-count span {
+  font-size: 11px;
+}
+
+.mapping-safety-notice p {
+  font-size: 13px;
+}
+
+.recognised-label {
+  font-size: 11px;
+}
+
+.match-badge {
+  font-size: 11px;
+}
+
+.recognised-details span {
+  font-size: 10px;
+}
+
+.recognised-details strong {
+  font-size: 12px;
+}
+
+.red-flag-label {
+  font-size: 11px;
+}
+
+.unmatched-wording span {
+  font-size: 11px;
+}
+
+.unmatched-wording strong {
+  font-size: 12px;
+}
+
+/* =========================================================
+   Confirmation
+   ========================================================= */
+
+.confirmation-heading > span {
+  font-size: 12px;
+}
+
+.confirmation-heading p {
+  font-size: 15px;
+}
+
+.confirmation-description > span {
+  font-size: 11px;
+}
+
+.confirmation-description p {
+  font-size: 14px;
+}
+
+.confirmation-option h3 {
+  font-size: 18px;
+}
+
+.confirmation-option p {
+  font-size: 13px;
+}
+
+.confirmation-red-flag {
+  font-size: 11px;
+}
+
+.confirmation-summary-header span {
+  font-size: 11px;
+}
+
+.confirmation-summary-card p {
+  font-size: 13px;
+}
+
+.confirmation-next-step span {
+  font-size: 11px;
+}
+
+.confirmation-next-step p {
+  font-size: 13px;
+}
+
+/* =========================================================
+   Prediction
+   ========================================================= */
+
+.prediction-heading > span {
+  font-size: 12px;
+}
+
+.prediction-heading p {
+  font-size: 15px;
+}
+
+.prediction-field label {
+  font-size: 13px;
+}
+
+.prediction-field input,
+.prediction-field select {
+  font-size: 15px;
+}
+
+.prediction-help {
+  font-size: 13px;
+}
+
+.prediction-result-header > div:first-child > span {
+  font-size: 11px;
+}
+
+.prediction-result-header p {
+  font-size: 13px;
+}
+
+.prediction-confidence span {
+  font-size: 10px;
+}
+
+.prediction-card-label {
+  font-size: 10px;
+}
+
+.prediction-card p {
+  font-size: 13px;
+}
+
+.prediction-guidance > span {
+  font-size: 11px;
+}
+
+.prediction-guidance p {
+  font-size: 13px;
+}
+
+.prediction-disclaimer {
+  font-size: 12px;
+}
+
+.prediction-reference span {
+  font-size: 10px;
+}
+
+.prediction-reference code {
+  font-size: 11px;
+}
+
+/* =========================================================
+   PATIENT HISTORY
+   ========================================================= */
+
+.history-heading p,
+.history-detail-header p {
+  font-size: 16px;
+}
+
+.history-summary span {
+  font-size: 12px;
+}
+
+.history-summary p {
+  font-size: 13px;
+}
+
+.history-date {
+  font-size: 12px;
+}
+
+.history-card h2 {
+  font-size: 21px;
+}
+
+.history-status {
+  font-size: 10px;
+}
+
+.history-input-text span,
+.history-detail-description span {
+  font-size: 10px;
+}
+
+.history-input-text p,
+.history-detail-description p {
+  font-size: 14px;
+}
+
+.history-meta span,
+.history-detail-meta span {
+  font-size: 10px;
+}
+
+.history-meta strong,
+.history-detail-meta strong {
+  font-size: 13px;
+}
+
+.history-top-result > span {
+  font-size: 10px;
+}
+
+.history-top-result strong {
+  font-size: 14px;
+}
+
+.history-top-result div > span {
+  font-size: 12px;
+}
+
+.history-red-flag-note strong {
+  font-size: 13px;
+}
+
+.history-red-flag-note p {
+  font-size: 12px;
+}
+
+.history-card-footer code {
+  font-size: 11px;
+}
+
+.history-state-card p {
+  font-size: 14px;
+}
+
+.history-detail-status > div span {
+  font-size: 10px;
+}
+
+.history-detail-status > div strong {
+  font-size: 20px;
+}
+
+.history-confirmed-codes > span {
+  font-size: 10px;
+}
+
+.history-confirmed-codes div > span {
+  font-size: 12px;
+}
+
+.history-urgent-detail span {
+  font-size: 10px;
+}
+
+.history-urgent-detail p {
+  font-size: 13px;
+}
+
+.history-section-heading > span {
+  font-size: 10px;
+}
+
+.history-section-heading p {
+  font-size: 13px;
+}
+
+.history-prediction-rank span {
+  font-size: 9px;
+}
+
+.history-prediction-rank strong {
+  font-size: 17px;
+}
+
+.history-prediction-content h3 {
+  font-size: 16px;
+}
+
+.history-prediction-content > div > strong {
+  font-size: 15px;
+}
+
+.history-prediction-content p {
+  font-size: 13px;
+}
+
+.history-reference-card span {
+  font-size: 10px;
+}
+
+.history-reference-card code {
+  font-size: 11px;
+}
+
+/* Footer shown on history / workflow pages */
+
+.symptom-safety-footer {
+  font-size: 13px;
+}
+
+.symptom-safety-footer strong {
+  font-size: 13px;
+}
+
+.symptom-safety-footer p {
+  font-size: 13px;
+}
+
+.symptom-safety-footer a {
+  font-size: 12px;
+}
+
+/* =========================================================
+   Feedback
+   ========================================================= */
+
+.feedback-heading > span {
+  font-size: 11px;
+}
+
+.feedback-heading h3 {
+  font-size: 20px;
+}
+
+.feedback-heading p {
+  font-size: 13px;
+}
+
+.feedback-choice strong {
+  font-size: 14px;
+}
+
+.feedback-choice small {
+  font-size: 12px;
+}
+
+.feedback-comment-label {
+  font-size: 12px;
+}
+
+.feedback-comment-label > span {
+  font-size: 11px;
+}
+
+.feedback-comment-field textarea {
+  font-size: 14px;
+}
+
+.feedback-actions p {
+  font-size: 12px;
+}
+
+.feedback-success span,
+.feedback-existing span {
+  font-size: 11px;
+}
+
+.feedback-success h3,
+.feedback-existing h3 {
+  font-size: 18px;
+}
+
+.feedback-success p,
+.feedback-existing p {
+  font-size: 13px;
+}
+
+/* =========================================================
+   ADMIN DASHBOARD
+   ========================================================= */
+
+.admin-heading > span,
+.admin-detail-heading > div > span {
+  font-size: 12px;
+}
+
+.admin-heading p,
+.admin-detail-heading p {
+  font-size: 15px;
+}
+
+.admin-stat-card > span {
+  font-size: 11px;
+}
+
+.admin-stat-card > strong {
+  font-size: 32px;
+}
+
+.admin-stat-card p {
+  font-size: 13px;
+}
+
+.admin-tab {
+  font-size: 13px;
+}
+
+.admin-tab span {
+  font-size: 11px;
+}
+
+.admin-panel-heading > div:first-child > span {
+  font-size: 11px;
+}
+
+.admin-panel-heading h2 {
+  font-size: 26px;
+}
+
+.admin-panel-heading p {
+  font-size: 13px;
+}
+
+.admin-history-top > div > span,
+.admin-feedback-top > div > span {
+  font-size: 11px;
+}
+
+.admin-history-top h3,
+.admin-feedback-top h3 {
+  font-size: 19px;
+}
+
+.admin-status,
+.admin-feedback-result {
+  font-size: 10px;
+}
+
+.admin-session-owner span,
+.admin-owner-card span {
+  font-size: 10px;
+}
+
+.admin-session-owner code,
+.admin-owner-card code {
+  font-size: 11px;
+}
+
+.admin-history-text span,
+.admin-detail-description span {
+  font-size: 10px;
+}
+
+.admin-history-text p,
+.admin-detail-description p {
+  font-size: 14px;
+}
+
+.admin-history-meta span,
+.admin-detail-meta span {
+  font-size: 10px;
+}
+
+.admin-history-meta strong,
+.admin-detail-meta strong {
+  font-size: 13px;
+}
+
+.admin-history-footer code,
+.admin-feedback-footer code {
+  font-size: 10px;
+}
+
+.admin-feedback-summary span {
+  font-size: 10px;
+}
+
+.admin-feedback-summary strong {
+  font-size: 13px;
+}
+
+.admin-feedback-reference span {
+  font-size: 10px;
+}
+
+.admin-feedback-reference code {
+  font-size: 11px;
+}
+
+.admin-feedback-comment span {
+  font-size: 10px;
+}
+
+.admin-feedback-comment p {
+  font-size: 14px;
+}
+
+.admin-feedback-footer a {
+  font-size: 12px;
+}
+
+.admin-empty-state p,
+.admin-state-card p {
+  font-size: 14px;
+}
+
+.admin-disclaimer strong {
+  font-size: 11px;
+}
+
+.admin-disclaimer p {
+  font-size: 12px;
+}
+
+/* =========================================================
+   ADMIN SESSION DETAIL
+   ========================================================= */
+
+.admin-detail-status > div > span {
+  font-size: 10px;
+}
+
+.admin-detail-status > div > strong {
+  font-size: 21px;
+}
+
+.admin-confirmed-codes > span {
+  font-size: 10px;
+}
+
+.admin-confirmed-codes div > span {
+  font-size: 12px;
+}
+
+.admin-urgent-card span {
+  font-size: 10px;
+}
+
+.admin-urgent-card p {
+  font-size: 13px;
+}
+
+.admin-rank span {
+  font-size: 9px;
+}
+
+.admin-rank strong {
+  font-size: 17px;
+}
+
+.admin-prediction-content h3 {
+  font-size: 16px;
+}
+
+.admin-prediction-content > div > strong {
+  font-size: 15px;
+}
+
+.admin-prediction-content p {
+  font-size: 13px;
+}
+
+.admin-session-reference span {
+  font-size: 10px;
+}
+
+.admin-session-reference code {
+  font-size: 11px;
+}
+
+/* =========================================================
+   Prevent IDs and long text from stretching the website
+   ========================================================= */
+
+code,
+.nav-user strong,
+.admin-session-owner,
+.admin-owner-card,
+.admin-feedback-reference,
+.history-reference-card,
+.admin-session-reference {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
 }

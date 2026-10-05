@@ -15,6 +15,7 @@ import SymptomConfirmationPage from './pages/SymptomConfirmationPage'
 import PredictionPage from './pages/PredictionPage'
 import PatientHistoryPage from './pages/PatientHistoryPage'
 import PatientHistoryDetailPage from './pages/PatientHistoryDetailPage'
+import AdminHistoryDetailPage from './pages/AdminHistoryDetailPage'
 
 function App() {
   return (
@@ -108,6 +109,15 @@ function App() {
             <ProtectedRoute>
               <PatientHistoryDetailPage />
             </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/history/:predictionId"
+          element={
+            <AdminRoute>
+              <AdminHistoryDetailPage />
+            </AdminRoute>
           }
         />
       </Route>
