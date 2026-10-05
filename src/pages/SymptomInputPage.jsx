@@ -8,6 +8,10 @@ import {
   saveSymptomMapping,
 } from '../services/symptoms'
 
+import {
+  clearPredictionResult,
+} from '../services/predictions'
+
 function languageLabel(language) {
   if (language === 'sw') {
     return 'Kiswahili'
@@ -81,6 +85,7 @@ function SymptomInputPage() {
 
     clearSymptomMapping()
     clearSymptomConfirmation()
+    clearPredictionResult()
   }
 
   function handleTextChange(event) {

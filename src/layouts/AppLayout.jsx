@@ -11,6 +11,10 @@ import {
 
 import { useAuth } from '../context/useAuth'
 
+import {
+  clearPredictionResult,
+} from '../services/predictions'
+
 function AppLayout() {
   const navigate = useNavigate()
 
@@ -24,6 +28,7 @@ function AppLayout() {
   function handleLogout() {
     clearSymptomMapping()
     clearSymptomConfirmation()
+    clearPredictionResult()
 
     logout()
     navigate('/')
