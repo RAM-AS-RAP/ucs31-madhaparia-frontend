@@ -96,18 +96,6 @@ function AppLayout() {
                 Admin
               </Link>
             )}
-
-            {!isAuthenticated && (
-              <>
-                <span className="nav-placeholder">
-                  Health Awareness
-                </span>
-
-                <span className="nav-placeholder">
-                  About
-                </span>
-              </>
-            )}
           </nav>
 
           <div className="nav-actions">

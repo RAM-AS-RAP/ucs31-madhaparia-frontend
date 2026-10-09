@@ -2,6 +2,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
 } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import {
@@ -124,6 +125,36 @@ describe('SymptomInputPage', () => {
           'Continue to confirmation',
         ),
       ).not.toBeInTheDocument()
+    },
+  )
+
+  it(
+    'shows a readable message for a validation error list',
+    async () => {
+      api.post.mockRejectedValue({
+        response: {
+          status: 422,
+          data: {
+            detail: [
+              {
+                type: 'string_too_long',
+                loc: ['body', 'text'],
+                msg: 'String should have at most 2000 characters',
+              },
+            ],
+          },
+        },
+      })
+
+      analyse('fever')
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('alert'),
+        ).toHaveTextContent(
+          'Please check your symptom description',
+        )
+      })
     },
   )
 })

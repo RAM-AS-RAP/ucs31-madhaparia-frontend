@@ -166,6 +166,7 @@ function PredictionFeedback({
         <div className="feedback-choice-group">
           <button
             type="button"
+            aria-pressed={wasHelpful === true}
             className={
               wasHelpful === true
                 ? 'feedback-choice selected'
@@ -193,6 +194,7 @@ function PredictionFeedback({
 
           <button
             type="button"
+            aria-pressed={wasHelpful === false}
             className={
               wasHelpful === false
                 ? 'feedback-choice selected'
@@ -248,7 +250,10 @@ function PredictionFeedback({
         </div>
 
         {error && (
-          <div className="form-message error-message">
+          <div
+            className="form-message error-message"
+            role="alert"
+          >
             {error}
           </div>
         )}

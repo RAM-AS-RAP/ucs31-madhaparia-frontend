@@ -192,7 +192,10 @@ function LoginPage() {
           )}
 
           {error && (
-            <div className="form-message error-message">
+            <div
+              className="form-message error-message"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -239,6 +242,12 @@ function LoginPage() {
 
                 <button
                   type="button"
+                  aria-pressed={showPassword}
+                  aria-label={
+                    showPassword
+                      ? 'Hide password'
+                      : 'Show password'
+                  }
                   onClick={() =>
                     setShowPassword(
                       (current) => !current,

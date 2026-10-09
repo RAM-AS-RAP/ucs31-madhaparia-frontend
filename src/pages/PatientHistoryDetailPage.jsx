@@ -131,7 +131,10 @@ function PatientHistoryDetailPage() {
     return (
       <section className="history-page">
         <div className="container history-layout">
-          <div className="history-state-card history-error-card">
+          <div
+            className="history-state-card history-error-card"
+            role="alert"
+          >
             <div>
               !
             </div>

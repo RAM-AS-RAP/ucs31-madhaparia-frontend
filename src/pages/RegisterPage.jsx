@@ -168,7 +168,10 @@ function RegisterPage() {
           </div>
 
           {error && (
-            <div className="form-message error-message">
+            <div
+              className="form-message error-message"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -216,6 +219,12 @@ function RegisterPage() {
 
                 <button
                   type="button"
+                  aria-pressed={showPassword}
+                  aria-label={
+                    showPassword
+                      ? 'Hide password'
+                      : 'Show password'
+                  }
                   onClick={() =>
                     setShowPassword(
                       (current) => !current,

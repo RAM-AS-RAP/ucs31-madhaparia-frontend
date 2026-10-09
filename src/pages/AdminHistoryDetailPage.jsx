@@ -133,7 +133,10 @@ function AdminHistoryDetailPage() {
     return (
       <section className="admin-page">
         <div className="container admin-layout">
-          <div className="admin-state-card admin-state-error">
+          <div
+            className="admin-state-card admin-state-error"
+            role="alert"
+          >
             <div>
               !
             </div>

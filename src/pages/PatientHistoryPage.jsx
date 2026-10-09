@@ -146,7 +146,10 @@ function PatientHistoryPage() {
         )}
 
         {!loading && error && (
-          <div className="history-state-card history-error-card">
+          <div
+            className="history-state-card history-error-card"
+            role="alert"
+          >
             <div>
               !
             </div>

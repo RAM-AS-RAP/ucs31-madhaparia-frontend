@@ -337,7 +337,10 @@ function PredictionPage() {
               </div>
 
               {error && (
-                <div className="form-message error-message">
+                <div
+                  className="form-message error-message"
+                  role="alert"
+                >
                   {error}
                 </div>
               )}

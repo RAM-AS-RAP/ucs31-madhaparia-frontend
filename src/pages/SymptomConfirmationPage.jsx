@@ -219,6 +219,7 @@ function SymptomConfirmationPage() {
                     <button
                       type="button"
                       key={symptom.code}
+                      aria-pressed={selected}
                       className={
                         selected
                           ? `confirmation-option selected${
@@ -275,7 +276,10 @@ function SymptomConfirmationPage() {
             </div>
 
             {error && (
-              <div className="form-message error-message">
+              <div
+                className="form-message error-message"
+                role="alert"
+              >
                 {error}
               </div>
             )}
