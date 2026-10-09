@@ -51,8 +51,9 @@ function SymptomInputPage() {
       const result = await mapSymptoms(cleanedText)
 
       // A new NLP analysis invalidates any older
-      // symptom confirmation result.
+      // symptom confirmation and prediction result.
       clearSymptomConfirmation()
+      clearPredictionResult()
 
       setMapping(result)
       saveSymptomMapping(result)
@@ -98,6 +99,7 @@ function SymptomInputPage() {
     }
 
     clearSymptomConfirmation()
+    clearPredictionResult()
   }
 
   function loadExample(exampleText) {
@@ -107,6 +109,7 @@ function SymptomInputPage() {
 
     clearSymptomMapping()
     clearSymptomConfirmation()
+    clearPredictionResult()
   }
 
   const recognised =

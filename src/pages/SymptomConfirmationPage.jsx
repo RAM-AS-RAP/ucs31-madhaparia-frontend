@@ -80,6 +80,10 @@ function SymptomConfirmationPage() {
 
     setLoading(true)
 
+    // A new confirmation means any saved
+    // prediction belongs to older symptoms.
+    clearPredictionResult()
+
     try {
       const confirmation =
         await confirmSymptoms(

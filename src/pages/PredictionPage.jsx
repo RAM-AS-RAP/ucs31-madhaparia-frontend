@@ -13,6 +13,7 @@ import {
   clearPredictionResult,
   createPrediction,
   getSavedPredictionResult,
+  isPredictionForConfirmation,
   savePredictionResult,
 } from '../services/predictions'
 
@@ -39,8 +40,23 @@ function PredictionPage() {
   const [sex, setSex] =
     useState('')
 
+  // Only reuse a saved result when it was made
+  // from the same symptom text and confirmed
+  // codes. Otherwise a result from an earlier
+  // set of symptoms could be shown again.
   const [result, setResult] =
-    useState(getSavedPredictionResult())
+    useState(() => {
+      const saved =
+        getSavedPredictionResult()
+
+      return isPredictionForConfirmation(
+        saved,
+        mapping?.input_text,
+        confirmation?.confirmed_codes,
+      )
+        ? saved
+        : null
+    })
 
   const [loading, setLoading] =
     useState(false)
@@ -118,6 +134,7 @@ function PredictionPage() {
 
       savePredictionResult(
         prediction,
+        mapping.input_text,
       )
     } catch (requestError) {
       if (
