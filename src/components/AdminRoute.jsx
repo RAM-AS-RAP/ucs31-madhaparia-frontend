@@ -4,6 +4,7 @@ import {
 } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
+import SessionUnavailable from './SessionUnavailable'
 
 function AdminRoute({ children }) {
   const location = useLocation()
@@ -12,6 +13,8 @@ function AdminRoute({ children }) {
     isAuthenticated,
     isAdmin,
     loading,
+    retrySession,
+    sessionError,
   } = useAuth()
 
   if (loading) {
@@ -23,6 +26,15 @@ function AdminRoute({ children }) {
           Checking administrator access...
         </p>
       </div>
+    )
+  }
+
+  if (!isAuthenticated && sessionError) {
+    return (
+      <SessionUnavailable
+        message={sessionError}
+        onRetry={retrySession}
+      />
     )
   }
 

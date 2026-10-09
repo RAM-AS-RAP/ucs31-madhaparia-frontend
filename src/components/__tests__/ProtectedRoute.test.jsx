@@ -88,6 +88,37 @@ describe('ProtectedRoute', () => {
   )
 
   it(
+    'offers a retry instead of logging out when the backend is unreachable',
+    () => {
+      useAuth.mockReturnValue({
+        isAuthenticated: false,
+        loading: false,
+        sessionError:
+          'RespiraCare could not connect to the backend.',
+        retrySession: vi.fn(),
+      })
+
+      renderProtectedRoute()
+
+      expect(
+        screen.getByRole('alert'),
+      ).toHaveTextContent(
+        'could not connect to the backend',
+      )
+
+      expect(
+        screen.getByRole('button', {
+          name: 'Try again',
+        }),
+      ).toBeInTheDocument()
+
+      expect(
+        screen.queryByText('Login page'),
+      ).not.toBeInTheDocument()
+    },
+  )
+
+  it(
     'allows authenticated users to access protected content',
     () => {
       useAuth.mockReturnValue({
