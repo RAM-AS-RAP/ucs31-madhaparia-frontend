@@ -19,8 +19,8 @@ function PatientDashboardPage() {
           <p>
             Signed in as
             <strong> {user?.email}</strong>.
-            Your symptom tools and prediction workflow
-            will be added in the next development stage.
+            Check your symptoms or review your
+            previous sessions below.
           </p>
         </div>
 

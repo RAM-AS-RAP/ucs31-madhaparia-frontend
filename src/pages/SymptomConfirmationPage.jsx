@@ -444,8 +444,9 @@ function SymptomConfirmationPage() {
                 </h3>
 
                 <p>
-                  Prediction will be connected in
-                  Frontend Issue #6.
+                  Add your age and sex in the next
+                  step to see your health-awareness
+                  result.
                 </p>
               </div>
 

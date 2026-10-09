@@ -100,4 +100,30 @@ describe('SymptomInputPage', () => {
       ).toBeNull()
     },
   )
+
+  it(
+    'does not offer confirmation when nothing was recognised',
+    async () => {
+      api.post.mockResolvedValue({
+        data: {
+          input_text: 'my knee itches',
+          recognised_symptoms: [],
+          unmatched_wording: [],
+          has_red_flag: false,
+        },
+      })
+
+      analyse('my knee itches')
+
+      await screen.findByText(
+        'No supported symptoms were recognised',
+      )
+
+      expect(
+        screen.queryByText(
+          'Continue to confirmation',
+        ),
+      ).not.toBeInTheDocument()
+    },
+  )
 })

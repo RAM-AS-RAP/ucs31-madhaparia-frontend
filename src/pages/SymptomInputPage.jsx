@@ -525,30 +525,34 @@ function SymptomInputPage() {
               </div>
             )}
 
-            <div className="mapping-next-step">
-              <div>
-                <span>
-                  Next step
-                </span>
+            {/* Confirmation needs at least one
+                recognised symptom. */}
+            {recognised.length > 0 && (
+              <div className="mapping-next-step">
+                <div>
+                  <span>
+                    Next step
+                  </span>
 
-                <h3>
-                  Review and confirm your symptoms
-                </h3>
+                  <h3>
+                    Review and confirm your symptoms
+                  </h3>
 
-                <p>
-                  In the next stage you will choose which
-                  recognised symptoms are actually correct
-                  before any prediction is made.
-                </p>
+                  <p>
+                    In the next stage you will choose which
+                    recognised symptoms are actually correct
+                    before any prediction is made.
+                  </p>
+                </div>
+
+                <Link
+                  to="/symptoms/confirm"
+                  className="button button-primary"
+                >
+                  Continue to confirmation
+                </Link>
               </div>
-
-              <Link
-                to="/symptoms/confirm"
-                className="button button-primary"
-              >
-                Continue to confirmation
-              </Link>
-            </div>
+            )}
           </section>
         )}
 
