@@ -3,7 +3,6 @@ import {
   Link,
   Navigate,
   useLocation,
-  useNavigate,
 } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
@@ -11,7 +10,6 @@ import { getApiErrorMessage } from '../services/api'
 
 function LoginPage() {
   const location = useLocation()
-  const navigate = useNavigate()
 
   const {
     isAuthenticated,
@@ -33,14 +31,23 @@ function LoginPage() {
   const authenticationRequired =
     location.state?.authenticationRequired
 
+  // All redirects after login happen here, once
+  // the user is known. Sending the user back to the
+  // page they asked for (location.state.from) is
+  // done in this one place so that two different
+  // navigations cannot race each other.
   if (isAuthenticated) {
+    const requestedRoute =
+      location.state?.from
+
+    const defaultRoute =
+      user?.role === 'admin'
+        ? '/admin'
+        : '/dashboard'
+
     return (
       <Navigate
-        to={
-          user?.role === 'admin'
-            ? '/admin'
-            : '/dashboard'
-        }
+        to={requestedRoute || defaultRoute}
         replace
       />
     )
@@ -61,29 +68,12 @@ function LoginPage() {
     setLoading(true)
 
     try {
-      const currentUser = await login(
+      // On success the user state changes and the
+      // redirect above takes the user onwards.
+      await login(
         email.trim(),
         password,
       )
-
-      const requestedRoute =
-        location.state?.from
-
-      if (requestedRoute) {
-        navigate(requestedRoute, {
-          replace: true,
-        })
-      } else if (
-        currentUser.role === 'admin'
-      ) {
-        navigate('/admin', {
-          replace: true,
-        })
-      } else {
-        navigate('/dashboard', {
-          replace: true,
-        })
-      }
     } catch (requestError) {
       const status =
         requestError.response?.status
