@@ -1,4 +1,5 @@
 import {
+  fireEvent,
   render,
   screen,
 } from '@testing-library/react'
@@ -29,6 +30,7 @@ function SessionState() {
   const {
     loading,
     isAuthenticated,
+    retrySession,
     sessionError,
   } = useAuth()
 
@@ -37,14 +39,23 @@ function SessionState() {
   }
 
   return (
-    <p>
-      {isAuthenticated
-        ? 'signed in'
-        : 'signed out'}
-      {sessionError
-        ? ' / backend unavailable'
-        : ''}
-    </p>
+    <>
+      <p>
+        {isAuthenticated
+          ? 'signed in'
+          : 'signed out'}
+        {sessionError
+          ? ' / backend unavailable'
+          : ''}
+      </p>
+
+      <button
+        type="button"
+        onClick={retrySession}
+      >
+        Try again
+      </button>
+    </>
   )
 }
 
@@ -110,6 +121,34 @@ describe('AuthProvider session restore', () => {
     })
 
     renderProvider()
+
+    expect(
+      await screen.findByText('signed in'),
+    ).toBeInTheDocument()
+  })
+
+  it('restores the session when retried after the backend returns', async () => {
+    getCurrentUser.mockRejectedValueOnce({
+      code: 'ERR_NETWORK',
+      request: {},
+    })
+
+    getCurrentUser.mockResolvedValueOnce({
+      email: 'patient@example.com',
+      role: 'patient',
+    })
+
+    renderProvider()
+
+    await screen.findByText(
+      'signed out / backend unavailable',
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Try again',
+      }),
+    )
 
     expect(
       await screen.findByText('signed in'),

@@ -324,7 +324,7 @@ Current result:
 
 ```text
 10 test files
-36 automated tests
+37 automated tests
 ```
 
 ---
@@ -407,7 +407,7 @@ npm run build
 Expected:
 
 ```text
-36 automated tests pass
+37 automated tests pass
 0 lint warnings
 0 lint errors
 Production build succeeds
