@@ -140,6 +140,9 @@ VITE_API_BASE_URL=http://127.0.0.1:8000
 
 For local development, create a `.env` file using the same configuration when required.
 
+- `npm run dev`: if `VITE_API_BASE_URL` is not set, the app uses `http://127.0.0.1:8000`.
+- `npm run build`: `VITE_API_BASE_URL` **must** be set (in `.env` or in the hosting provider's environment settings). The build stops with an error if it is missing, so a deployed site never tries to call `127.0.0.1` on the visitor's own computer.
+
 ---
 
 ## Running the Backend
@@ -331,10 +334,16 @@ Expected result:
 
 ## Production Build
 
-Run:
+Set `VITE_API_BASE_URL` to the deployed backend URL first, then run:
 
 ```bash
 npm run build
+```
+
+Without `VITE_API_BASE_URL` the build fails with:
+
+```text
+VITE_API_BASE_URL is not set. Set it to the backend URL before running "npm run build" ...
 ```
 
 Production files are generated in:

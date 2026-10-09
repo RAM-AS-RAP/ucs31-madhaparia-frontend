@@ -6,10 +6,19 @@ import {
   notifyAuthExpired,
 } from './authToken'
 
+// During local development (npm run dev) the
+// backend defaults to http://127.0.0.1:8000.
+// Production builds have no default: vite.config.js
+// stops `npm run build` if VITE_API_BASE_URL is
+// not set, so a deployed site never calls localhost.
+const DEV_API_BASE_URL = 'http://127.0.0.1:8000'
+
 const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_BASE_URL ||
-    'http://127.0.0.1:8000',
+    (import.meta.env.DEV
+      ? DEV_API_BASE_URL
+      : undefined),
 
   headers: {
     'Content-Type': 'application/json',
