@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { getApiErrorMessage } from '../services/api'
+
 import {
   submitPredictionFeedback,
 } from '../services/feedback'
@@ -77,16 +79,12 @@ function PredictionFeedback({
         setError(
           'Please check your feedback and try again.',
         )
-      } else if (
-        requestError.code === 'ERR_NETWORK'
-      ) {
-        setError(
-          'RespiraCare could not connect to the backend. Please try again.',
-        )
       } else {
         setError(
-          detail ||
+          getApiErrorMessage(
+            requestError,
             'Your feedback could not be submitted. Please try again.',
+          ),
         )
       }
     } finally {

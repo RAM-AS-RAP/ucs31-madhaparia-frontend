@@ -4,6 +4,7 @@ import {
   useNavigate,
 } from 'react-router-dom'
 
+import { getApiErrorMessage } from '../services/api'
 import { registerPatient } from '../services/auth'
 
 function RegisterPage() {
@@ -71,16 +72,12 @@ function RegisterPage() {
         setError(
           'Please check your email and password details.',
         )
-      } else if (
-        requestError.code === 'ERR_NETWORK'
-      ) {
-        setError(
-          'RespiraCare could not connect to the backend. Please try again.',
-        )
       } else {
         setError(
-          requestError.response?.data?.detail ||
+          getApiErrorMessage(
+            requestError,
             'Your account could not be created. Please try again.',
+          ),
         )
       }
     } finally {

@@ -13,6 +13,8 @@ import {
   getAdminHistory,
 } from '../services/admin'
 
+import { getApiErrorMessage } from '../services/api'
+
 function formatDate(value) {
   if (!value) {
     return 'Unknown date'
@@ -100,9 +102,10 @@ function AdminDashboardPage() {
           )
         } else {
           setError(
-            requestError.response?.data?.detail ||
-              requestError.message ||
+            getApiErrorMessage(
+              requestError,
               'RespiraCare could not load the administrator dashboard.',
+            ),
           )
         }
       } finally {

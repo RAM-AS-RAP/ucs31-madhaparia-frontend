@@ -13,7 +13,9 @@ import {
 
 import {
   clearPredictionResult,
-} from '../services/predictions'  
+} from '../services/predictions'
+
+import { getApiErrorMessage } from '../services/api'
 
 function SymptomConfirmationPage() {
   const mapping = getSavedSymptomMapping()
@@ -97,19 +99,12 @@ function SymptomConfirmationPage() {
         confirmation,
       )
     } catch (requestError) {
-      if (
-        requestError.code ===
-        'ERR_NETWORK'
-      ) {
-        setError(
-          'RespiraCare could not connect to the backend. Please try again.',
-        )
-      } else {
-        setError(
-          requestError.response?.data?.detail ||
-            'Your symptoms could not be confirmed. Please try again.',
-        )
-      }
+      setError(
+        getApiErrorMessage(
+          requestError,
+          'Your symptoms could not be confirmed. Please try again.',
+        ),
+      )
     } finally {
       setLoading(false)
     }

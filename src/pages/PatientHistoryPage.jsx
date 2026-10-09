@@ -7,6 +7,8 @@ import {
   Link,
 } from 'react-router-dom'
 
+import { getApiErrorMessage } from '../services/api'
+
 import {
   getPatientHistory,
 } from '../services/history'
@@ -88,9 +90,10 @@ function PatientHistoryPage() {
           )
         } else {
           setError(
-            requestError.response?.data?.detail ||
-              requestError.message ||
+            getApiErrorMessage(
+              requestError,
               'RespiraCare could not load your prediction history.',
+            ),
           )
         }
       } finally {

@@ -12,6 +12,8 @@ import {
   clearPredictionResult,
 } from '../services/predictions'
 
+import { getApiErrorMessage } from '../services/api'
+
 function languageLabel(language) {
   if (language === 'sw') {
     return 'Kiswahili'
@@ -58,11 +60,7 @@ function SymptomInputPage() {
       setMapping(result)
       saveSymptomMapping(result)
     } catch (requestError) {
-      if (requestError.code === 'ERR_NETWORK') {
-        setError(
-          'RespiraCare could not connect to the backend. Please try again.',
-        )
-      } else if (
+      if (
         requestError.response?.status === 422
       ) {
         setError(
@@ -70,8 +68,10 @@ function SymptomInputPage() {
         )
       } else {
         setError(
-          requestError.response?.data?.detail ||
+          getApiErrorMessage(
+            requestError,
             'Your symptoms could not be analysed. Please try again.',
+          ),
         )
       }
     } finally {

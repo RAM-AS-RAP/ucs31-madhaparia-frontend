@@ -12,6 +12,8 @@ import {
   getAdminHistoryItem,
 } from '../services/admin'
 
+import { getApiErrorMessage } from '../services/api'
+
 function formatDate(value) {
   if (!value) {
     return 'Unknown date'
@@ -69,32 +71,32 @@ function AdminHistoryDetailPage() {
           return
         }
 
+        const status =
+          requestError.response?.status
+
+        // 422 means the id in the address is
+        // not a valid session id.
         if (
-          requestError.response?.status ===
-          404
+          status === 404 ||
+          status === 422
         ) {
           setError(
             'This prediction session could not be found.',
           )
-        } else if (
-          requestError.response?.status ===
-          403
-        ) {
+        } else if (status === 403) {
           setError(
             'Administrator access is required.',
           )
-        } else if (
-          requestError.response?.status ===
-          401
-        ) {
+        } else if (status === 401) {
           setError(
             'Your login session is no longer valid.',
           )
         } else {
           setError(
-            requestError.response?.data?.detail ||
-              requestError.message ||
+            getApiErrorMessage(
+              requestError,
               'RespiraCare could not load this prediction session.',
+            ),
           )
         }
       } finally {

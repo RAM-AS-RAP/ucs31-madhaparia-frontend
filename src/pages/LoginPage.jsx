@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
+import { getApiErrorMessage } from '../services/api'
 
 function LoginPage() {
   const location = useLocation()
@@ -91,16 +92,16 @@ function LoginPage() {
         setError(
           'The email or password you entered is incorrect.',
         )
-      } else if (
-        requestError.code === 'ERR_NETWORK'
-      ) {
+      } else if (status === 422) {
         setError(
-          'RespiraCare could not connect to the backend. Please try again.',
+          'Please check your email address and password.',
         )
       } else {
         setError(
-          requestError.response?.data?.detail ||
+          getApiErrorMessage(
+            requestError,
             'Login could not be completed. Please try again.',
+          ),
         )
       }
     } finally {

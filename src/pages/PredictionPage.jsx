@@ -17,6 +17,8 @@ import {
   savePredictionResult,
 } from '../services/predictions'
 
+import { getApiErrorMessage } from '../services/api'
+
 import PredictionFeedback from '../components/PredictionFeedback'
 
 function confidenceClass(index) {
@@ -138,13 +140,6 @@ function PredictionPage() {
       )
     } catch (requestError) {
       if (
-        requestError.code ===
-        'ERR_NETWORK'
-      ) {
-        setError(
-          'RespiraCare could not connect to the backend. Please try again.',
-        )
-      } else if (
         requestError.response?.status === 401
       ) {
         setError(
@@ -158,9 +153,10 @@ function PredictionPage() {
         )
       } else {
         setError(
-          requestError.response?.data?.detail ||
-            requestError.message ||
+          getApiErrorMessage(
+            requestError,
             'RespiraCare could not generate the result. Please try again.',
+          ),
         )
       }
     } finally {
