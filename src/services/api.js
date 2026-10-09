@@ -40,28 +40,6 @@ function setAuthorizationHeader(
     `Bearer ${token}`
 }
 
-function hasAuthorizationHeader(
-  headers,
-) {
-  if (!headers) {
-    return false
-  }
-
-  if (
-    typeof headers.get ===
-    'function'
-  ) {
-    return Boolean(
-      headers.get('Authorization'),
-    )
-  }
-
-  return Boolean(
-    headers.Authorization ||
-      headers.authorization,
-  )
-}
-
 api.interceptors.request.use(
   (config) => {
     if (config.skipAuth === true) {
@@ -88,14 +66,13 @@ api.interceptors.response.use(
     const status =
       error.response?.status ?? null
 
-    const requestWasAuthenticated =
-      hasAuthorizationHeader(
-        error.config?.headers,
-      )
-
+    // Any 401 on a protected request means the
+    // session is no longer valid, including when
+    // the token was removed and no Authorization
+    // header was sent. Login and registration use
+    // skipAuth, so a wrong password does not count.
     if (
       status === 401 &&
-      requestWasAuthenticated &&
       error.config?.skipAuth !== true
     ) {
       clearAuthToken()
