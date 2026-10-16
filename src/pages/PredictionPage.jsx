@@ -173,7 +173,7 @@ function PredictionPage() {
   }
 
   const predictions =
-    result?.predictions || []
+    (result?.predictions || []).slice(0, 1)
 
   return (
     <section className="prediction-page">
@@ -402,26 +402,15 @@ function PredictionPage() {
                     </span>
 
                     <h2>
-                      Your top health-awareness
-                      patterns
+                      Your health-awareness result
                     </h2>
 
                     <p>
-                      These rankings show how strongly
+                      This result shows how strongly
                       your submitted symptom pattern
-                      matched patterns in the trained
+                      matched a pattern in the trained
                       model.
                     </p>
-                  </div>
-
-                  <div className="prediction-result-count">
-                    <strong>
-                      {predictions.length}
-                    </strong>
-
-                    <span>
-                      patterns
-                    </span>
                   </div>
                 </section>
 
@@ -449,16 +438,6 @@ function PredictionPage() {
                           index,
                         )}`}
                       >
-                        <div className="prediction-rank">
-                          <span>
-                            Rank
-                          </span>
-
-                          <strong>
-                            {prediction.rank}
-                          </strong>
-                        </div>
-
                         <div className="prediction-card-content">
                           <div className="prediction-card-heading">
                             <div>
