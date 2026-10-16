@@ -31,6 +31,20 @@ const routinePrediction = {
       model_confidence_percent: 96.75,
       description: 'Old routine result',
     },
+    {
+      rank: 2,
+      condition: 'pneumonia',
+      display_name: 'Pneumonia',
+      model_confidence_percent: 2.1,
+      description: 'Second ranked result',
+    },
+    {
+      rank: 3,
+      condition: 'bronchitis',
+      display_name: 'Bronchitis',
+      model_confidence_percent: 1.15,
+      description: 'Third ranked result',
+    },
   ],
   confidence_explanation: 'Confidence note',
   health_guidance: 'Routine guidance',
@@ -157,7 +171,7 @@ describe('PredictionPage saved results', () => {
   )
 
   it(
-    'shows the saved result again for the same symptoms',
+    'shows only the highest-confidence saved result for the same symptoms',
     () => {
       saveState({
         text: OLD_TEXT,
@@ -170,6 +184,20 @@ describe('PredictionPage saved results', () => {
 
       expect(
         screen.getByText('Tuberculosis (TB)'),
+      ).toBeInTheDocument()
+
+      expect(
+        screen.queryByText('Pneumonia'),
+      ).not.toBeInTheDocument()
+
+      expect(
+        screen.queryByText('Bronchitis'),
+      ).not.toBeInTheDocument()
+
+      expect(
+        screen.getByText(
+          'Your health-awareness result',
+        ),
       ).toBeInTheDocument()
     },
   )
