@@ -13,6 +13,8 @@ import {
   getAdminHistory,
 } from '../services/admin'
 
+import { getApiErrorMessage } from '../services/api'
+
 function formatDate(value) {
   if (!value) {
     return 'Unknown date'
@@ -100,9 +102,10 @@ function AdminDashboardPage() {
           )
         } else {
           setError(
-            requestError.response?.data?.detail ||
-              requestError.message ||
+            getApiErrorMessage(
+              requestError,
               'RespiraCare could not load the administrator dashboard.',
+            ),
           )
         }
       } finally {
@@ -197,7 +200,10 @@ function AdminDashboardPage() {
     return (
       <section className="admin-page">
         <div className="container admin-layout">
-          <div className="admin-state-card admin-state-error">
+          <div
+            className="admin-state-card admin-state-error"
+            role="alert"
+          >
             <div>
               !
             </div>
@@ -300,6 +306,7 @@ function AdminDashboardPage() {
         <div className="admin-tabs">
           <button
             type="button"
+            aria-pressed={activeView === 'history'}
             className={
               activeView === 'history'
                 ? 'admin-tab active'
@@ -317,6 +324,7 @@ function AdminDashboardPage() {
 
           <button
             type="button"
+            aria-pressed={activeView === 'feedback'}
             className={
               activeView === 'feedback'
                 ? 'admin-tab active'

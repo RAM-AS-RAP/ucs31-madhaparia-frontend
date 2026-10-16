@@ -13,7 +13,9 @@ import {
 
 import {
   clearPredictionResult,
-} from '../services/predictions'  
+} from '../services/predictions'
+
+import { getApiErrorMessage } from '../services/api'
 
 function SymptomConfirmationPage() {
   const mapping = getSavedSymptomMapping()
@@ -80,6 +82,10 @@ function SymptomConfirmationPage() {
 
     setLoading(true)
 
+    // A new confirmation means any saved
+    // prediction belongs to older symptoms.
+    clearPredictionResult()
+
     try {
       const confirmation =
         await confirmSymptoms(
@@ -93,19 +99,12 @@ function SymptomConfirmationPage() {
         confirmation,
       )
     } catch (requestError) {
-      if (
-        requestError.code ===
-        'ERR_NETWORK'
-      ) {
-        setError(
-          'RespiraCare could not connect to the backend. Please try again.',
-        )
-      } else {
-        setError(
-          requestError.response?.data?.detail ||
-            'Your symptoms could not be confirmed. Please try again.',
-        )
-      }
+      setError(
+        getApiErrorMessage(
+          requestError,
+          'Your symptoms could not be confirmed. Please try again.',
+        ),
+      )
     } finally {
       setLoading(false)
     }
@@ -220,6 +219,7 @@ function SymptomConfirmationPage() {
                     <button
                       type="button"
                       key={symptom.code}
+                      aria-pressed={selected}
                       className={
                         selected
                           ? `confirmation-option selected${
@@ -276,7 +276,10 @@ function SymptomConfirmationPage() {
             </div>
 
             {error && (
-              <div className="form-message error-message">
+              <div
+                className="form-message error-message"
+                role="alert"
+              >
                 {error}
               </div>
             )}
@@ -445,8 +448,9 @@ function SymptomConfirmationPage() {
                 </h3>
 
                 <p>
-                  Prediction will be connected in
-                  Frontend Issue #6.
+                  Add your age and sex in the next
+                  step to see your health-awareness
+                  result.
                 </p>
               </div>
 

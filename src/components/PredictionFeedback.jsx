@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { getApiErrorMessage } from '../services/api'
+
 import {
   submitPredictionFeedback,
 } from '../services/feedback'
@@ -77,16 +79,12 @@ function PredictionFeedback({
         setError(
           'Please check your feedback and try again.',
         )
-      } else if (
-        requestError.code === 'ERR_NETWORK'
-      ) {
-        setError(
-          'RespiraCare could not connect to the backend. Please try again.',
-        )
       } else {
         setError(
-          detail ||
+          getApiErrorMessage(
+            requestError,
             'Your feedback could not be submitted. Please try again.',
+          ),
         )
       }
     } finally {
@@ -168,6 +166,7 @@ function PredictionFeedback({
         <div className="feedback-choice-group">
           <button
             type="button"
+            aria-pressed={wasHelpful === true}
             className={
               wasHelpful === true
                 ? 'feedback-choice selected'
@@ -195,6 +194,7 @@ function PredictionFeedback({
 
           <button
             type="button"
+            aria-pressed={wasHelpful === false}
             className={
               wasHelpful === false
                 ? 'feedback-choice selected'
@@ -250,7 +250,10 @@ function PredictionFeedback({
         </div>
 
         {error && (
-          <div className="form-message error-message">
+          <div
+            className="form-message error-message"
+            role="alert"
+          >
             {error}
           </div>
         )}

@@ -140,6 +140,9 @@ VITE_API_BASE_URL=http://127.0.0.1:8000
 
 For local development, create a `.env` file using the same configuration when required.
 
+- `npm run dev`: if `VITE_API_BASE_URL` is not set, the app uses `http://127.0.0.1:8000`.
+- `npm run build`: `VITE_API_BASE_URL` **must** be set (in `.env` or in the hosting provider's environment settings). The build stops with an error if it is missing, so a deployed site never tries to call `127.0.0.1` on the visitor's own computer.
+
 ---
 
 ## Running the Backend
@@ -185,6 +188,20 @@ http://localhost:5173
 ```
 
 Keep both backend and frontend terminals running when testing the complete application.
+
+### Backend CORS setting (`FRONTEND_ORIGINS`)
+
+The backend only accepts browser requests from the addresses listed in its `FRONTEND_ORIGINS` setting. By default this is:
+
+```env
+FRONTEND_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+```
+
+If Vite starts on a different port (for example `http://localhost:5174` because 5173 is busy), add that address to `FRONTEND_ORIGINS` in the backend `.env` and restart the backend. Otherwise every request fails in the browser with a CORS error and the app shows "could not connect to the backend".
+
+### Backend compatibility
+
+This frontend works with the backend `main` branch and with backend pull request [#44](https://github.com/RAM-AS-RAP/ucs31-madhaparia-backend/pull/44). The two pull requests can be merged in either order. After #44, `POST /feedback` requires the login token; the frontend already sends it.
 
 ---
 
@@ -293,21 +310,21 @@ Run the automated tests:
 npm test
 ```
 
-The current access-control test suite validates:
+The test suite validates:
 
-- Protected route loading state
-- Unauthenticated user redirect
-- Authenticated patient access
-- Administrator route loading state
-- Unauthenticated administrator-route redirect
-- Patient rejection from administrator pages
-- Administrator access to administrator pages
+- Protected and administrator route access (loading, redirects, access denied)
+- Session restore: a 401 signs out, a network error keeps the user signed in
+- Any 401 from a protected request signs the user out
+- Redirect back to the requested page after login, and logout to the home page
+- A saved prediction is only shown again for the same symptoms
+- FastAPI validation errors (422 lists) are shown as readable text
+- Accessibility basics: `aria-pressed` on toggles, `role="alert"` on errors
 
 Current result:
 
 ```text
-2 test files
-7 automated tests
+10 test files
+37 automated tests
 ```
 
 ---
@@ -331,10 +348,16 @@ Expected result:
 
 ## Production Build
 
-Run:
+Set `VITE_API_BASE_URL` to the deployed backend URL first, then run:
 
 ```bash
 npm run build
+```
+
+Without `VITE_API_BASE_URL` the build fails with:
+
+```text
+VITE_API_BASE_URL is not set. Set it to the backend URL before running "npm run build" ...
 ```
 
 Production files are generated in:
@@ -373,7 +396,7 @@ Start the backend, then run:
 npm run dev
 ```
 
-Validate the installation using:
+Validate the installation using (the build needs `VITE_API_BASE_URL`, see above):
 
 ```bash
 npm test
@@ -384,7 +407,7 @@ npm run build
 Expected:
 
 ```text
-7 automated tests pass
+37 automated tests pass
 0 lint warnings
 0 lint errors
 Production build succeeds

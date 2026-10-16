@@ -12,6 +12,8 @@ import {
   clearPredictionResult,
 } from '../services/predictions'
 
+import { getApiErrorMessage } from '../services/api'
+
 function languageLabel(language) {
   if (language === 'sw') {
     return 'Kiswahili'
@@ -51,17 +53,14 @@ function SymptomInputPage() {
       const result = await mapSymptoms(cleanedText)
 
       // A new NLP analysis invalidates any older
-      // symptom confirmation result.
+      // symptom confirmation and prediction result.
       clearSymptomConfirmation()
+      clearPredictionResult()
 
       setMapping(result)
       saveSymptomMapping(result)
     } catch (requestError) {
-      if (requestError.code === 'ERR_NETWORK') {
-        setError(
-          'RespiraCare could not connect to the backend. Please try again.',
-        )
-      } else if (
+      if (
         requestError.response?.status === 422
       ) {
         setError(
@@ -69,8 +68,10 @@ function SymptomInputPage() {
         )
       } else {
         setError(
-          requestError.response?.data?.detail ||
+          getApiErrorMessage(
+            requestError,
             'Your symptoms could not be analysed. Please try again.',
+          ),
         )
       }
     } finally {
@@ -98,6 +99,7 @@ function SymptomInputPage() {
     }
 
     clearSymptomConfirmation()
+    clearPredictionResult()
   }
 
   function loadExample(exampleText) {
@@ -107,6 +109,7 @@ function SymptomInputPage() {
 
     clearSymptomMapping()
     clearSymptomConfirmation()
+    clearPredictionResult()
   }
 
   const recognised =
@@ -182,7 +185,10 @@ function SymptomInputPage() {
               </div>
 
               {error && (
-                <div className="form-message error-message">
+                <div
+                  className="form-message error-message"
+                  role="alert"
+                >
                   {error}
                 </div>
               )}
@@ -522,30 +528,34 @@ function SymptomInputPage() {
               </div>
             )}
 
-            <div className="mapping-next-step">
-              <div>
-                <span>
-                  Next step
-                </span>
+            {/* Confirmation needs at least one
+                recognised symptom. */}
+            {recognised.length > 0 && (
+              <div className="mapping-next-step">
+                <div>
+                  <span>
+                    Next step
+                  </span>
 
-                <h3>
-                  Review and confirm your symptoms
-                </h3>
+                  <h3>
+                    Review and confirm your symptoms
+                  </h3>
 
-                <p>
-                  In the next stage you will choose which
-                  recognised symptoms are actually correct
-                  before any prediction is made.
-                </p>
+                  <p>
+                    In the next stage you will choose which
+                    recognised symptoms are actually correct
+                    before any prediction is made.
+                  </p>
+                </div>
+
+                <Link
+                  to="/symptoms/confirm"
+                  className="button button-primary"
+                >
+                  Continue to confirmation
+                </Link>
               </div>
-
-              <Link
-                to="/symptoms/confirm"
-                className="button button-primary"
-              >
-                Continue to confirmation
-              </Link>
-            </div>
+            )}
           </section>
         )}
 

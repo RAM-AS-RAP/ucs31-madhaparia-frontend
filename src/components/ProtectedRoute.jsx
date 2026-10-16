@@ -4,6 +4,7 @@ import {
 } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
+import SessionUnavailable from './SessionUnavailable'
 
 function ProtectedRoute({ children }) {
   const location = useLocation()
@@ -11,6 +12,8 @@ function ProtectedRoute({ children }) {
   const {
     isAuthenticated,
     loading,
+    retrySession,
+    sessionError,
   } = useAuth()
 
   if (loading) {
@@ -22,6 +25,15 @@ function ProtectedRoute({ children }) {
           Checking your RespiraCare session...
         </p>
       </div>
+    )
+  }
+
+  if (!isAuthenticated && sessionError) {
+    return (
+      <SessionUnavailable
+        message={sessionError}
+        onRetry={retrySession}
+      />
     )
   }
 

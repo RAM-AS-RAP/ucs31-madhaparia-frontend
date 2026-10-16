@@ -4,8 +4,14 @@ import {
 } from '../services/symptoms'
 
 import {
+  useEffect,
+  useRef,
+} from 'react'
+
+import {
   Link,
   Outlet,
+  useLocation,
   useNavigate,
 } from 'react-router-dom'
 
@@ -17,6 +23,13 @@ import {
 
 function AppLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Logging out on a protected page made the route
+  // guard send the user to /login before the
+  // navigation to / happened. So: go to / first,
+  // then clear the user once / is showing.
+  const logoutPending = useRef(false)
 
   const {
     isAdmin,
@@ -25,12 +38,27 @@ function AppLayout() {
     user,
   } = useAuth()
 
+  useEffect(() => {
+    if (
+      logoutPending.current &&
+      location.pathname === '/'
+    ) {
+      logoutPending.current = false
+      logout()
+    }
+  }, [location.pathname, logout])
+
   function handleLogout() {
     clearSymptomMapping()
     clearSymptomConfirmation()
     clearPredictionResult()
 
-    logout()
+    if (location.pathname === '/') {
+      logout()
+      return
+    }
+
+    logoutPending.current = true
     navigate('/')
   }
 
@@ -67,18 +95,6 @@ function AppLayout() {
               <Link to="/admin">
                 Admin
               </Link>
-            )}
-
-            {!isAuthenticated && (
-              <>
-                <span className="nav-placeholder">
-                  Health Awareness
-                </span>
-
-                <span className="nav-placeholder">
-                  About
-                </span>
-              </>
             )}
           </nav>
 

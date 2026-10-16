@@ -8,6 +8,8 @@ import {
   useParams,
 } from 'react-router-dom'
 
+import { getApiErrorMessage } from '../services/api'
+
 import {
   getPatientHistoryItem,
 } from '../services/history'
@@ -71,25 +73,28 @@ function PatientHistoryDetailPage() {
           return
         }
 
+        const status =
+          requestError.response?.status
+
+        // 422 means the id in the address is
+        // not a valid session id.
         if (
-          requestError.response?.status ===
-          404
+          status === 404 ||
+          status === 422
         ) {
           setError(
             'This prediction session could not be found.',
           )
-        } else if (
-          requestError.response?.status ===
-          401
-        ) {
+        } else if (status === 401) {
           setError(
             'Your login session is no longer valid.',
           )
         } else {
           setError(
-            requestError.response?.data?.detail ||
-              requestError.message ||
+            getApiErrorMessage(
+              requestError,
               'RespiraCare could not load this prediction session.',
+            ),
           )
         }
       } finally {
@@ -126,7 +131,10 @@ function PatientHistoryDetailPage() {
     return (
       <section className="history-page">
         <div className="container history-layout">
-          <div className="history-state-card history-error-card">
+          <div
+            className="history-state-card history-error-card"
+            role="alert"
+          >
             <div>
               !
             </div>
