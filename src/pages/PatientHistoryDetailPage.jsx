@@ -294,10 +294,10 @@ function PatientHistoryDetailPage() {
               </h2>
 
               <p>
-                This saved session did not generate
-                ranked condition predictions because
-                it followed RespiraCare's urgent-review
-                route.
+                This session followed the urgent-review
+                route because a safety-sensitive symptom
+                was confirmed. The prediction model was
+                bypassed.
               </p>
             </div>
           </section>
@@ -309,7 +309,9 @@ function PatientHistoryDetailPage() {
               </span>
 
               <h2>
-                Ranked condition patterns
+                {predictions.length > 1
+                  ? 'Ranked condition patterns'
+                  : 'Saved condition pattern'}
               </h2>
 
               <p>
@@ -328,17 +330,17 @@ function PatientHistoryDetailPage() {
                         prediction.condition
                       }
                     >
-                      <div className="history-prediction-rank">
-                        <span>
-                          Rank
-                        </span>
+                      {predictions.length > 1 && (
+                        <div className="history-prediction-rank">
+                          <span>
+                            Rank
+                          </span>
 
-                        <strong>
-                          {
-                            prediction.rank
-                          }
-                        </strong>
-                      </div>
+                          <strong>
+                            {prediction.rank}
+                          </strong>
+                        </div>
+                      )}
 
                       <div className="history-prediction-content">
                         <div>
@@ -369,7 +371,7 @@ function PatientHistoryDetailPage() {
             ) : (
               <div className="history-state-card">
                 <p>
-                  No prediction rankings were stored
+                  No conditionprediction was stored
                   for this session.
                 </p>
               </div>
