@@ -425,7 +425,29 @@ function PredictionPage() {
                   <p>
                     {result.confidence_explanation}
                   </p>
+
+                  {result.score_note && (
+                    <p>
+                      {result.score_note}
+                    </p>
+                  )}
                 </div>
+
+                {result.uncertain === true &&
+                  result.uncertainty_message && (
+                    <div
+                      className="prediction-uncertainty-note"
+                      role="status"
+                    >
+                      <strong>
+                        Important information about this result
+                      </strong>
+
+                      <p>
+                        {result.uncertainty_message}
+                      </p>
+                    </div>
+                  )}
 
                 <div className="prediction-list">
                   {predictions.map(

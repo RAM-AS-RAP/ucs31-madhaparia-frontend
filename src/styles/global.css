@@ -7807,3 +7807,27 @@ code,
   word-break: break-word;
   min-width: 0;
 }
+
+
+/* V2 prediction uncertainty feedback */
+
+.prediction-uncertainty-note {
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid #e4d3ad;
+  border-radius: 14px;
+  background: #fffaf0;
+}
+
+.prediction-uncertainty-note strong {
+  display: block;
+  color: #805c24;
+  font-size: 11px;
+}
+
+.prediction-uncertainty-note p {
+  margin: 6px 0 0;
+  color: #765f3b;
+  font-size: 10px;
+  line-height: 1.6;
+}

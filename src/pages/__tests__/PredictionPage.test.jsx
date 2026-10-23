@@ -201,4 +201,106 @@ describe('PredictionPage saved results', () => {
       ).toBeInTheDocument()
     },
   )
+
+  it('displays V2 confidence and uncertainty guidance', () => {
+    const v2Prediction = {
+      ...routinePrediction,
+      model_version: 'v2_23class_prototype',
+      predictions: [routinePrediction.predictions[0]],
+      uncertain: true,
+      uncertainty_message:
+        'The model result has limited certainty.',
+      score_note:
+        'Model confidence is not a clinical probability.',
+    }
+
+    saveState({
+      text: OLD_TEXT,
+      codes: ['fever', 'cough'],
+      safetyStatus: 'continue',
+      prediction: v2Prediction,
+    })
+
+    renderPredictionPage()
+
+    expect(
+      screen.getByText(
+        'Model confidence is not a clinical probability.',
+      ),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText(
+        'The model result has limited certainty.',
+      ),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('status'),
+    ).toHaveTextContent(
+      'The model result has limited certainty.',
+    )
+
+    expect(
+      screen.getByText('Tuberculosis (TB)'),
+    ).toBeInTheDocument()
+  })
+
+  it('does not display uncertainty warning when V2 is not flagged', () => {
+    const v2Prediction = {
+      ...routinePrediction,
+      model_version: 'v2_23class_prototype',
+      predictions: [routinePrediction.predictions[0]],
+      uncertain: false,
+      uncertainty_message: '',
+      score_note:
+        'Model confidence is not a clinical probability.',
+    }
+
+    saveState({
+      text: OLD_TEXT,
+      codes: ['fever', 'cough'],
+      safetyStatus: 'continue',
+      prediction: v2Prediction,
+    })
+
+    renderPredictionPage()
+
+    expect(
+      screen.getByText(
+        'Model confidence is not a clinical probability.',
+      ),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.queryByText(
+        'Important information about this result',
+      ),
+    ).not.toBeInTheDocument()
+  })
+
+  it('keeps the existing V1 confidence display', () => {
+    saveState({
+      text: OLD_TEXT,
+      codes: ['fever', 'cough'],
+      safetyStatus: 'continue',
+      prediction: routinePrediction,
+    })
+
+    renderPredictionPage()
+
+    expect(
+      screen.getByText('About model confidence'),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText('Confidence note'),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.queryByText(
+        'Important information about this result',
+      ),
+    ).not.toBeInTheDocument()
+  })
 })
