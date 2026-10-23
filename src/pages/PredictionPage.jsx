@@ -146,12 +146,15 @@ function PredictionPage() {
           'Your login session is no longer valid. Please log in again.',
         )
       } else if (
-        requestError.response?.status === 422
-      ) {
-        setError(
-          'Please check your age and sex before trying again.',
-        )
-      } else {
+          requestError.response?.status === 422
+        ) {
+          setError(
+            getApiErrorMessage(
+              requestError,
+              'Please check your details and confirmed symptoms before trying again.',
+            ),
+          )
+        }else {
         setError(
           getApiErrorMessage(
             requestError,
