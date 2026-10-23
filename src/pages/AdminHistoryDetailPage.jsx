@@ -310,8 +310,9 @@ function AdminHistoryDetailPage() {
 
               <p>
                 This session followed the urgent-review
-                route and therefore contains no ranked
-                condition predictions.
+                route. The prediction model was bypassed
+                because a safety-sensitive symptom was
+                confirmed.
               </p>
             </div>
           </section>
@@ -324,7 +325,9 @@ function AdminHistoryDetailPage() {
                 </span>
 
                 <h2>
-                  Ranked condition patterns
+                  {predictions.length > 1
+                    ? 'Ranked condition patterns'
+                    : 'Saved condition pattern'}
                 </h2>
 
                 <p>
@@ -344,17 +347,17 @@ function AdminHistoryDetailPage() {
                         prediction.condition
                       }
                     >
-                      <div className="admin-rank">
-                        <span>
-                          Rank
-                        </span>
+                      {predictions.length > 1 && (
+                        <div className="admin-rank">
+                          <span>
+                            Rank
+                          </span>
 
-                        <strong>
-                          {
-                            prediction.rank
-                          }
-                        </strong>
-                      </div>
+                          <strong>
+                            {prediction.rank}
+                          </strong>
+                        </div>
+                      )}
 
                       <div className="admin-prediction-content">
                         <div>
@@ -385,7 +388,7 @@ function AdminHistoryDetailPage() {
             ) : (
               <div className="admin-empty-state">
                 <p>
-                  No ranked predictions were stored
+                  No condition prediction was stored
                   for this session.
                 </p>
               </div>

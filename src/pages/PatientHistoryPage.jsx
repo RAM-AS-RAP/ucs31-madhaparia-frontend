@@ -311,7 +311,9 @@ function PatientHistoryPage() {
                           !item.has_red_flag && (
                             <div className="history-top-result">
                               <span>
-                                Top pattern
+                                {item.predictions?.length > 1
+                                  ? 'Top pattern'
+                                  : 'Condition pattern'}
                               </span>
 
                               <div>
