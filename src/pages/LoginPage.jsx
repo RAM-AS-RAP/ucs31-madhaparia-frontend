@@ -101,7 +101,7 @@ function LoginPage() {
 
   return (
     <section className="auth-page">
-      <div className="container auth-grid">
+      <div className="rc-container auth-grid">
         <div className="auth-intro">
           <span className="auth-eyebrow">
             Welcome back

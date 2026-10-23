@@ -126,7 +126,7 @@ function SymptomConfirmationPage() {
 
   return (
     <section className="confirmation-page">
-      <div className="container confirmation-layout">
+      <div className="rc-container confirmation-layout">
         <div className="confirmation-heading">
           <span className="symptom-eyebrow">
             Symptom review

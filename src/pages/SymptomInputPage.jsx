@@ -120,7 +120,7 @@ function SymptomInputPage() {
 
   return (
     <section className="symptom-page">
-      <div className="container symptom-layout">
+      <div className="rc-container symptom-layout">
         <div className="symptom-heading">
           <span className="symptom-eyebrow">
             Symptom awareness

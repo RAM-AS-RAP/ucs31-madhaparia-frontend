@@ -112,7 +112,7 @@ function PatientHistoryPage() {
 
   return (
     <section className="history-page">
-      <div className="container history-layout">
+      <div className="rc-container history-layout">
         <div className="history-heading">
           <span className="symptom-eyebrow">
             Patient history

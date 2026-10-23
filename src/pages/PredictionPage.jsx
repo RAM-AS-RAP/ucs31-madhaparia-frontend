@@ -180,7 +180,7 @@ function PredictionPage() {
 
   return (
     <section className="prediction-page">
-      <div className="container prediction-layout">
+      <div className="rc-container prediction-layout">
         <div className="prediction-heading">
           <span className="symptom-eyebrow">
             Health awareness
