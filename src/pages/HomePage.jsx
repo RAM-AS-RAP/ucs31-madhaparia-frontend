@@ -4,7 +4,7 @@ function HomePage() {
   return (
     <>
       <section className="hero">
-        <div className="container hero-grid">
+        <div className="rc-container hero-grid">
           <div className="hero-content">
             <div className="eyebrow">
               Smart respiratory health awareness
@@ -154,7 +154,7 @@ function HomePage() {
         id="how-it-works"
         className="how-it-works"
       >
-        <div className="container">
+        <div className="rc-container">
           <div className="section-heading">
             <span>How it works</span>
 
@@ -218,7 +218,7 @@ function HomePage() {
       </section>
 
       <section className="safety-section">
-        <div className="container safety-card">
+        <div className="rc-container safety-card">
           <div className="safety-icon">
             !
           </div>

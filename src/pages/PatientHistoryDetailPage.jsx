@@ -114,7 +114,7 @@ function PatientHistoryDetailPage() {
   if (loading) {
     return (
       <section className="history-page">
-        <div className="container history-layout">
+        <div className="rc-container history-layout">
           <div className="history-state-card">
             <div className="auth-spinner" />
 
@@ -130,7 +130,7 @@ function PatientHistoryDetailPage() {
   if (error || !session) {
     return (
       <section className="history-page">
-        <div className="container history-layout">
+        <div className="rc-container history-layout">
           <div
             className="history-state-card history-error-card"
             role="alert"
@@ -164,7 +164,7 @@ function PatientHistoryDetailPage() {
 
   return (
     <section className="history-page">
-      <div className="container history-layout">
+      <div className="rc-container history-layout">
         <div className="history-detail-header">
           <div>
             <span className="symptom-eyebrow">

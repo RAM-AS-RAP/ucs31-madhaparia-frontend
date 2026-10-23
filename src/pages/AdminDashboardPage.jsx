@@ -178,7 +178,7 @@ function AdminDashboardPage() {
   if (loading) {
     return (
       <section className="admin-page">
-        <div className="container admin-layout">
+        <div className="rc-container admin-layout">
           <div className="admin-state-card">
             <div className="auth-spinner" />
 
@@ -199,7 +199,7 @@ function AdminDashboardPage() {
   if (error) {
     return (
       <section className="admin-page">
-        <div className="container admin-layout">
+        <div className="rc-container admin-layout">
           <div
             className="admin-state-card admin-state-error"
             role="alert"
@@ -223,7 +223,7 @@ function AdminDashboardPage() {
 
   return (
     <section className="admin-page">
-      <div className="container admin-layout">
+      <div className="rc-container admin-layout">
         <header className="admin-heading">
           <span>
             RespiraCare administration

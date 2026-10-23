@@ -64,8 +64,8 @@ function AppLayout() {
 
   return (
     <div className="app-shell">
-      <header className="navbar">
-        <div className="container navbar-content">
+      <header className="rc-navbar">
+        <div className="rc-container navbar-content">
           <Link to="/" className="brand">
             <div className="brand-icon">R</div>
 
@@ -147,7 +147,7 @@ function AppLayout() {
       </main>
 
       <footer className="footer">
-        <div className="container footer-content">
+        <div className="rc-container footer-content">
           <div>
             <strong>RespiraCare</strong>
 

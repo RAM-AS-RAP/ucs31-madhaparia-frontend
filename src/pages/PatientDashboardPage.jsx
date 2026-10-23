@@ -6,7 +6,7 @@ function PatientDashboardPage() {
 
   return (
     <section className="dashboard-page">
-      <div className="container">
+      <div className="rc-container">
         <div className="dashboard-welcome">
           <span>
             Patient dashboard

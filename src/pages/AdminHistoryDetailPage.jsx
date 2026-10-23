@@ -116,7 +116,7 @@ function AdminHistoryDetailPage() {
   if (loading) {
     return (
       <section className="admin-page">
-        <div className="container admin-layout">
+        <div className="rc-container admin-layout">
           <div className="admin-state-card">
             <div className="auth-spinner" />
 
@@ -132,7 +132,7 @@ function AdminHistoryDetailPage() {
   if (error || !session) {
     return (
       <section className="admin-page">
-        <div className="container admin-layout">
+        <div className="rc-container admin-layout">
           <div
             className="admin-state-card admin-state-error"
             role="alert"
@@ -166,7 +166,7 @@ function AdminHistoryDetailPage() {
 
   return (
     <section className="admin-page">
-      <div className="container admin-layout">
+      <div className="rc-container admin-layout">
         <header className="admin-detail-heading">
           <div>
             <span>
