@@ -303,4 +303,89 @@ describe('PredictionPage saved results', () => {
       ),
     ).not.toBeInTheDocument()
   })
+  it('explains unsupported V2 symptom features', () => {
+    const v2Prediction = {
+      ...routinePrediction,
+      model_version: 'v2_23class_prototype',
+      predictions: [routinePrediction.predictions[0]],
+      unsupported_model_features: [
+        'headache',
+        'chest_pain',
+      ],
+    }
+
+    saveState({
+      text: OLD_TEXT,
+      codes: ['fever', 'cough'],
+      safetyStatus: 'continue',
+      prediction: v2Prediction,
+    })
+
+    renderPredictionPage()
+
+    expect(
+      screen.getByText(
+        'Some symptom details were not used',
+      ),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('note', {
+        name: 'Unsupported symptom information',
+      }),
+    ).toHaveTextContent(
+      'This does not mean those symptoms are absent.',
+    )
+
+    expect(
+      screen.getByText('Tuberculosis (TB)'),
+    ).toBeInTheDocument()
+  })
+
+  it('shows urgent guidance without displaying a disease prediction', () => {
+    const urgentPrediction = {
+      ...routinePrediction,
+      prediction_id: 'urgent-session',
+      input_text: NEW_TEXT,
+      confirmed_codes: ['coughing_blood', 'fever'],
+      status: 'urgent_review',
+      has_red_flag: true,
+      predictions: [],
+      health_guidance:
+        'Seek urgent medical assessment.',
+      unsupported_model_features: ['headache'],
+    }
+
+    saveState({
+      text: NEW_TEXT,
+      codes: ['coughing_blood', 'fever'],
+      safetyStatus: 'urgent_review',
+      prediction: urgentPrediction,
+    })
+
+    renderPredictionPage()
+
+    expect(
+      screen.getByText(
+        'Seek prompt medical assessment.',
+      ),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText(
+        'Seek urgent medical assessment.',
+      ),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.queryByText('Tuberculosis (TB)'),
+    ).not.toBeInTheDocument()
+
+    expect(
+      screen.queryByText(
+        'Some symptom details were not used',
+      ),
+    ).not.toBeInTheDocument()
+  })
+
 })

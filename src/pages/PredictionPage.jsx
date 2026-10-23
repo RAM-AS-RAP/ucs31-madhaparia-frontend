@@ -449,6 +449,32 @@ function PredictionPage() {
                     </div>
                   )}
 
+                {Array.isArray(result.unsupported_model_features) &&
+                  result.unsupported_model_features.length > 0 && (
+                    <div
+                      className="prediction-warning"
+                      role="note"
+                      aria-label="Unsupported symptom information"
+                    >
+                      <div aria-hidden="true">!</div>
+
+                      <div>
+                        <strong>
+                          Some symptom details were not used
+                        </strong>
+
+                        <p>
+                          {result.unsupported_model_features.length}{' '}
+                          confirmed symptom detail(s) could not be
+                          used by this prediction model. They were
+                          excluded from the model calculation.
+                          This does not mean those symptoms are
+                          absent.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                 <div className="prediction-list">
                   {predictions.map(
                     (
