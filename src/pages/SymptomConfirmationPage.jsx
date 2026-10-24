@@ -1,8 +1,6 @@
+
 import { useState } from 'react'
-import {
-  Link,
-  Navigate,
-} from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 
 import {
   clearSymptomConfirmation,
@@ -11,41 +9,22 @@ import {
   saveSymptomConfirmation,
 } from '../services/symptoms'
 
-import {
-  clearPredictionResult,
-} from '../services/predictions'
-
+import { clearPredictionResult } from '../services/predictions'
 import { getApiErrorMessage } from '../services/api'
 
 function SymptomConfirmationPage() {
   const mapping = getSavedSymptomMapping()
+  const recognised = mapping?.recognised_symptoms || []
 
-  const recognised =
-    mapping?.recognised_symptoms || []
-
-  const [selectedCodes, setSelectedCodes] =
-    useState(() =>
-      recognised.map(
-        (symptom) => symptom.code,
-      ),
-    )
-
-  const [result, setResult] =
-    useState(null)
-
-  const [loading, setLoading] =
-    useState(false)
-
-  const [error, setError] =
-    useState('')
+  const [selectedCodes, setSelectedCodes] = useState(
+    () => recognised.map((symptom) => symptom.code),
+  )
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   if (!mapping) {
-    return (
-      <Navigate
-        to="/symptoms"
-        replace
-      />
-    )
+    return <Navigate to="/symptoms" replace />
   }
 
   function toggleSymptom(code) {
@@ -55,18 +34,11 @@ function SymptomConfirmationPage() {
     clearSymptomConfirmation()
     clearPredictionResult()
 
-    setSelectedCodes((current) => {
-      if (current.includes(code)) {
-        return current.filter(
-          (item) => item !== code,
-        )
-      }
-
-      return [
-        ...current,
-        code,
-      ]
-    })
+    setSelectedCodes((current) =>
+      current.includes(code)
+        ? current.filter((item) => item !== code)
+        : [...current, code],
+    )
   }
 
   async function handleConfirmation() {
@@ -76,28 +48,21 @@ function SymptomConfirmationPage() {
       setError(
         'Please confirm at least one symptom or return to the previous step and revise your description.',
       )
-
       return
     }
 
     setLoading(true)
-
-    // A new confirmation means any saved
-    // prediction belongs to older symptoms.
     clearPredictionResult()
+    clearSymptomConfirmation()
 
     try {
-      const confirmation =
-        await confirmSymptoms(
-          mapping.input_text,
-          selectedCodes,
-        )
+      const confirmation = await confirmSymptoms(
+        mapping.input_text,
+        selectedCodes,
+      )
 
       setResult(confirmation)
-
-      saveSymptomConfirmation(
-        confirmation,
-      )
+      saveSymptomConfirmation(confirmation)
     } catch (requestError) {
       setError(
         getApiErrorMessage(
@@ -113,380 +78,375 @@ function SymptomConfirmationPage() {
   function handleReviewAgain() {
     setResult(null)
     setError('')
-
     clearSymptomConfirmation()
     clearPredictionResult()
   }
 
-  const confirmed =
-    result?.confirmed_symptoms || []
-
-  const rejected =
-    result?.rejected_symptoms || []
+  const confirmed = result?.confirmed_symptoms || []
+  const rejected = result?.rejected_symptoms || []
+  const isUrgent = result?.safety_status === 'urgent_review'
 
   return (
-    <section className="confirmation-page">
-      <div className="rc-container confirmation-layout">
-        <div className="confirmation-heading">
-          <span className="symptom-eyebrow">
-            Symptom review
-          </span>
+    <section
+      className="sym33-page"
+      aria-labelledby="sym33-confirm-title"
+    >
+      <div className="rc-container sym33-container">
 
-          <h1>
-            Confirm what
-            <span> RespiraCare recognised.</span>
-          </h1>
+        {/* Page heading */}
+        <div className="row g-4 align-items-end sym33-intro-row">
+          <div className="col-12 col-lg-8">
+            <p className="sym33-eyebrow">
+              Symptom review
+            </p>
 
-          <p>
-            Select the symptoms that correctly describe
-            how you are feeling. Anything you leave
-            unchecked will not be sent forward to the
-            prediction stage.
-          </p>
+            <h1 id="sym33-confirm-title">
+              Check what we recognised.
+              <span> You decide what's correct.</span>
+            </h1>
+
+            <p className="sym33-lead">
+              Review the symptoms identified from your
+              description. Keep the ones that match how
+              you feel and remove any that do not.
+            </p>
+          </div>
+
+          <div className="col-12 col-lg-4">
+            <div className="sym33-progress">
+              <div className="sym33-progress-top">
+                <strong>Step 2 of 3</strong>
+                <span>Confirm symptoms</span>
+              </div>
+
+              <div
+                className="sym33-progress-track"
+                role="progressbar"
+                aria-label="Assessment progress"
+                aria-valuemin={0}
+                aria-valuemax={3}
+                aria-valuenow={2}
+              >
+                <span style={{ width: '66.67%' }} />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {!result && (
-          <div className="confirmation-card">
-            <div className="confirmation-card-header">
-              <div>
-                <span>
-                  Step 2 of 3
-                </span>
+        {!result ? (
+          <div className="sym33-confirm-panel">
 
-                <h2>
-                  Review recognised symptoms
-                </h2>
+            <div className="sym33-confirm-header">
+              <div>
+                <p className="sym33-section-kicker">
+                  Recognised symptoms
+                </p>
+
+                <h2>Review your selections</h2>
 
                 <p>
-                  We found {recognised.length}{' '}
-                  recognised symptom
-                  {recognised.length === 1
-                    ? ''
-                    : 's'}.
+                  {recognised.length} symptom
+                  {recognised.length === 1 ? '' : 's'} recognised
+                  from your description.
                 </p>
               </div>
 
-              <div className="confirmation-count">
-                <strong>
-                  {selectedCodes.length}
-                </strong>
-
-                <span>
-                  selected
-                </span>
+              <div className="sym33-total">
+                <strong>{selectedCodes.length}</strong>
+                <span>selected</span>
               </div>
             </div>
 
-            <div className="confirmation-original-text">
-              <span>
-                Your description
-              </span>
+            <div className="sym33-original-description">
+              <strong>Your original description</strong>
 
-              <p>
-                “{mapping.input_text}”
-              </p>
+              <p>“{mapping.input_text}”</p>
             </div>
 
             {mapping.has_red_flag && (
-              <div className="confirmation-warning">
-                <div>
-                  !
-                </div>
+              <div
+                className="sym33-alert sym33-alert-warning"
+                role="alert"
+              >
+                <strong>
+                  Safety-sensitive wording detected
+                </strong>
 
-                <div>
-                  <strong>
-                    Safety-sensitive wording detected
-                  </strong>
-
-                  <p>
-                    One or more recognised symptoms may
-                    require urgent-review handling if
-                    you confirm them below.
-                  </p>
-                </div>
+                <p>
+                  One or more recognised symptoms may
+                  need urgent attention. If your symptoms
+                  are severe, rapidly worsening, or involve
+                  breathing difficulty, seek medical
+                  attention promptly.
+                </p>
               </div>
             )}
 
-            <div className="confirmation-list">
-              {recognised.map(
-                (symptom) => {
-                  const selected =
-                    selectedCodes.includes(
-                      symptom.code,
-                    )
+            <div
+              className="sym33-selection-list"
+              aria-label="Select your symptoms"
+            >
+              {recognised.map((symptom) => {
+                const selected = selectedCodes.includes(
+                  symptom.code,
+                )
 
-                  return (
-                    <button
-                      type="button"
-                      key={symptom.code}
-                      aria-pressed={selected}
-                      className={
-                        selected
-                          ? `confirmation-option selected${
-                              symptom.is_red_flag
-                                ? ' warning'
-                                : ''
-                            }`
-                          : `confirmation-option${
-                              symptom.is_red_flag
-                                ? ' warning'
-                                : ''
-                            }`
-                      }
-                      onClick={() =>
-                        toggleSymptom(
-                          symptom.code,
-                        )
-                      }
+                return (
+                  <button
+                    type="button"
+                    key={symptom.code}
+                    className={`sym33-selection-row${
+                      selected ? ' is-selected' : ''
+                    }${
+                      symptom.is_red_flag ? ' is-warning' : ''
+                    }`}
+                    aria-pressed={selected}
+                    disabled={loading}
+                    onClick={() =>
+                      toggleSymptom(symptom.code)
+                    }
+                  >
+                    <span
+                      className="sym33-checkbox"
+                      aria-hidden="true"
                     >
-                      <div className="confirmation-checkbox">
-                        {selected
-                          ? '✓'
-                          : ''}
-                      </div>
+                      {selected ? '✓' : ''}
+                    </span>
 
-                      <div className="confirmation-option-text">
-                        <div className="confirmation-option-top">
-                          <h3>
-                            {
-                              symptom.display_name
-                            }
-                          </h3>
+                    <span className="sym33-selection-copy">
+                      <span className="sym33-selection-title">
+                        <strong>{symptom.display_name}</strong>
 
-                          {symptom.is_red_flag && (
-                            <span className="confirmation-red-flag">
-                              Safety-sensitive
-                            </span>
-                          )}
-                        </div>
+                        {symptom.is_red_flag && (
+                          <span className="sym33-warning-tag">
+                            Safety-sensitive
+                          </span>
+                        )}
+                      </span>
 
-                        <p>
-                          Recognised from{' '}
-                          <strong>
-                            “{
-                              symptom.matched_text
-                            }”
-                          </strong>
-                        </p>
-                      </div>
-                    </button>
-                  )
-                },
-              )}
+                      <span className="sym33-selection-description">
+                        Recognised from{' '}
+                        <b>“{symptom.matched_text}”</b>
+                      </span>
+                    </span>
+
+                    <span className="sym33-selection-state">
+                      {selected ? 'Selected' : 'Not selected'}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
+
+            <p className="sym33-selection-help">
+              Select a symptom to include it, or select
+              it again to remove it. At least one symptom
+              must remain selected.
+            </p>
 
             {error && (
               <div
-                className="form-message error-message"
+                className="form-message error-message sym33-error"
                 role="alert"
               >
                 {error}
               </div>
             )}
 
-            <div className="confirmation-actions">
+            <div className="sym33-confirm-actions">
               <Link
                 to="/symptoms"
-                className="button button-secondary"
+                className="button button-secondary sym33-secondary-button"
               >
                 Back to symptom input
               </Link>
 
               <button
                 type="button"
-                className="button button-primary"
+                className="button button-primary sym33-primary-button"
                 disabled={loading}
-                onClick={
-                  handleConfirmation
-                }
+                onClick={handleConfirmation}
               >
                 {loading
                   ? 'Confirming...'
                   : 'Confirm selected symptoms'}
+
+                {!loading && (
+                  <span aria-hidden="true">→</span>
+                )}
               </button>
             </div>
           </div>
-        )}
+        ) : (
+          <div
+            className="sym33-confirm-result"
+            aria-live="polite"
+          >
+            {isUrgent ? (
+              <div
+                className="sym33-alert sym33-alert-urgent"
+                role="alert"
+              >
+                <p className="sym33-section-kicker">
+                  Urgent review recommended
+                </p>
 
-        {result && (
-          <div className="confirmation-result">
-            {result.safety_status ===
-            'urgent_review' ? (
-              <div className="urgent-review-card">
-                <div className="urgent-review-icon">
-                  !
-                </div>
-
-                <div>
-                  <span>
-                    Urgent review recommended
-                  </span>
-
-                  <h2>
-                    A confirmed symptom needs
-                    prompt attention.
-                  </h2>
-
-                  <p>
-                    RespiraCare detected a
-                    safety-sensitive confirmed symptom.
-                    Consider seeking prompt professional
-                    medical assessment, especially if
-                    symptoms are severe, worsening, or
-                    causing breathing difficulty.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="confirmation-success-card">
-                <div className="confirmation-success-icon">
-                  ✓
-                </div>
-
-                <div>
-                  <span>
-                    Confirmation complete
-                  </span>
-
-                  <h2>
-                    Your symptoms are ready for
-                    the next stage.
-                  </h2>
-
-                  <p>
-                    Only the symptoms you confirmed
-                    will be used when RespiraCare
-                    prepares the prediction request.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div className="confirmation-summary">
-              <div className="confirmation-summary-header">
-                <div>
-                  <span>
-                    Confirmed
-                  </span>
-
-                  <h3>
-                    Selected symptoms
-                  </h3>
-                </div>
-
-                <strong>
-                  {confirmed.length}
-                </strong>
-              </div>
-
-              <div className="confirmation-summary-list">
-                {confirmed.map(
-                  (symptom) => (
-                    <div
-                      className="confirmation-summary-item"
-                      key={symptom.code}
-                    >
-                      <div>
-                        <strong>
-                          {
-                            symptom.display_name
-                          }
-                        </strong>
-
-                        <span>
-                          {
-                            symptom.matched_text
-                          }
-                        </span>
-                      </div>
-
-                      {symptom.is_red_flag && (
-                        <span className="confirmation-red-flag">
-                          Safety-sensitive
-                        </span>
-                      )}
-                    </div>
-                  ),
-                )}
-              </div>
-            </div>
-
-            {rejected.length > 0 && (
-              <div className="confirmation-rejected">
-                <span>
-                  Not confirmed
-                </span>
-
-                <h3>
-                  Excluded symptoms
-                </h3>
-
-                <div className="rejected-list">
-                  {rejected.map(
-                    (symptom) => (
-                      <span
-                        key={symptom.code}
-                      >
-                        {
-                          symptom.display_name
-                        }
-                      </span>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="confirmation-next-step">
-              <div>
-                <span>
-                  Next step
-                </span>
-
-                <h3>
-                  Generate health-awareness results
-                </h3>
+                <h2>
+                  A confirmed symptom needs prompt attention.
+                </h2>
 
                 <p>
-                  Add your age and sex in the next
-                  step to see your health-awareness
-                  result.
+                  RespiraCare detected a safety-sensitive
+                  confirmed symptom. Seek prompt professional
+                  medical assessment, particularly if you
+                  have severe or worsening symptoms or
+                  difficulty breathing.
+                </p>
+
+                <p>
+                  This assessment will not continue to
+                  automated disease prediction.
                 </p>
               </div>
+            ) : (
+              <div className="sym33-confirm-success">
+                <p className="sym33-section-kicker">
+                  Confirmation complete
+                </p>
 
-              <Link
-                to="/prediction"
-                className="button button-primary"
-              >
-                Continue to prediction
-              </Link>
-            </div>
+                <h2>Your symptoms have been confirmed.</h2>
 
-            <button
-              type="button"
-              className="confirmation-review-again"
-              onClick={handleReviewAgain}
+                <p>
+                  Only the symptoms you selected will be
+                  used in the next stage of the assessment.
+                </p>
+              </div>
+            )}
+
+            <section
+              className="sym33-confirm-summary"
+              aria-labelledby="sym33-summary-title"
             >
-              Review selections again
-            </button>
+              <div className="sym33-results-heading">
+                <div>
+                  <p className="sym33-section-kicker">
+                    Your selection
+                  </p>
+
+                  <h2 id="sym33-summary-title">
+                    Confirmed symptoms
+                  </h2>
+                </div>
+
+                <div className="sym33-total">
+                  <strong>{confirmed.length}</strong>
+                  <span>confirmed</span>
+                </div>
+              </div>
+
+              <div className="sym33-summary-list">
+                {confirmed.map((symptom) => (
+                  <div
+                    className="sym33-summary-row"
+                    key={symptom.code}
+                  >
+                    <div>
+                      <strong>{symptom.display_name}</strong>
+                      <p>{symptom.matched_text}</p>
+                    </div>
+
+                    {symptom.is_red_flag && (
+                      <span className="sym33-warning-tag">
+                        Safety-sensitive
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {rejected.length > 0 && (
+                <div className="sym33-excluded">
+                  <h3>Not confirmed</h3>
+
+                  <p>
+                    These symptoms were excluded from
+                    your confirmed selection.
+                  </p>
+
+                  <div className="sym33-excluded-list">
+                    {rejected.map((symptom) => (
+                      <span key={symptom.code}>
+                        {symptom.display_name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {!isUrgent && (
+              <div className="sym33-next">
+                <div>
+                  <p className="sym33-section-kicker">
+                    Next step
+                  </p>
+
+                  <h3>Generate your health-awareness result</h3>
+
+                  <p>
+                    Provide your age and sex in the next
+                    step to continue to the preliminary
+                    single-condition prediction.
+                  </p>
+                </div>
+
+                <Link
+                  to="/prediction"
+                  className="button button-primary sym33-primary-button"
+                >
+                  Continue to prediction
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            )}
+
+            <div className="sym33-result-actions">
+              <button
+                type="button"
+                className="sym33-text-action"
+                onClick={handleReviewAgain}
+              >
+                Review selections again
+              </button>
+
+              {isUrgent && (
+                <Link
+                  to="/dashboard"
+                  className="button button-secondary sym33-secondary-button"
+                >
+                  Return to dashboard
+                </Link>
+              )}
+            </div>
           </div>
         )}
 
-        <div className="symptom-safety-footer">
-          <strong>
-            Important
-          </strong>
+        <div className="sym33-bottom-note">
+          <div>
+            <strong>Health-awareness information only</strong>
 
-          <p>
-            RespiraCare provides preliminary
-            health-awareness support and is not a
-            medical diagnosis.
-          </p>
+            <p>
+              RespiraCare provides preliminary
+              health-awareness support and is not a
+              medical diagnosis.
+            </p>
+          </div>
 
           <Link to="/dashboard">
             Return to dashboard
           </Link>
         </div>
+
       </div>
     </section>
   )
