@@ -15,6 +15,8 @@ import {
   clearSymptomMapping,
 } from '../services/symptoms'
 
+const FOOTER_YEAR = new Date().getFullYear()
+
 function BrandMark() {
   return (
     <svg
@@ -51,8 +53,12 @@ function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const logoutPending = useRef(false)
+  const menuToggleRef = useRef(null)
 
-  const [menuOpen, setMenuOpen] = useState(false)
+  // Remember the route where the menu was opened.
+  // Changing routes automatically closes the menu.
+  const [menuOpenAt, setMenuOpenAt] = useState(null)
+  const menuOpen = menuOpenAt === location.key
 
   const {
     isAdmin,
@@ -72,18 +78,15 @@ function AppLayout() {
     }
   }, [location.pathname, logout])
 
-  // Close the mobile menu after navigating.
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [location.pathname])
-
-  // Close the menu with the Escape key.
+  // Dismiss the mobile menu with Escape.
+  // Return keyboard focus to its toggle button.
   useEffect(() => {
     if (!menuOpen) return undefined
 
     function handleEscape(event) {
       if (event.key === 'Escape') {
-        setMenuOpen(false)
+        setMenuOpenAt(null)
+        menuToggleRef.current?.focus()
       }
     }
 
@@ -95,7 +98,7 @@ function AppLayout() {
   }, [menuOpen])
 
   function handleLogout() {
-    setMenuOpen(false)
+    setMenuOpenAt(null)
 
     clearSymptomMapping()
     clearSymptomConfirmation()
@@ -126,15 +129,13 @@ function AppLayout() {
 
   return (
     <div className="app-shell">
-      {/* NAVIGATION */}
+      {/* Navigation */}
       <header className="rc-navbar rc28-header">
         <div className="rc-container rc28-header-inner">
-
-          {/* Logo */}
           <Link
             to="/"
             className="brand rc28-brand"
-            onClick={() => setMenuOpen(false)}
+            onClick={() => setMenuOpenAt(null)}
           >
             <BrandMark />
 
@@ -208,9 +209,10 @@ function AppLayout() {
             )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Tablet and mobile menu toggle */}
           <button
             type="button"
+            ref={menuToggleRef}
             className="rc28-menu-toggle d-xl-none"
             aria-label={
               menuOpen
@@ -219,9 +221,11 @@ function AppLayout() {
             }
             aria-controls="rc28-mobile-menu"
             aria-expanded={menuOpen}
-            onClick={() =>
-              setMenuOpen((current) => !current)
-            }
+            onClick={() => {
+              setMenuOpenAt((current) =>
+                current === location.key ? null : location.key
+              )
+            }}
           >
             <svg
               viewBox="0 0 24 24"
@@ -242,7 +246,7 @@ function AppLayout() {
           </button>
         </div>
 
-        {/* Mobile navigation panel */}
+        {/* Tablet and mobile navigation */}
         <div
           id="rc28-mobile-menu"
           className="rc28-mobile-panel d-xl-none"
@@ -259,7 +263,7 @@ function AppLayout() {
                   to={item.to}
                   end={item.end}
                   className={navClass}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => setMenuOpenAt(null)}
                 >
                   {item.label}
                 </NavLink>
@@ -291,7 +295,7 @@ function AppLayout() {
                 <Link
                   to="/login"
                   className="rc28-action rc28-action-outline"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => setMenuOpenAt(null)}
                 >
                   Log in
                 </Link>
@@ -299,7 +303,7 @@ function AppLayout() {
                 <Link
                   to="/register"
                   className="rc28-action rc28-action-primary"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => setMenuOpenAt(null)}
                 >
                   Get started
                 </Link>
@@ -309,17 +313,15 @@ function AppLayout() {
         </div>
       </header>
 
-      {/* PAGE CONTENT */}
+      {/* Main page content */}
       <main>
         <Outlet />
       </main>
 
-      {/* FOOTER */}
+      {/* Footer */}
       <footer className="footer rc28-footer">
         <div className="rc-container">
           <div className="row gy-4 gx-lg-5 rc28-footer-main">
-
-            {/* Brand information */}
             <div className="col-12 col-lg-5">
               <strong className="rc28-footer-brand">
                 RespiraCare
@@ -331,7 +333,6 @@ function AppLayout() {
               </p>
             </div>
 
-            {/* Useful links */}
             <div className="col-12 col-sm-6 col-lg-3">
               <h2 className="rc28-footer-heading">
                 Explore
@@ -369,7 +370,6 @@ function AppLayout() {
               </nav>
             </div>
 
-            {/* Safety disclaimer */}
             <div className="col-12 col-sm-6 col-lg-4">
               <h2 className="rc28-footer-heading">
                 Important information
@@ -385,7 +385,7 @@ function AppLayout() {
 
           <div className="rc28-footer-bottom">
             <span>
-              © {new Date().getFullYear()} RespiraCare
+              © {FOOTER_YEAR} RespiraCare
             </span>
 
             <span>

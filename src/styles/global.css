@@ -11649,3 +11649,106 @@ code,
   .adm36-filters button { flex: 1; }
   .adm36-tabs button { flex: 1; }
 }
+
+/* =========================================================
+   ISSUE #37 - MOBILE AND TABLET RESPONSIVENESS
+   Append once to src/styles/global.css
+   ========================================================= */
+
+/* Keep expanded navigation usable on shorter phone screens. */
+@media (max-width: 1199.98px) {
+  .rc28-mobile-panel {
+    max-height: calc(100vh - 72px);
+    max-height: calc(100dvh - 72px);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rc28-mobile-panel-inner,
+  .rc28-mobile-account-actions,
+  .rc28-mobile-guest-actions {
+    min-width: 0;
+  }
+
+  .rc28-mobile-nav .rc28-nav-link,
+  .rc28-mobile-account-actions .rc28-action,
+  .rc28-mobile-guest-actions .rc28-action {
+    min-height: 48px;
+  }
+}
+
+/* Comfortable tap targets for footer navigation. */
+.rc28-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* Improve the contrast of Highcharts axis labels. */
+.adm36-chart .highcharts-axis-labels text,
+.adm36-chart .highcharts-axis-title {
+  fill: var(--text-soft) !important;
+  font-size: 13px !important;
+}
+
+@media (max-width: 575.98px) {
+  .rc28-mobile-panel {
+    max-height: calc(100vh - 68px);
+    max-height: calc(100dvh - 68px);
+  }
+
+  /* Keep logo and hamburger menu within the screen. */
+  .rc28-header-inner,
+  .rc28-brand,
+  .rc28-brand-copy {
+    min-width: 0;
+  }
+
+  .rc28-brand-copy {
+    overflow-wrap: anywhere;
+  }
+
+  /* Prevent long headings and condition names from overflowing. */
+  .sym33-page h1,
+  .pred34-page h1,
+  .hist35-page h1,
+  .adm36-page h1,
+  .hist35-condition h3,
+  .adm36-condition h3 {
+    overflow-wrap: anywhere;
+  }
+
+  /* Long saved session IDs must wrap within mobile cards. */
+  .pred34-page code,
+  .hist35-page code,
+  .adm36-page code {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  /* Allow Highcharts containers to shrink on small screens. */
+  .adm36-charts > div,
+  .adm36-chart-panel,
+  .adm36-chart {
+    min-width: 0;
+  }
+}
+
+/* Extra-small phones */
+@media (max-width: 359.98px) {
+  .rc28-mobile-guest-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .sym33-intro-row h1,
+  .pred34-intro h1,
+  .hist35-intro h1,
+  .hist35-detail-heading h1,
+  .adm36-intro h1,
+  .adm36-detail-intro h1 {
+    font-size: 32px;
+  }
+}
