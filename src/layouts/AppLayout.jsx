@@ -1,33 +1,58 @@
 
-import {
-  clearSymptomConfirmation,
-  clearSymptomMapping,
-} from '../services/symptoms'
-
-import {
-  useEffect,
-  useRef,
-} from 'react'
-
+import { useEffect, useRef, useState } from 'react'
 import {
   Link,
+  NavLink,
   Outlet,
   useLocation,
   useNavigate,
 } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
-
+import { clearPredictionResult } from '../services/predictions'
 import {
-  clearPredictionResult,
-} from '../services/predictions'
+  clearSymptomConfirmation,
+  clearSymptomMapping,
+} from '../services/symptoms'
+
+function BrandMark() {
+  return (
+    <svg
+      width="43"
+      height="43"
+      viewBox="15 7 228 242"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="#b99bc9"
+        d="M46 15 C34 15 24 28 23 40 V214 C23 230 34 239 52 240 C74 241 88 224 88 203 V178 C88 168 80 166 72 171 C52 181 39 194 28 212 C29 188 44 161 56 137 C76 101 88 74 88 40 C88 25 77 15 60 15 Z"
+      />
+      <path
+        fill="#d1b7e1"
+        d="M231 24 C225 22 190 21 172 24 C141 28 122 56 105 83 C89 107 76 135 66 148 C83 136 104 124 125 121 C148 117 172 116 194 103 C222 85 235 57 233 34 Z"
+      />
+      <path
+        fill="#9677ad"
+        d="M72 159 C97 155 105 162 122 181 L154 218 C171 238 183 241 205 240 C223 239 236 232 236 223 C237 214 223 201 210 185 L187 153 C164 123 140 126 117 134 C100 140 84 149 72 159 Z"
+      />
+      <path
+        d="M181 47 V76 M166.5 61.5 H195.5"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="9"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
 
 function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
-
-  // Keep existing logout and navigation behaviour.
   const logoutPending = useRef(false)
+
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const {
     isAdmin,
@@ -36,6 +61,7 @@ function AppLayout() {
     user,
   } = useAuth()
 
+  // Preserve the existing safe logout sequence.
   useEffect(() => {
     if (
       logoutPending.current &&
@@ -46,7 +72,31 @@ function AppLayout() {
     }
   }, [location.pathname, logout])
 
+  // Close the mobile menu after navigating.
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
+
+  // Close the menu with the Escape key.
+  useEffect(() => {
+    if (!menuOpen) return undefined
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+
+    return () => {
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [menuOpen])
+
   function handleLogout() {
+    setMenuOpen(false)
+
     clearSymptomMapping()
     clearSymptomConfirmation()
     clearPredictionResult()
@@ -60,85 +110,35 @@ function AppLayout() {
     navigate('/')
   }
 
+  const navigationItems = [
+    { to: '/', label: 'Home', end: true },
+    ...(isAuthenticated
+      ? [{ to: '/dashboard', label: 'Dashboard', end: false }]
+      : []),
+    ...(isAdmin
+      ? [{ to: '/admin', label: 'Admin', end: false }]
+      : []),
+  ]
+
+  function navClass({ isActive }) {
+    return `rc28-nav-link${isActive ? ' is-active' : ''}`
+  }
+
   return (
     <div className="app-shell">
-      <header className="rc-navbar">
-        <div className="rc-container navbar-content">
+      {/* NAVIGATION */}
+      <header className="rc-navbar rc28-header">
+        <div className="rc-container rc28-header-inner">
 
-          {/* RespiraCare logo and branding */}
-          <Link to="/" className="brand">
+          {/* Logo */}
+          <Link
+            to="/"
+            className="brand rc28-brand"
+            onClick={() => setMenuOpen(false)}
+          >
+            <BrandMark />
 
-            <svg
-              width="43"
-              height="43"
-              viewBox="15 7 228 242"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-              focusable="false"
-              style={{ flexShrink: 0 }}
-            >
-              {/* Left upright of K */}
-              <path
-                fill="#b99bc9"
-                d="
-                  M46 15
-                  C34 15 24 28 23 40
-                  V214
-                  C23 230 34 239 52 240
-                  C74 241 88 224 88 203
-                  V178
-                  C88 168 80 166 72 171
-                  C52 181 39 194 28 212
-                  C29 188 44 161 56 137
-                  C76 101 88 74 88 40
-                  C88 25 77 15 60 15
-                  Z
-                "
-              />
-
-              {/* Upper leaf */}
-              <path
-                fill="#d1b7e1"
-                d="
-                  M231 24
-                  C225 22 190 21 172 24
-                  C141 28 122 56 105 83
-                  C89 107 76 135 66 148
-                  C83 136 104 124 125 121
-                  C148 117 172 116 194 103
-                  C222 85 235 57 233 34
-                  Z
-                "
-              />
-
-              {/* Lower diagonal of K */}
-              <path
-                fill="#9677ad"
-                d="
-                  M72 159
-                  C97 155 105 162 122 181
-                  L154 218
-                  C171 238 183 241 205 240
-                  C223 239 236 232 236 223
-                  C237 214 223 201 210 185
-                  L187 153
-                  C164 123 140 126 117 134
-                  C100 140 84 149 72 159
-                  Z
-                "
-              />
-
-              {/* White medical cross */}
-              <path
-                d="M181 47 V76 M166.5 61.5 H195.5"
-                fill="none"
-                stroke="#ffffff"
-                strokeWidth="9"
-                strokeLinecap="round"
-              />
-            </svg>
-
-            <div>
+            <span className="rc28-brand-copy">
               <span className="brand-name">
                 RespiraCare
               </span>
@@ -146,45 +146,44 @@ function AppLayout() {
               <span className="brand-subtitle">
                 Respiratory Health Awareness
               </span>
-            </div>
+            </span>
           </Link>
 
-          {/* Navigation links */}
-          <nav className="nav-links">
-            <Link to="/">
-              Home
-            </Link>
-
-            {isAuthenticated && (
-              <Link to="/dashboard">
-                Dashboard
-              </Link>
-            )}
-
-            {isAdmin && (
-              <Link to="/admin">
-                Admin
-              </Link>
-            )}
+          {/* Desktop navigation */}
+          <nav
+            className="rc28-primary-nav d-none d-xl-flex"
+            aria-label="Main navigation"
+          >
+            {navigationItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={navClass}
+              >
+                {item.label}
+              </NavLink>
+            ))}
           </nav>
 
-          {/* Login and account controls */}
-          <div className="nav-actions">
+          {/* Desktop account actions */}
+          <div className="rc28-desktop-actions d-none d-xl-flex">
             {isAuthenticated ? (
               <>
-                <div className="nav-user">
+                <div
+                  className="rc28-account"
+                  title={user?.email || undefined}
+                >
                   <span>
-                    {isAdmin ? 'Admin' : 'Patient'}
+                    {isAdmin ? 'Administrator' : 'Patient'}
                   </span>
 
-                  <strong>
-                    {user?.email}
-                  </strong>
+                  <strong>{user?.email}</strong>
                 </div>
 
                 <button
                   type="button"
-                  className="button button-ghost"
+                  className="rc28-action rc28-action-outline"
                   onClick={handleLogout}
                 >
                   Log out
@@ -194,44 +193,205 @@ function AppLayout() {
               <>
                 <Link
                   to="/login"
-                  className="button button-ghost"
+                  className="rc28-action rc28-action-text"
                 >
                   Log in
                 </Link>
 
                 <Link
                   to="/register"
-                  className="button button-primary"
+                  className="rc28-action rc28-action-primary"
                 >
                   Get started
                 </Link>
               </>
             )}
           </div>
+
+          {/* Mobile menu button */}
+          <button
+            type="button"
+            className="rc28-menu-toggle d-xl-none"
+            aria-label={
+              menuOpen
+                ? 'Close navigation menu'
+                : 'Open navigation menu'
+            }
+            aria-controls="rc28-mobile-menu"
+            aria-expanded={menuOpen}
+            onClick={() =>
+              setMenuOpen((current) => !current)
+            }
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              {menuOpen ? (
+                <path d="M6 6l12 12M18 6L6 18" />
+              ) : (
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile navigation panel */}
+        <div
+          id="rc28-mobile-menu"
+          className="rc28-mobile-panel d-xl-none"
+          hidden={!menuOpen}
+        >
+          <div className="rc-container rc28-mobile-panel-inner">
+            <nav
+              className="rc28-mobile-nav"
+              aria-label="Mobile navigation"
+            >
+              {navigationItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={navClass}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
+
+            {isAuthenticated ? (
+              <div className="rc28-mobile-account-actions">
+                <div className="rc28-mobile-account">
+                  <span>
+                    {isAdmin
+                      ? 'Administrator account'
+                      : 'Patient account'}
+                  </span>
+
+                  <strong>{user?.email}</strong>
+                </div>
+
+                <button
+                  type="button"
+                  className="rc28-action rc28-action-outline"
+                  onClick={handleLogout}
+                >
+                  Log out
+                </button>
+              </div>
+            ) : (
+              <div className="rc28-mobile-guest-actions">
+                <Link
+                  to="/login"
+                  className="rc28-action rc28-action-outline"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Log in
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="rc28-action rc28-action-primary"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Get started
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Page content */}
+      {/* PAGE CONTENT */}
       <main>
         <Outlet />
       </main>
 
-      {/* Existing footer */}
-      <footer className="footer">
-        <div className="rc-container footer-content">
-          <div>
-            <strong>RespiraCare</strong>
+      {/* FOOTER */}
+      <footer className="footer rc28-footer">
+        <div className="rc-container">
+          <div className="row gy-4 gx-lg-5 rc28-footer-main">
 
-            <p>
-              Respiratory health awareness supported by
-              intelligent symptom analysis.
-            </p>
+            {/* Brand information */}
+            <div className="col-12 col-lg-5">
+              <strong className="rc28-footer-brand">
+                RespiraCare
+              </strong>
+
+              <p className="rc28-footer-description">
+                Respiratory health awareness supported
+                by intelligent symptom analysis.
+              </p>
+            </div>
+
+            {/* Useful links */}
+            <div className="col-12 col-sm-6 col-lg-3">
+              <h2 className="rc28-footer-heading">
+                Explore
+              </h2>
+
+              <nav
+                className="rc28-footer-links"
+                aria-label="Footer navigation"
+              >
+                <Link to="/">
+                  Explore RespiraCare
+                </Link>
+
+                {isAuthenticated ? (
+                  <Link to="/dashboard">
+                    Account overview
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/login">
+                      Sign in
+                    </Link>
+
+                    <Link to="/register">
+                      Create an account
+                    </Link>
+                  </>
+                )}
+
+                {isAdmin && (
+                  <Link to="/admin">
+                    Administration
+                  </Link>
+                )}
+              </nav>
+            </div>
+
+            {/* Safety disclaimer */}
+            <div className="col-12 col-sm-6 col-lg-4">
+              <h2 className="rc28-footer-heading">
+                Important information
+              </h2>
+
+              <p className="rc28-footer-disclaimer">
+                For health-awareness and educational
+                purposes only. This system does not
+                provide a medical diagnosis.
+              </p>
+            </div>
           </div>
 
-          <p className="footer-disclaimer">
-            For health-awareness and educational purposes only.
-            This system does not provide a medical diagnosis.
-          </p>
+          <div className="rc28-footer-bottom">
+            <span>
+              © {new Date().getFullYear()} RespiraCare
+            </span>
+
+            <span>
+              Information for awareness, not diagnosis.
+            </span>
+          </div>
         </div>
       </footer>
     </div>
