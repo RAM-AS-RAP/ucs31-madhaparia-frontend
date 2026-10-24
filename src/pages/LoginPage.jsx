@@ -1,91 +1,51 @@
+
 import { useState } from 'react'
-import {
-  Link,
-  Navigate,
-  useLocation,
-} from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
 import { getApiErrorMessage } from '../services/api'
 
 function LoginPage() {
   const location = useLocation()
-
-  const {
-    isAuthenticated,
-    login,
-    user,
-  } = useAuth()
+  const { isAuthenticated, login, user } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] =
-    useState(false)
-
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const accountCreated =
-    location.state?.accountCreated
+  const accountCreated = location.state?.accountCreated
+  const authenticationRequired = location.state?.authenticationRequired
 
-  const authenticationRequired =
-    location.state?.authenticationRequired
-
-  // All redirects after login happen here, once
-  // the user is known. Sending the user back to the
-  // page they asked for (location.state.from) is
-  // done in this one place so that two different
-  // navigations cannot race each other.
+  // Keep existing role-based and requested-page redirects.
   if (isAuthenticated) {
-    const requestedRoute =
-      location.state?.from
+    const requestedRoute = location.state?.from
+    const defaultRoute = user?.role === 'admin' ? '/admin' : '/dashboard'
 
-    const defaultRoute =
-      user?.role === 'admin'
-        ? '/admin'
-        : '/dashboard'
-
-    return (
-      <Navigate
-        to={requestedRoute || defaultRoute}
-        replace
-      />
-    )
+    return <Navigate to={requestedRoute || defaultRoute} replace />
   }
 
   async function handleSubmit(event) {
     event.preventDefault()
-
     setError('')
 
     if (!email.trim() || !password) {
-      setError(
-        'Please enter your email address and password.',
-      )
+      setError('Please enter your email address and password.')
       return
     }
 
     setLoading(true)
 
     try {
-      // On success the user state changes and the
-      // redirect above takes the user onwards.
-      await login(
-        email.trim(),
-        password,
-      )
+      await login(email.trim(), password)
     } catch (requestError) {
-      const status =
-        requestError.response?.status
+      const status = requestError.response?.status
 
       if (status === 401) {
-        setError(
-          'The email or password you entered is incorrect.',
-        )
+        setError('The email or password you entered is incorrect.')
       } else if (status === 422) {
-        setError(
-          'Please check your email address and password.',
-        )
+        setError('Please check your email address and password.')
       } else {
         setError(
           getApiErrorMessage(
@@ -100,190 +60,189 @@ function LoginPage() {
   }
 
   return (
-    <section className="auth-page">
-      <div className="rc-container auth-grid">
-        <div className="auth-intro">
-          <span className="auth-eyebrow">
-            Welcome back
-          </span>
+    <section className="login-page" aria-labelledby="login-heading">
+      <div className="rc-container">
+        <div className="row align-items-center gx-xl-5 gy-5 login-grid">
 
-          <h1>
-            Continue your respiratory
-            <span> health-awareness journey.</span>
-          </h1>
+          {/* Introduction */}
+            <div className="col-12 col-lg-6 order-2 order-lg-1 d-none d-lg-block">            <div className="login-editorial">
 
-          <p>
-            Sign in to access RespiraCare and continue
-            using your personal health-awareness tools.
-          </p>
+              <p className="login-eyebrow">
+                Your RespiraCare account
+              </p>
 
-          <div className="auth-benefits">
-            <div>
-              <span>✓</span>
+              <h1 id="login-heading">
+                Your health awareness,
+                <span> right where you left off.</span>
+              </h1>
 
-              <div>
-                <strong>
-                  Your personal history
-                </strong>
+              <p className="login-intro">
+                Sign in to revisit earlier symptom checks or start a new one.
+                Everything is organised in one place, at your own pace.
+              </p>
 
-                <p>
-                  Access your stored respiratory
-                  health-awareness sessions.
-                </p>
+              <div
+                className="login-benefits"
+                aria-label="What you can do after signing in"
+              >
+                <div className="login-benefit">
+                  <span className="login-benefit-number" aria-hidden="true">
+                    01
+                  </span>
+
+                  <div>
+                    <strong>Pick up where you left off</strong>
+                    <p>
+                      Review your previous health-awareness sessions.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="login-benefit">
+                  <span className="login-benefit-number" aria-hidden="true">
+                    02
+                  </span>
+
+                  <div>
+                    <strong>Describe symptoms naturally</strong>
+                    <p>
+                      Use English, Kiswahili, or a mix of both.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <span>✓</span>
+              <p className="login-editorial-note">
+                Your account history is only accessible through an
+                authorised session.
+              </p>
 
-              <div>
-                <strong>
-                  Private account access
-                </strong>
-
-                <p>
-                  Your prediction history is linked
-                  only to your account.
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <span>✓</span>
-
-              <div>
-                <strong>
-                  English + Kiswahili
-                </strong>
-
-                <p>
-                  Describe symptoms naturally using
-                  supported language input.
-                </p>
-              </div>
             </div>
           </div>
-        </div>
 
-        <div className="auth-card">
-          <div className="auth-card-header">
-            <span className="auth-card-label">
-              RespiraCare account
-            </span>
+          {/* Login form */}
+          <div className="col-12 col-lg-6 order-1 order-lg-2">
+            <div className="login-panel">
 
-            <h2>Log in</h2>
+              <p className="login-panel-eyebrow">
+                Account access
+              </p>
 
-            <p>
-              Enter your account details to continue.
-            </p>
-          </div>
+              <h2>Log in</h2>
 
-          {accountCreated && (
-            <div className="form-message success-message">
-              Your account was created successfully.
-              You can now log in.
-            </div>
-          )}
+              <p className="login-panel-description">
+                Welcome back. Enter your details below.
+              </p>
 
-          {authenticationRequired && (
-            <div className="form-message info-message">
-              Please log in to access that page.
-            </div>
-          )}
+              {accountCreated && (
+                <div
+                  className="form-message success-message"
+                  role="status"
+                >
+                  Your account was created successfully. You can now log in.
+                </div>
+              )}
 
-          {error && (
-            <div
-              className="form-message error-message"
-              role="alert"
-            >
-              {error}
-            </div>
-          )}
+              {authenticationRequired && (
+                <div
+                  className="form-message info-message"
+                  role="status"
+                >
+                  Please log in to access that page.
+                </div>
+              )}
 
-          <form
-            className="auth-form"
-            onSubmit={handleSubmit}
-          >
-            <label>
-              <span>Email address</span>
+              {error && (
+                <div
+                  className="form-message error-message"
+                  role="alert"
+                >
+                  {error}
+                </div>
+              )}
 
-              <input
-                type="email"
-                value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
-                placeholder="you@example.com"
-                autoComplete="email"
-                required
-              />
-            </label>
+              <form className="login-form" onSubmit={handleSubmit}>
 
-            <label>
-              <span>Password</span>
+                <div className="login-field">
+                  <label
+                    className="form-label"
+                    htmlFor="login-email"
+                  >
+                    Email address
+                  </label>
 
-              <div className="password-field">
-                <input
-                  type={
-                    showPassword
-                      ? 'text'
-                      : 'password'
-                  }
-                  value={password}
-                  onChange={(event) =>
-                    setPassword(
-                      event.target.value,
-                    )
-                  }
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  required
-                />
+                  <input
+                    id="login-email"
+                    className="form-control login-input"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+
+                <div className="login-field">
+                  <label
+                    className="form-label"
+                    htmlFor="login-password"
+                  >
+                    Password
+                  </label>
+
+                  <div className="login-password-wrap">
+                    <input
+                      id="login-password"
+                      className="form-control login-input"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
+                      required
+                    />
+
+                    <button
+                      className="login-password-toggle"
+                      type="button"
+                      aria-pressed={showPassword}
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
+                      onClick={() =>
+                        setShowPassword((current) => !current)
+                      }
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
 
                 <button
-                  type="button"
-                  aria-pressed={showPassword}
-                  aria-label={
-                    showPassword
-                      ? 'Hide password'
-                      : 'Show password'
-                  }
-                  onClick={() =>
-                    setShowPassword(
-                      (current) => !current,
-                    )
-                  }
+                  type="submit"
+                  className="btn btn-primary login-submit"
+                  disabled={loading}
                 >
-                  {showPassword
-                    ? 'Hide'
-                    : 'Show'}
+                  <span>{loading ? 'Logging in...' : 'Log in'}</span>
+                  {!loading && <span aria-hidden="true">→</span>}
                 </button>
-              </div>
-            </label>
 
-            <button
-              type="submit"
-              className="button button-primary auth-submit"
-              disabled={loading}
-            >
-              {loading
-                ? 'Logging in...'
-                : 'Log in'}
-            </button>
-          </form>
+              </form>
 
-          <p className="auth-switch">
-            New to RespiraCare?{' '}
-            <Link to="/register">
-              Create an account
-            </Link>
-          </p>
+              <p className="login-register">
+                New to RespiraCare?{' '}
+                <Link to="/register">Create an account</Link>
+              </p>
 
-          <div className="auth-disclaimer">
-            RespiraCare provides health-awareness
-            information only and does not provide a
-            medical diagnosis.
+              <p className="login-disclaimer">
+                For health awareness and education only.
+                RespiraCare does not provide a medical diagnosis.
+              </p>
+
+            </div>
           </div>
+
         </div>
       </div>
     </section>
