@@ -1,18 +1,7 @@
 
 import { render, screen } from '@testing-library/react'
-import {
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
-import {
-  MemoryRouter,
-  Route,
-  Routes,
-} from 'react-router-dom'
-
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import AdminHistoryDetailPage from '../AdminHistoryDetailPage'
 import { getAdminHistoryItem } from '../../services/admin'
 
@@ -30,56 +19,38 @@ const singleSession = {
   confirmed_codes: ['fever', 'cough'],
   status: 'prediction_complete',
   has_red_flag: false,
-  predictions: [
-    {
-      rank: 1,
-      condition: 'Tuberculosis',
-      display_name: 'Tuberculosis (TB)',
-      model_confidence_percent: 72,
-      description: 'Example condition information.',
-    },
-  ],
+  predictions: [{
+    rank: 1,
+    condition: 'Tuberculosis',
+    display_name: 'Tuberculosis (TB)',
+    model_confidence_percent: 72,
+    description: 'Example condition information.',
+  }],
 }
 
 function renderAdminHistoryDetail() {
   return render(
     <MemoryRouter initialEntries={['/admin/history/test-session']}>
       <Routes>
-        <Route
-          path="/admin/history/:predictionId"
-          element={<AdminHistoryDetailPage />}
-        />
+        <Route path="/admin/history/:predictionId" element={<AdminHistoryDetailPage />} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
 describe('Admin history detail display', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
+  beforeEach(() => vi.clearAllMocks())
 
   it('shows a single saved condition without ranking', async () => {
     getAdminHistoryItem.mockResolvedValueOnce(singleSession)
-
     renderAdminHistoryDetail()
-
-    expect(
-      await screen.findByRole('heading', {
-        name: 'Saved condition pattern',
-      }),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText('Tuberculosis (TB)'),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.queryByText('Rank'),
-    ).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Saved condition pattern' }))
+      .toBeInTheDocument()
+    expect(screen.getByText('Tuberculosis (TB)')).toBeInTheDocument()
+    expect(screen.queryByText('Rank')).not.toBeInTheDocument()
   })
 
-  it('supports older history containing multiple predictions', async () => {
+  it('shows only one condition for older records containing multiple predictions', async () => {
     getAdminHistoryItem.mockResolvedValueOnce({
       ...singleSession,
       predictions: [
@@ -89,46 +60,40 @@ describe('Admin history detail display', () => {
           condition: 'Pneumonia',
           display_name: 'Pneumonia',
           model_confidence_percent: 18,
-          description: 'Example older prediction.',
+          description: 'Older prediction.',
         },
       ],
     })
-
     renderAdminHistoryDetail()
-
-    expect(
-      await screen.findByRole('heading', {
-        name: 'Ranked condition patterns',
-      }),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText('Pneumonia'),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getAllByText('Rank'),
-    ).toHaveLength(2)
+    expect(await screen.findByRole('heading', { name: 'Saved condition pattern' }))
+      .toBeInTheDocument()
+    expect(screen.getByText('Tuberculosis (TB)')).toBeInTheDocument()
+    expect(screen.queryByText('Pneumonia')).not.toBeInTheDocument()
+    expect(screen.queryByText('Rank')).not.toBeInTheDocument()
   })
 
-  it('shows urgent-review information without a prediction', async () => {
+  it('shows urgent guidance without a prediction', async () => {
     getAdminHistoryItem.mockResolvedValueOnce({
       ...singleSession,
       status: 'urgent_review',
       has_red_flag: true,
       predictions: [],
     })
-
     renderAdminHistoryDetail()
+    expect(await screen.findByText(/The prediction model was bypassed/i))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Tuberculosis (TB)')).not.toBeInTheDocument()
+  })
 
-    expect(
-      await screen.findByText(
-        /The prediction model was bypassed/i,
-      ),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.queryByText('Tuberculosis (TB)'),
-    ).not.toBeInTheDocument()
+  it('does not show a disease when status alone indicates urgent review', async () => {
+    getAdminHistoryItem.mockResolvedValueOnce({
+      ...singleSession,
+      status: 'urgent_review',
+      has_red_flag: false,
+    })
+    renderAdminHistoryDetail()
+    expect(await screen.findByText(/The prediction model was bypassed/i))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Tuberculosis (TB)')).not.toBeInTheDocument()
   })
 })
