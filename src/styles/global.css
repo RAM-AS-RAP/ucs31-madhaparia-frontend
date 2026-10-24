@@ -7807,3 +7807,370 @@ code,
     transition: none;
   }
 }
+
+
+/* =========================================================
+   ISSUE #31 - INTELLIGENT PATIENT REGISTRATION
+   Bootstrap 5 + RespiraCare Lavender Theme
+   ========================================================= */
+
+.register-page {
+  min-height: calc(100vh - 78px);
+  padding: clamp(42px, 5vw, 72px) 0 78px;
+  background: var(--background);
+}
+
+.register-grid {
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
+/* Desktop introduction */
+
+.register-editorial {
+  max-width: 630px;
+}
+
+.register-eyebrow,
+.register-panel-eyebrow {
+  margin: 0;
+  color: var(--rc-primary-hover);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+}
+
+.register-editorial h2 {
+  margin: 20px 0;
+  color: var(--text);
+  font-size: clamp(40px, 4vw, 58px);
+  font-weight: 750;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.register-editorial h2 span {
+  color: var(--rc-primary-hover);
+}
+
+.register-intro {
+  max-width: 590px;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 20px;
+  line-height: 1.65;
+}
+
+.register-benefits {
+  display: grid;
+  gap: 20px;
+  max-width: 560px;
+  margin-top: 33px;
+  padding-top: 26px;
+  border-top: 1px solid var(--border);
+}
+
+.register-benefit {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.register-benefit > span {
+  flex: 0 0 35px;
+  color: var(--rc-primary);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.register-benefit strong {
+  display: block;
+  color: var(--text);
+  font-size: 19px;
+}
+
+.register-benefit p {
+  margin: 4px 0 0;
+  color: var(--text-soft);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.register-editorial-note {
+  max-width: 530px;
+  margin: 30px 0 0;
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Registration form panel */
+
+.register-panel {
+  width: 100%;
+  max-width: 555px;
+  margin-left: auto;
+  padding: clamp(25px, 3vw, 40px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.register-panel h1 {
+  margin: 10px 0 6px;
+  color: var(--text);
+  font-size: clamp(30px, 3vw, 36px);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+
+.register-panel-description {
+  margin: 0 0 26px;
+  color: var(--text-soft);
+  font-size: 18px;
+}
+
+.register-panel .form-message {
+  margin-bottom: 18px;
+}
+
+/* Input fields */
+
+.register-form {
+  display: grid;
+  gap: 19px;
+}
+
+.register-form .form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.register-page .register-input {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.register-page .register-input:focus {
+  border-color: var(--rc-primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(112, 84, 154, 0.18);
+}
+
+.register-page .register-input[aria-invalid='true'] {
+  border-color: #b65050;
+}
+
+.register-page .register-input::placeholder {
+  color: #81798a;
+}
+
+/* Live validation feedback */
+
+.register-field-note {
+  margin: 7px 0 0;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.register-field-note-error {
+  color: #a63838;
+}
+
+.register-field-note-valid {
+  color: #24765c;
+  font-weight: 700;
+}
+
+/* Password visibility */
+
+.register-password-wrap {
+  position: relative;
+}
+
+.register-password-wrap .register-input {
+  padding-right: 78px;
+}
+
+.register-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  transform: translateY(-50%);
+  min-width: 58px;
+  min-height: 39px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rc-primary-hover);
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.register-password-toggle:hover {
+  background: var(--surface-soft);
+}
+
+/* Password feedback indicator */
+
+.register-strength-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 11px;
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+.register-strength-heading strong {
+  color: var(--rc-primary-hover);
+  text-align: right;
+}
+
+.register-strength-bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.register-strength-bars span {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.register-strength-bars span.is-filled {
+  background: var(--rc-primary);
+}
+
+/* Patient account information */
+
+.register-role-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-soft);
+}
+
+.register-role-note > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 25px;
+  width: 25px;
+  height: 25px;
+  border-radius: 7px;
+  background: var(--rc-primary);
+  color: #fff;
+  font-weight: 800;
+}
+
+.register-role-note p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.register-role-note strong {
+  color: var(--text);
+}
+
+/* Submit button */
+
+.register-page .register-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 55px;
+  border-radius: 11px;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.register-page .register-submit:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+/* Links and disclaimer */
+
+.register-switch {
+  margin: 23px 0 0;
+  color: var(--text-soft);
+  font-size: 16px;
+  text-align: center;
+}
+
+.register-switch a {
+  color: var(--rc-primary-hover);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.register-disclaimer {
+  margin: 23px 0 0;
+  padding-top: 19px;
+  border-top: 1px solid var(--border);
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+/* Keyboard accessibility */
+
+.register-password-toggle:focus-visible,
+.register-switch a:focus-visible,
+.register-submit:focus-visible {
+  outline: 3px solid var(--rc-lilac);
+  outline-offset: 3px;
+}
+
+/* Tablet */
+
+@media (max-width: 991.98px) {
+  .register-page {
+    padding: 38px 0 65px;
+  }
+
+  .register-panel {
+    max-width: 620px;
+    margin-inline: auto;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 575.98px) {
+  .register-page {
+    padding: 24px 0 55px;
+  }
+
+  .register-panel {
+    padding: 25px 19px;
+    border-radius: 16px;
+  }
+
+  .register-panel h1 {
+    font-size: 31px;
+  }
+}
