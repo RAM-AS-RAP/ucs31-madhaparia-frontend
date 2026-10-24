@@ -1,17 +1,7 @@
 
 import { render, screen } from '@testing-library/react'
-import {
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
-import {
-  MemoryRouter,
-  Route,
-  Routes,
-} from 'react-router-dom'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import PatientHistoryDetailPage from '../PatientHistoryDetailPage'
 import { getPatientHistoryItem } from '../../services/history'
@@ -48,10 +38,7 @@ function renderHistoryDetail() {
   return render(
     <MemoryRouter initialEntries={['/history/test-session']}>
       <Routes>
-        <Route
-          path="/history/:predictionId"
-          element={<PatientHistoryDetailPage />}
-        />
+        <Route path="/history/:predictionId" element={<PatientHistoryDetailPage />} />
       </Routes>
     </MemoryRouter>,
   )
@@ -64,25 +51,16 @@ describe('Patient history detail display', () => {
 
   it('shows a single condition without ranking', async () => {
     getPatientHistoryItem.mockResolvedValueOnce(singleSession)
-
     renderHistoryDetail()
 
-    expect(
-      await screen.findByRole('heading', {
-        name: 'Saved condition pattern',
-      }),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText('Tuberculosis (TB)'),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.queryByText('Rank'),
-    ).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', {
+      name: 'Saved condition pattern',
+    })).toBeInTheDocument()
+    expect(screen.getByText('Tuberculosis (TB)')).toBeInTheDocument()
+    expect(screen.queryByText('Rank')).not.toBeInTheDocument()
   })
 
-  it('supports older records containing multiple predictions', async () => {
+  it('shows only one condition for older records with multiple predictions', async () => {
     getPatientHistoryItem.mockResolvedValueOnce({
       ...singleSession,
       predictions: [
@@ -96,17 +74,14 @@ describe('Patient history detail display', () => {
         },
       ],
     })
-
     renderHistoryDetail()
 
-    expect(
-      await screen.findByRole('heading', {
-        name: 'Ranked condition patterns',
-      }),
-    ).toBeInTheDocument()
-
-    expect(screen.getByText('Pneumonia')).toBeInTheDocument()
-    expect(screen.getAllByText('Rank')).toHaveLength(2)
+    expect(await screen.findByRole('heading', {
+      name: 'Saved condition pattern',
+    })).toBeInTheDocument()
+    expect(screen.getByText('Tuberculosis (TB)')).toBeInTheDocument()
+    expect(screen.queryByText('Pneumonia')).not.toBeInTheDocument()
+    expect(screen.queryByText('Rank')).not.toBeInTheDocument()
   })
 
   it('shows urgent guidance without a disease prediction', async () => {
@@ -116,17 +91,11 @@ describe('Patient history detail display', () => {
       has_red_flag: true,
       predictions: [],
     })
-
     renderHistoryDetail()
 
-    expect(
-      await screen.findByText(
-        /The prediction model was bypassed/i,
-      ),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.queryByText('Tuberculosis (TB)'),
-    ).not.toBeInTheDocument()
+    expect(await screen.findByText(/The prediction model was bypassed/i))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Tuberculosis (TB)')).not.toBeInTheDocument()
+    expect(screen.queryByText('Saved condition pattern')).not.toBeInTheDocument()
   })
 })
