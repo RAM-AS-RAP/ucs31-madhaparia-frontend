@@ -7,6 +7,7 @@ import { ColumnSeries } from '@highcharts/react/series/Column'
 
 import { getAdminFeedback, getAdminHistory } from '../services/admin'
 import { getApiErrorMessage } from '../services/api'
+import { Accessibility } from '@highcharts/react/modules/Accessibility'
 
 const PURPLE = '#70549a'
 const LILAC = '#a78bc7'
@@ -191,10 +192,23 @@ function AdminDashboardPage() {
                       tooltip: { pointFormat: '<b>{point.y}</b> sessions' },
                       plotOptions: { pie: { innerSize: '65%', dataLabels: { enabled: false }, borderWidth: 0 } },
                     }}>
-                      <PieSeries name="Sessions" data={[
-                        { name: 'Non-urgent', y: stats.nonUrgent, color: PURPLE },
-                        { name: 'Urgent review', y: stats.urgent, color: AMBER },
-                      ]} />
+                      <Chart options={{
+                        ...baseChart,
+                        tooltip: { pointFormat: '<b>{point.y}</b> sessions' },
+                        plotOptions: {
+                          pie: {
+                            innerSize: '65%',
+                            dataLabels: { enabled: false },
+                            borderWidth: 0,
+                          },
+                        },
+                      }}>
+                        <Accessibility />
+                        <PieSeries name="Sessions" data={[
+                          { name: 'Non-urgent', y: stats.nonUrgent, color: PURPLE },
+                          { name: 'Urgent review', y: stats.urgent, color: AMBER },
+                        ]} />
+                      </Chart>
                     </Chart>
                   </div>
                   <div className="adm36-key"><span><i className="adm36-dot" />Non-urgent: {stats.nonUrgent}</span><span><i className="adm36-dot is-amber" />Urgent: {stats.urgent}</span></div>
@@ -220,10 +234,30 @@ function AdminDashboardPage() {
                       tooltip: { pointFormat: '<b>{point.y}</b> responses' },
                       plotOptions: { column: { borderWidth: 0, borderRadius: 4 } },
                     }}>
-                      <ColumnSeries name="Feedback" data={[
-                        { y: stats.helpful, color: PURPLE },
-                        { y: stats.notHelpful, color: LILAC },
-                      ]} />
+                      <Chart options={{
+                        ...baseChart,
+                        chart: { ...baseChart.chart, type: 'column' },
+                        xAxis: {
+                          categories: ['Helpful', 'Not helpful'],
+                          lineColor: '#ded6e8',
+                        },
+                        yAxis: {
+                          min: 0,
+                          allowDecimals: false,
+                          title: { text: 'Responses' },
+                          gridLineColor: '#eee9f3',
+                        },
+                        tooltip: { pointFormat: '<b>{point.y}</b> responses' },
+                        plotOptions: {
+                          column: { borderWidth: 0, borderRadius: 4 },
+                        },
+                      }}>
+                        <Accessibility />
+                        <ColumnSeries name="Feedback" data={[
+                          { y: stats.helpful, color: PURPLE },
+                          { y: stats.notHelpful, color: LILAC },
+                        ]} />
+                      </Chart>
                     </Chart>
                   </div>
                   <p className="adm36-chart-summary">{stats.helpful} helpful · {stats.notHelpful} not helpful</p>
