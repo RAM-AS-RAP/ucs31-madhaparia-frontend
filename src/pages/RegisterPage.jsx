@@ -1,8 +1,6 @@
+
 import { useState } from 'react'
-import {
-  Link,
-  useNavigate,
-} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { getApiErrorMessage } from '../services/api'
 import { registerPatient } from '../services/auth'
@@ -11,67 +9,80 @@ function RegisterPage() {
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
+  const [emailVisited, setEmailVisited] = useState(false)
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] =
-    useState('')
-
-  const [showPassword, setShowPassword] =
-    useState(false)
-
+  const [passwordVisited, setPasswordVisited] = useState(false)
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const trimmedEmail = email.trim()
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)
+  const passwordValid = password.length >= 8
+  const passwordsMatch =
+    confirmPassword.length > 0 && password === confirmPassword
+
+  // Guidance only: the minimum requirement remains 8 characters.
+  const strengthLevel = !password
+    ? 0
+    : !passwordValid
+      ? 1
+      : password.length >= 12 &&
+          /[a-zA-Z]/.test(password) &&
+          /[^a-zA-Z]/.test(password)
+        ? 3
+        : 2
+
+  const strengthLabels = [
+    'Not entered',
+    'Below minimum',
+    'Meets minimum',
+    'Better length and variety',
+  ]
+
   async function handleSubmit(event) {
     event.preventDefault()
-
     setError('')
+    setEmailVisited(true)
+    setPasswordVisited(true)
 
-    if (!email.trim()) {
-      setError(
-        'Please enter your email address.',
-      )
+    if (!trimmedEmail) {
+      setError('Please enter your email address.')
       return
     }
 
-    if (password.length < 8) {
-      setError(
-        'Please use a password with at least 8 characters.',
-      )
+    if (!emailValid) {
+      setError('Please enter a valid email address.')
       return
     }
 
-    if (password !== confirmPassword) {
-      setError(
-        'The passwords do not match.',
-      )
+    if (!passwordValid) {
+      setError('Please use a password with at least 8 characters.')
+      return
+    }
+
+    if (!confirmPassword || !passwordsMatch) {
+      setError('The passwords do not match.')
       return
     }
 
     setLoading(true)
 
     try {
-      await registerPatient(
-        email.trim(),
-        password,
-      )
+      await registerPatient(trimmedEmail, password)
 
       navigate('/login', {
-        state: {
-          accountCreated: true,
-        },
+        state: { accountCreated: true },
       })
     } catch (requestError) {
-      const status =
-        requestError.response?.status
+      const status = requestError.response?.status
 
       if (status === 409) {
-        setError(
-          'An account with this email already exists.',
-        )
+        setError('An account with this email already exists.')
       } else if (status === 422) {
-        setError(
-          'Please check your email and password details.',
-        )
+        setError('Please check your email and password details.')
       } else {
         setError(
           getApiErrorMessage(
@@ -86,209 +97,334 @@ function RegisterPage() {
   }
 
   return (
-    <section className="auth-page">
-      <div className="rc-container auth-grid">
-        <div className="auth-intro">
-          <span className="auth-eyebrow">
-            Join RespiraCare
-          </span>
+    <section
+      className="register-page"
+      aria-labelledby="register-heading"
+    >
+      <div className="rc-container">
+        <div className="row align-items-center gx-xl-5 gy-5 register-grid">
 
-          <h1>
-            Your respiratory health awareness,
-            <span> in one place.</span>
-          </h1>
+          {/* Desktop introduction */}
+          <div className="col-12 col-lg-6 d-none d-lg-block">
+            <div className="register-editorial">
+              <p className="register-eyebrow">
+                Getting started with RespiraCare
+              </p>
 
-          <p>
-            Create your patient account to use
-            personalised symptom awareness tools and
-            securely access your own prediction
-            history.
-          </p>
+              <h2>
+                Better understanding begins{' '}
+                <span>with your words.</span>
+              </h2>
 
-          <div className="auth-benefits">
-            <div>
-              <span>01</span>
+              <p className="register-intro">
+                Create an account to describe your symptoms,
+                confirm what the system recognises and keep
+                your health-awareness history in one place.
+              </p>
 
-              <div>
-                <strong>
-                  Describe symptoms naturally
-                </strong>
+              <div className="register-benefits">
+                <div className="register-benefit">
+                  <span aria-hidden="true">01</span>
 
-                <p>
-                  Use English, Kiswahili or a mixture
-                  of both.
-                </p>
+                  <div>
+                    <strong>Describe symptoms naturally</strong>
+                    <p>Use English, Kiswahili, or a mix of both.</p>
+                  </div>
+                </div>
+
+                <div className="register-benefit">
+                  <span aria-hidden="true">02</span>
+
+                  <div>
+                    <strong>Review before continuing</strong>
+                    <p>
+                      Check recognised symptoms before
+                      receiving guidance.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <span>02</span>
-
-              <div>
-                <strong>
-                  Review what RespiraCare understands
-                </strong>
-
-                <p>
-                  Confirm recognised symptoms before
-                  prediction.
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <span>03</span>
-
-              <div>
-                <strong>
-                  Understand possible patterns
-                </strong>
-
-                <p>
-                  Receive clear awareness guidance,
-                  not a medical diagnosis.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="auth-card">
-          <div className="auth-card-header">
-            <span className="auth-card-label">
-              Patient registration
-            </span>
-
-            <h2>Create your account</h2>
-
-            <p>
-              Registration creates a patient account
-              only.
-            </p>
-          </div>
-
-          {error && (
-            <div
-              className="form-message error-message"
-              role="alert"
-            >
-              {error}
-            </div>
-          )}
-
-          <form
-            className="auth-form"
-            onSubmit={handleSubmit}
-          >
-            <label>
-              <span>Email address</span>
-
-              <input
-                type="email"
-                value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
-                placeholder="you@example.com"
-                autoComplete="email"
-                required
-              />
-            </label>
-
-            <label>
-              <span>Password</span>
-
-              <div className="password-field">
-                <input
-                  type={
-                    showPassword
-                      ? 'text'
-                      : 'password'
-                  }
-                  value={password}
-                  onChange={(event) =>
-                    setPassword(
-                      event.target.value,
-                    )
-                  }
-                  placeholder="At least 8 characters"
-                  autoComplete="new-password"
-                  minLength="8"
-                  required
-                />
-
-                <button
-                  type="button"
-                  aria-pressed={showPassword}
-                  aria-label={
-                    showPassword
-                      ? 'Hide password'
-                      : 'Show password'
-                  }
-                  onClick={() =>
-                    setShowPassword(
-                      (current) => !current,
-                    )
-                  }
-                >
-                  {showPassword
-                    ? 'Hide'
-                    : 'Show'}
-                </button>
-              </div>
-            </label>
-
-            <label>
-              <span>Confirm password</span>
-
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(event) =>
-                  setConfirmPassword(
-                    event.target.value,
-                  )
-                }
-                placeholder="Enter password again"
-                autoComplete="new-password"
-                required
-              />
-            </label>
-
-            <div className="patient-role-note">
-              <div>✓</div>
-
-              <p>
-                Public registration creates a
-                <strong> patient </strong>
-                account. Administrator accounts
-                cannot be created here.
+              <p className="register-editorial-note">
+                This tool supports health awareness.
+                It does not provide a medical diagnosis.
               </p>
             </div>
-
-            <button
-              type="submit"
-              className="button button-primary auth-submit"
-              disabled={loading}
-            >
-              {loading
-                ? 'Creating account...'
-                : 'Create account'}
-            </button>
-          </form>
-
-          <p className="auth-switch">
-            Already have an account?{' '}
-            <Link to="/login">
-              Log in
-            </Link>
-          </p>
-
-          <div className="auth-disclaimer">
-            By continuing, you acknowledge that
-            RespiraCare provides health-awareness
-            information and not medical diagnosis.
           </div>
+
+          {/* Registration form */}
+          <div className="col-12 col-lg-6">
+            <div className="register-panel">
+
+              <p className="register-panel-eyebrow">
+                Patient registration
+              </p>
+
+              <h1 id="register-heading">
+                Create your account
+              </h1>
+
+              <p className="register-panel-description">
+                A few details and you're ready to begin.
+              </p>
+
+              {error && (
+                <div
+                  className="form-message error-message"
+                  role="alert"
+                >
+                  {error}
+                </div>
+              )}
+
+              <form
+                className="register-form"
+                onSubmit={handleSubmit}
+                noValidate
+              >
+
+                {/* Email */}
+                <div className="register-field">
+                  <label
+                    className="form-label"
+                    htmlFor="register-email"
+                  >
+                    Email address
+                  </label>
+
+                  <input
+                    id="register-email"
+                    className="form-control register-input"
+                    type="email"
+                    inputMode="email"
+                    value={email}
+                    onChange={(event) => {
+                      setEmail(event.target.value)
+                      setError('')
+                    }}
+                    onBlur={() => setEmailVisited(true)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    aria-invalid={emailVisited && !emailValid}
+                    aria-describedby="register-email-help"
+                    required
+                  />
+
+                  <p
+                    id="register-email-help"
+                    className={`register-field-note ${
+                      emailVisited && !emailValid
+                        ? 'register-field-note-error'
+                        : ''
+                    }`}
+                  >
+                    {emailVisited && !emailValid
+                      ? 'Enter a valid email address.'
+                      : 'You will use this email to log in.'}
+                  </p>
+                </div>
+
+                {/* Password */}
+                <div className="register-field">
+                  <label
+                    className="form-label"
+                    htmlFor="register-password"
+                  >
+                    Password
+                  </label>
+
+                  <div className="register-password-wrap">
+                    <input
+                      id="register-password"
+                      className="form-control register-input"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(event) => {
+                        setPassword(event.target.value)
+                        setError('')
+                      }}
+                      onBlur={() => setPasswordVisited(true)}
+                      placeholder="At least 8 characters"
+                      autoComplete="new-password"
+                      minLength={8}
+                      aria-invalid={
+                        passwordVisited && !passwordValid
+                      }
+                      aria-describedby="register-password-help"
+                      required
+                    />
+
+                    <button
+                      className="register-password-toggle"
+                      type="button"
+                      aria-pressed={showPassword}
+                      aria-label={
+                        showPassword
+                          ? 'Hide password'
+                          : 'Show password'
+                      }
+                      onClick={() =>
+                        setShowPassword((current) => !current)
+                      }
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+
+                  <div
+                    className="register-strength-heading"
+                    aria-live="polite"
+                  >
+                    <span>Password feedback</span>
+                    <strong>
+                      {strengthLabels[strengthLevel]}
+                    </strong>
+                  </div>
+
+                  <div
+                    className="register-strength-bars"
+                    aria-hidden="true"
+                  >
+                    {[1, 2, 3].map((level) => (
+                      <span
+                        key={level}
+                        className={
+                          level <= strengthLevel
+                            ? 'is-filled'
+                            : ''
+                        }
+                      />
+                    ))}
+                  </div>
+
+                  <p
+                    id="register-password-help"
+                    className="register-field-note"
+                  >
+                    At least 8 characters required.
+                    A longer, less predictable password is
+                    recommended. This is only a simple estimate.
+                  </p>
+                </div>
+
+                {/* Confirm password */}
+                <div className="register-field">
+                  <label
+                    className="form-label"
+                    htmlFor="register-confirm"
+                  >
+                    Confirm password
+                  </label>
+
+                  <div className="register-password-wrap">
+                    <input
+                      id="register-confirm"
+                      className="form-control register-input"
+                      type={
+                        showConfirmPassword
+                          ? 'text'
+                          : 'password'
+                      }
+                      value={confirmPassword}
+                      onChange={(event) => {
+                        setConfirmPassword(event.target.value)
+                        setError('')
+                      }}
+                      placeholder="Enter password again"
+                      autoComplete="new-password"
+                      aria-invalid={
+                        confirmPassword.length > 0 &&
+                        !passwordsMatch
+                      }
+                      aria-describedby="register-confirm-help"
+                      required
+                    />
+
+                    <button
+                      className="register-password-toggle"
+                      type="button"
+                      aria-pressed={showConfirmPassword}
+                      aria-label={
+                        showConfirmPassword
+                          ? 'Hide confirmation password'
+                          : 'Show confirmation password'
+                      }
+                      onClick={() =>
+                        setShowConfirmPassword(
+                          (current) => !current,
+                        )
+                      }
+                    >
+                      {showConfirmPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+
+                  <p
+                    id="register-confirm-help"
+                    className={[
+                      'register-field-note',
+                      confirmPassword && !passwordsMatch
+                        ? 'register-field-note-error'
+                        : '',
+                      passwordsMatch
+                        ? 'register-field-note-valid'
+                        : '',
+                    ].filter(Boolean).join(' ')}
+                    aria-live="polite"
+                  >
+                    {!confirmPassword
+                      ? 'Re-enter your password to confirm it.'
+                      : passwordsMatch
+                        ? 'Passwords match.'
+                        : 'Passwords do not match yet.'}
+                  </p>
+                </div>
+
+                {/* Patient role notice */}
+                <div className="register-role-note">
+                  <span aria-hidden="true">✓</span>
+
+                  <p>
+                    Registration creates a{' '}
+                    <strong>patient account</strong>.
+                    Administrator accounts cannot be
+                    created here.
+                  </p>
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  className="btn btn-primary register-submit"
+                  disabled={loading}
+                >
+                  <span>
+                    {loading
+                      ? 'Creating account...'
+                      : 'Create account'}
+                  </span>
+
+                  {!loading && (
+                    <span aria-hidden="true">→</span>
+                  )}
+                </button>
+              </form>
+
+              <p className="register-switch">
+                Already have an account?{' '}
+                <Link to="/login">Log in</Link>
+              </p>
+
+              <p className="register-disclaimer">
+                RespiraCare provides health-awareness
+                information only, not a medical diagnosis.
+              </p>
+
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
