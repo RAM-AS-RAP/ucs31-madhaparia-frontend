@@ -1,387 +1,271 @@
-import {
-  useEffect,
-  useState,
-} from 'react'
 
-import {
-  Link,
-} from 'react-router-dom'
-
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getApiErrorMessage } from '../services/api'
-
-import {
-  getPatientHistory,
-} from '../services/history'
+import { getPatientHistory } from '../services/history'
 
 function formatDate(value) {
-  if (!value) {
-    return 'Unknown date'
-  }
-
+  if (!value) return 'Date unavailable'
   const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
-
-  return date.toLocaleString()
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString()
 }
 
-function sexLabel(sex) {
-  if (sex === 'M') {
-    return 'Male'
-  }
-
-  if (sex === 'F') {
-    return 'Female'
-  }
-
-  return sex
+function sexLabel(value) {
+  if (value === 'M') return 'Male'
+  if (value === 'F') return 'Female'
+  return value || 'Not recorded'
 }
 
-function statusLabel(status) {
-  if (status === 'prediction_complete') {
-    return 'Prediction complete'
-  }
+function isUrgentSession(item) {
+  return item.status === 'urgent_review' || item.has_red_flag === true
+}
 
-  if (status === 'urgent_review') {
-    return 'Urgent review'
-  }
-
-  return status
+function statusLabel(item) {
+  if (isUrgentSession(item)) return 'Urgent review'
+  if (item.status === 'prediction_complete') return 'Prediction complete'
+  return item.status ? item.status.replaceAll('_', ' ') : 'Status unavailable'
 }
 
 function PatientHistoryPage() {
-  const [history, setHistory] =
-    useState([])
-
-  const [loading, setLoading] =
-    useState(true)
-
-  const [error, setError] =
-    useState('')
+  const [history, setHistory] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     let active = true
 
     async function loadHistory() {
       try {
-        const data =
-          await getPatientHistory()
-
-        if (!active) {
-          return
-        }
-
-        setHistory(
-          data.history || [],
-        )
-      } catch (requestError) {
-        if (!active) {
-          return
-        }
-
-        if (
-          requestError.response?.status ===
-          401
-        ) {
-          setError(
-            'Your login session is no longer valid. Please log in again.',
-          )
-        } else {
-          setError(
-            getApiErrorMessage(
-              requestError,
-              'RespiraCare could not load your prediction history.',
-            ),
-          )
-        }
-      } finally {
+        const data = await getPatientHistory()
         if (active) {
-          setLoading(false)
+          setHistory(Array.isArray(data?.history) ? data.history : [])
         }
+      } catch (requestError) {
+        if (!active) return
+        setError(
+          requestError.response?.status === 401
+            ? 'Your login session is no longer valid. Please log in again.'
+            : getApiErrorMessage(
+                requestError,
+                'RespiraCare could not load your prediction history.',
+              ),
+        )
+      } finally {
+        if (active) setLoading(false)
       }
     }
 
     loadHistory()
-
     return () => {
       active = false
     }
   }, [])
 
+  const urgentCount = history.filter(isUrgentSession).length
+  const searchTerm = search.trim().toLowerCase()
+
+  const visibleHistory = history
+    .filter((item) => {
+      const urgent = isUrgentSession(item)
+      if (filter === 'urgent' && !urgent) return false
+      if (filter === 'complete' && urgent) return false
+      if (!searchTerm) return true
+
+      const searchable = [
+        item.input_text,
+        item.predictions?.[0]?.display_name,
+        item.prediction_id,
+      ].filter(Boolean).join(' ').toLowerCase()
+
+      return searchable.includes(searchTerm)
+    })
+    .sort((a, b) => {
+      const first = new Date(a.created_at).getTime()
+      const second = new Date(b.created_at).getTime()
+      return (Number.isFinite(second) ? second : 0) -
+        (Number.isFinite(first) ? first : 0)
+    })
+
   return (
-    <section className="history-page">
-      <div className="rc-container history-layout">
-        <div className="history-heading">
-          <span className="symptom-eyebrow">
-            Patient history
-          </span>
-
-          <h1>
-            Your previous
-            <span> RespiraCare sessions.</span>
-          </h1>
-
-          <p>
-            Review your previous respiratory
-            health-awareness sessions and open any
-            result for more detail.
-          </p>
+    <section className="hist35-page" aria-labelledby="hist35-title">
+      <div className="rc-container hist35-container">
+        <div className="hist35-intro">
+          <div>
+            <p className="hist35-eyebrow">Patient history</p>
+            <h1 id="hist35-title">
+              Your previous <span>health-awareness sessions.</span>
+            </h1>
+            <p className="hist35-lead">
+              Review the symptom descriptions, saved results and safety
+              guidance from your previous assessments.
+            </p>
+          </div>
+          <Link to="/symptoms" className="button button-primary hist35-button">
+            New symptom check <span aria-hidden="true">→</span>
+          </Link>
         </div>
 
         {loading && (
-          <div className="history-state-card">
-            <div className="auth-spinner" />
-
-            <h2>
-              Loading your history...
-            </h2>
-
-            <p>
-              RespiraCare is retrieving your saved
-              prediction sessions.
-            </p>
+          <div className="hist35-state" role="status">
+            <div className="auth-spinner" aria-hidden="true" />
+            <h2>Loading your history...</h2>
+            <p>Retrieving your saved assessment sessions.</p>
           </div>
         )}
 
         {!loading && error && (
-          <div
-            className="history-state-card history-error-card"
-            role="alert"
-          >
-            <div>
-              !
-            </div>
-
-            <h2>
-              History could not be loaded
-            </h2>
-
-            <p>
-              {error}
-            </p>
+          <div className="hist35-state hist35-state-error" role="alert">
+            <h2>History could not be loaded</h2>
+            <p>{error}</p>
+            <Link className="button button-secondary hist35-button" to="/dashboard">
+              Return to dashboard
+            </Link>
           </div>
         )}
 
-        {!loading &&
-          !error &&
-          history.length === 0 && (
-            <div className="history-state-card">
+        {!loading && !error && history.length === 0 && (
+          <div className="hist35-state">
+            <p className="hist35-empty-number">0 sessions</p>
+            <h2>No prediction history yet</h2>
+            <p>Your completed assessments will appear here once saved.</p>
+            <Link className="button button-primary hist35-button" to="/symptoms">
+              Check symptoms
+            </Link>
+          </div>
+        )}
+
+        {!loading && !error && history.length > 0 && (
+          <>
+            <div className="hist35-overview" aria-label="History overview">
               <div>
-                0
+                <span>Saved sessions</span>
+                <strong>{history.length}</strong>
               </div>
-
-              <h2>
-                No prediction history yet
-              </h2>
-
-              <p>
-                Once you complete a RespiraCare
-                prediction, the session will appear
-                here.
-              </p>
-
-              <Link
-                to="/symptoms"
-                className="button button-primary"
-              >
-                Check symptoms
-              </Link>
+              <div>
+                <span>Urgent reviews</span>
+                <strong>{urgentCount}</strong>
+              </div>
+              <p>Most recent sessions first</p>
             </div>
-          )}
 
-        {!loading &&
-          !error &&
-          history.length > 0 && (
-            <>
-              <div className="history-summary">
-                <div>
-                  <span>
-                    Saved sessions
-                  </span>
-
-                  <strong>
-                    {history.length}
-                  </strong>
-                </div>
-
-                <p>
-                  Your most recent sessions appear
-                  first.
-                </p>
+            <div className="hist35-toolbar">
+              <div className="hist35-filters" role="group" aria-label="Filter history">
+                <button type="button" className={filter === 'all' ? 'is-active' : ''}
+                  aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>
+                  All sessions
+                </button>
+                <button type="button" className={filter === 'complete' ? 'is-active' : ''}
+                  aria-pressed={filter === 'complete'} onClick={() => setFilter('complete')}>
+                  Predictions
+                </button>
+                <button type="button" className={filter === 'urgent' ? 'is-active' : ''}
+                  aria-pressed={filter === 'urgent'} onClick={() => setFilter('urgent')}>
+                  Urgent review
+                </button>
               </div>
+              <div className="hist35-search">
+                <label htmlFor="hist35-search-input">Search history</label>
+                <input id="hist35-search-input" className="form-control"
+                  value={search} onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search symptoms or conditions" type="search" />
+              </div>
+            </div>
 
-              <div className="history-list">
-                {history.map(
-                  (item) => {
-                    const topPrediction =
-                      item.predictions?.[0]
+            <p className="hist35-showing" role="status">
+              Showing {visibleHistory.length} of {history.length} saved sessions
+            </p>
 
-                    return (
-                      <article
-                        className={
-                          item.has_red_flag
-                            ? 'history-card history-card-warning'
-                            : 'history-card'
-                        }
-                        key={
-                          item.prediction_id
-                        }
-                      >
-                        <div className="history-card-top">
-                          <div>
-                            <span className="history-date">
-                              {formatDate(
-                                item.created_at,
-                              )}
-                            </span>
+            {visibleHistory.length === 0 ? (
+              <div className="hist35-state">
+                <h2>No matching sessions</h2>
+                <p>Try a different search or change the selected filter.</p>
+                <button type="button" className="button button-secondary hist35-button"
+                  onClick={() => { setFilter('all'); setSearch('') }}>
+                  Clear filters
+                </button>
+              </div>
+            ) : (
+              <div className="hist35-list">
+                {visibleHistory.map((item) => {
+                  const urgent = isUrgentSession(item)
+                  const topPrediction = !urgent && Array.isArray(item.predictions)
+                    ? item.predictions[0] : null
+                  const rawConfidence = topPrediction?.model_confidence_percent
+                  const hasConfidence = rawConfidence != null &&
+                    Number.isFinite(Number(rawConfidence))
 
-                            <h2>
-                              {item.has_red_flag
-                                ? 'Urgent-review session'
-                                : topPrediction?.display_name ||
-                                  'Prediction session'}
-                            </h2>
-                          </div>
-
-                          <span
-                            className={
-                              item.status ===
-                              'urgent_review'
-                                ? 'history-status urgent'
-                                : 'history-status complete'
-                            }
-                          >
-                            {statusLabel(
-                              item.status,
-                            )}
-                          </span>
+                  return (
+                    <article className={`hist35-session${urgent ? ' is-urgent' : ''}`}
+                      key={item.prediction_id}>
+                      <div className="hist35-session-top">
+                        <div>
+                          <p className="hist35-date">{formatDate(item.created_at)}</p>
+                          <h2>{urgent ? 'Urgent-review session' :
+                            topPrediction?.display_name || 'Prediction session'}</h2>
                         </div>
+                        <span className={`hist35-status${urgent ? ' is-urgent' : ''}`}>
+                          {statusLabel(item)}
+                        </span>
+                      </div>
 
-                        <div className="history-input-text">
-                          <span>
-                            Symptom description
-                          </span>
+                      <div className="hist35-quote">
+                        <strong>Original symptom description</strong>
+                        <p>“{item.input_text || 'No description saved'}”</p>
+                      </div>
 
-                          <p>
-                            “{item.input_text}”
-                          </p>
+                      <div className="hist35-metadata">
+                        <div><span>Age</span><strong>{item.age ?? '—'}</strong></div>
+                        <div><span>Sex</span><strong>{sexLabel(item.sex)}</strong></div>
+                        <div><span>Confirmed symptoms</span>
+                          <strong>{item.confirmed_codes?.length ?? 0}</strong></div>
+                      </div>
+
+                      {urgent ? (
+                        <div className="hist35-urgent-note">
+                          <strong>Safety-sensitive assessment</strong>
+                          <p>This session followed the urgent-review route rather than automated disease prediction.</p>
                         </div>
-
-                        <div className="history-meta">
+                      ) : topPrediction && (
+                        <div className="hist35-result-preview">
                           <div>
-                            <span>
-                              Age
-                            </span>
-
-                            <strong>
-                              {item.age}
-                            </strong>
+                            <span>Saved condition pattern</span>
+                            <strong>{topPrediction.display_name}</strong>
                           </div>
-
-                          <div>
-                            <span>
-                              Sex
-                            </span>
-
-                            <strong>
-                              {sexLabel(
-                                item.sex,
-                              )}
-                            </strong>
-                          </div>
-
-                          <div>
-                            <span>
-                              Confirmed symptoms
-                            </span>
-
-                            <strong>
-                              {
-                                item
-                                  .confirmed_codes
-                                  ?.length || 0
-                              }
-                            </strong>
-                          </div>
-                        </div>
-
-                        {topPrediction &&
-                          !item.has_red_flag && (
-                            <div className="history-top-result">
-                              <span>
-                                {item.predictions?.length > 1
-                                  ? 'Top pattern'
-                                  : 'Condition pattern'}
-                              </span>
-
-                              <div>
-                                <strong>
-                                  {
-                                    topPrediction.display_name
-                                  }
-                                </strong>
-
-                                <span>
-                                  {
-                                    topPrediction.model_confidence_percent
-                                  }
-                                  % model confidence
-                                </span>
-                              </div>
+                          {hasConfidence && (
+                            <div className="hist35-preview-confidence">
+                              <strong>{rawConfidence}%</strong>
+                              <span>model confidence</span>
                             </div>
                           )}
-
-                        {item.has_red_flag && (
-                          <div className="history-red-flag-note">
-                            <strong>
-                              Safety-sensitive session
-                            </strong>
-
-                            <p>
-                              This session was routed
-                              through urgent-review
-                              handling instead of normal
-                              condition prediction.
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="history-card-footer">
-                          <code>
-                            {item.prediction_id}
-                          </code>
-
-                          <Link
-                            to={`/history/${item.prediction_id}`}
-                            className="button button-secondary"
-                          >
-                            View details
-                          </Link>
                         </div>
-                      </article>
-                    )
-                  },
-                )}
+                      )}
+
+                      <div className="hist35-session-bottom">
+                        <div className="hist35-reference">
+                          <span>Session reference</span>
+                          <code>{item.prediction_id}</code>
+                        </div>
+                        <Link className="button button-secondary hist35-button"
+                          to={`/history/${encodeURIComponent(item.prediction_id)}`}>
+                          View details <span aria-hidden="true">→</span>
+                        </Link>
+                      </div>
+                    </article>
+                  )
+                })}
               </div>
-            </>
-          )}
+            )}
+          </>
+        )}
 
-        <div className="symptom-safety-footer">
-          <strong>
-            Important
-          </strong>
-
-          <p>
-            RespiraCare prediction history contains
-            health-awareness results and does not
-            represent a medical diagnosis.
-          </p>
-
-          <Link to="/dashboard">
-            Return to dashboard
-          </Link>
+        <div className="hist35-bottom-note">
+          <div>
+            <strong>Health-awareness information only</strong>
+            <p>Historical model results are not medical diagnoses and cannot confirm or rule out an illness.</p>
+          </div>
+          <Link to="/dashboard">Return to dashboard</Link>
         </div>
       </div>
     </section>
