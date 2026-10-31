@@ -6,12 +6,15 @@ import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles/global.css'
+import { ThemeProvider } from './context/ThemeContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
