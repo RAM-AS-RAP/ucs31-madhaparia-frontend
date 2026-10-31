@@ -16,6 +16,7 @@ import SymptomConfirmationPage from './pages/SymptomConfirmationPage'
 import PredictionPage from './pages/PredictionPage'
 import PatientHistoryPage from './pages/PatientHistoryPage'
 import PatientHistoryDetailPage from './pages/PatientHistoryDetailPage'
+import SettingsPage from './pages/SettingsPage'
 
 // Load administrator pages only when they are needed.
 const AdminDashboardPage = lazy(
@@ -135,6 +136,7 @@ function App() {
         />
 
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
     </Routes>
   )

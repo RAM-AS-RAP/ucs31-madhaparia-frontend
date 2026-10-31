@@ -115,6 +115,7 @@ function AppLayout() {
 
   const navigationItems = [
     { to: '/', label: 'Home', end: true },
+      { to: '/settings', label: 'Settings', end: true },
     ...(isAuthenticated
       ? [{ to: '/dashboard', label: 'Dashboard', end: false }]
       : []),
