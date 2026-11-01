@@ -1,0 +1,310 @@
+
+/* Issue #67 - Accessibility Settings */
+
+/* Text and interface scaling */
+
+:root[data-a11y-size='normal'] #root {
+  zoom: 1;
+}
+
+:root[data-a11y-size='large'] #root {
+  zoom: 1.125;
+}
+
+:root[data-a11y-size='extra-large'] #root {
+  zoom: 1.25;
+}
+
+:root[data-a11y-size='huge'] #root {
+  zoom: 1.45;
+}
+
+/* High contrast - light appearance */
+
+:root[data-a11y-contrast='true'][data-color-mode='light'] {
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-soft: #f0f0f0;
+  --text: #000000;
+  --text-soft: #202020;
+  --border: #111111;
+  --navy: #000000;
+  --navy-soft: #202020;
+  --rc-primary: #073a73;
+  --rc-primary-hover: #002b59;
+  --rc-lavender: #e5edfa;
+  --rc-lilac: #073a73;
+}
+
+/* High contrast - dark appearance */
+
+:root[data-a11y-contrast='true'][data-color-mode='dark'] {
+  --background: #000000;
+  --surface: #101010;
+  --surface-soft: #1b1b1b;
+  --text: #ffffff;
+  --text-soft: #f0f0f0;
+  --border: #ffffff;
+  --navy: #ffffff;
+  --navy-soft: #f0f0f0;
+  --rc-primary: #ffe080;
+  --rc-primary-hover: #ffedaa;
+  --rc-lilac: #ffe080;
+  --rc-lavender: #292929;
+}
+
+/* Stronger focus indicators */
+
+:root[data-a11y-contrast='true'] :is(
+  a,
+  button,
+  input,
+  textarea,
+  select
+):focus-visible {
+  outline: 3px solid var(--rc-primary-hover) !important;
+  outline-offset: 3px;
+}
+
+/* Improve borders on important cards */
+
+:root[data-a11y-contrast='true'] :is(
+  .settings-panel,
+  .settings-preview,
+  .auth-card,
+  .dashboard-card,
+  .patient32-history-panel,
+  .patient32-primary-panel,
+  .symptom-input-card,
+  .symptom-help-card,
+  .mapping-results,
+  .pred34-panel,
+  .hist35-panel,
+  .adm36-stat,
+  .adm36-chart-panel,
+  .adm36-record-panel,
+  .adm36-detail-panel
+) {
+  background: var(--surface) !important;
+  color: var(--text);
+  border: 2px solid var(--border) !important;
+}
+
+/* Keep primary buttons readable in high-contrast dark mode */
+
+:root[data-a11y-contrast='true'][data-color-mode='dark']
+:is(.button-primary, .btn-primary, .rc28-action-primary) {
+  background: #ffe080 !important;
+  color: #000000 !important;
+  border-color: #ffe080 !important;
+}
+
+:root[data-a11y-contrast='true'][data-color-mode='dark']
+:is(.button-primary, .btn-primary, .rc28-action-primary):hover {
+  background: #ffedaa !important;
+  color: #000000 !important;
+}
+
+/* Bold text */
+
+:root[data-a11y-bold='true'] body {
+  font-weight: 700;
+}
+
+:root[data-a11y-bold='true'] :is(
+  p,
+  li,
+  span,
+  small,
+  label,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  td,
+  th
+) {
+  font-weight: 700 !important;
+}
+
+/* Reduce motion */
+
+:root[data-a11y-reduce-motion='true'] *,
+:root[data-a11y-reduce-motion='true'] *::before,
+:root[data-a11y-reduce-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-a11y-reduce-motion='true'] {
+  scroll-behavior: auto !important;
+}
+
+/* Always respect device accessibility preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessibility Settings UI */
+
+.accessibility-panel {
+  margin-top: 24px;
+}
+
+.accessibility-heading h2 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  color: var(--text);
+}
+
+.accessibility-fieldset {
+  min-width: 0;
+  margin-top: 25px;
+  padding: 0;
+  border: 0;
+}
+
+.accessibility-fieldset legend {
+  float: none;
+  width: auto;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.accessibility-size-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.accessibility-size-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.accessibility-size-option.is-selected {
+  background: var(--rc-primary);
+  color: #ffffff;
+  border-color: var(--rc-primary);
+}
+
+:root[data-color-mode='dark']
+.accessibility-size-option.is-selected {
+  color: #ffffff;
+}
+
+:root[data-a11y-contrast='true'][data-color-mode='dark']
+.accessibility-size-option.is-selected {
+  color: #000000;
+}
+
+.accessibility-size-option:focus-within {
+  outline: 3px solid var(--rc-lilac);
+  outline-offset: 3px;
+}
+
+.accessibility-size-option input {
+  width: 17px;
+  height: 17px;
+  accent-color: currentColor;
+}
+
+.accessibility-toggles {
+  margin-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
+.accessibility-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.accessibility-toggle-copy {
+  display: grid;
+  gap: 7px;
+}
+
+.accessibility-toggle-copy strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
+.accessibility-toggle-copy small {
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+.accessibility-switch {
+  flex-shrink: 0;
+  width: 48px;
+  height: 25px;
+  accent-color: var(--rc-primary);
+  cursor: pointer;
+}
+
+.accessibility-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.accessibility-reset {
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.accessibility-reset:hover {
+  border-color: var(--rc-primary);
+}
+
+@media (max-width: 650px) {
+  .accessibility-toggle-row {
+    gap: 12px;
+  }
+
+  .accessibility-size-options {
+    gap: 9px;
+  }
+
+  .accessibility-size-option {
+    padding: 9px 12px;
+  }
+}

@@ -1,5 +1,6 @@
 
 import { useTheme } from '../context/useTheme'
+import AccessibilitySettings from '../components/AccessibilitySettings'
 
 const choices = [
   {
@@ -91,6 +92,7 @@ function SettingsPage() {
             </p>
           </div>
         </div>
+        <AccessibilitySettings />
       </div>
     </section>
   )
