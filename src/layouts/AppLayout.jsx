@@ -9,12 +9,13 @@ import {
 } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
+import { useLanguage } from '../context/useLanguage'
+import { getRoleHomePath } from '../utils/roleRouting'
 import { clearPredictionResult } from '../services/predictions'
 import {
   clearSymptomConfirmation,
   clearSymptomMapping,
 } from '../services/symptoms'
-import { useLanguage } from '../context/useLanguage'
 
 const FOOTER_YEAR = new Date().getFullYear()
 
@@ -54,22 +55,61 @@ function AppLayout() {
   const { t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
+
   const logoutPending = useRef(false)
   const menuToggleRef = useRef(null)
 
-  // Remember the route where the menu was opened.
-  // Changing routes automatically closes the menu.
   const [menuOpenAt, setMenuOpenAt] = useState(null)
   const menuOpen = menuOpenAt === location.key
 
   const {
-    isAdmin,
     isAuthenticated,
+    isAdmin,
     logout,
     user,
   } = useAuth()
 
-  // Preserve the existing safe logout sequence.
+  const isPatient =
+    isAuthenticated &&
+    user?.role === 'patient'
+
+  const isAdministrator =
+    isAuthenticated &&
+    isAdmin &&
+    user?.role === 'admin'
+
+  // The footer account link must use the correct role.
+  const homePath = getRoleHomePath(user?.role)
+
+  // Patient and administrator navigation are separate.
+  const navigationItems = [
+    {
+      to: '/',
+      label: t('nav.home'),
+      end: true,
+    },
+    {
+      to: '/settings',
+      label: t('nav.settings'),
+      end: true,
+    },
+    ...(isPatient
+      ? [{
+          to: '/dashboard',
+          label: t('nav.dashboard'),
+          end: false,
+        }]
+      : []),
+    ...(isAdministrator
+      ? [{
+          to: '/admin',
+          label: t('nav.admin'),
+          end: false,
+        }]
+      : []),
+  ]
+
+  // Keep the existing safe logout sequence.
   useEffect(() => {
     if (
       logoutPending.current &&
@@ -80,8 +120,7 @@ function AppLayout() {
     }
   }, [location.pathname, logout])
 
-  // Dismiss the mobile menu with Escape.
-  // Return keyboard focus to its toggle button.
+  // Close the mobile menu using Escape.
   useEffect(() => {
     if (!menuOpen) return undefined
 
@@ -114,16 +153,6 @@ function AppLayout() {
     logoutPending.current = true
     navigate('/')
   }
-  const navigationItems = [
-    { to: '/', label: t('nav.home'), end: true },
-    { to: '/settings', label: t('nav.settings'), end: true },
-    ...(isAuthenticated
-      ? [{ to: '/dashboard', label: t('nav.dashboard'), end: false }]
-      : []),
-    ...(isAdmin
-      ? [{ to: '/admin', label: t('nav.admin'), end: false }]
-      : []),
-  ]
 
   function navClass({ isActive }) {
     return `rc28-nav-link${isActive ? ' is-active' : ''}`
@@ -131,9 +160,11 @@ function AppLayout() {
 
   return (
     <div className="app-shell">
+
       {/* Navigation */}
       <header className="rc-navbar rc28-header">
         <div className="rc-container rc28-header-inner">
+
           <Link
             to="/"
             className="brand rc28-brand"
@@ -155,7 +186,7 @@ function AppLayout() {
           {/* Desktop navigation */}
           <nav
             className="rc28-primary-nav d-none d-xl-flex"
-            aria-label="Main navigation"
+            aria-label={t('nav.main')}
           >
             {navigationItems.map((item) => (
               <NavLink
@@ -178,7 +209,11 @@ function AppLayout() {
                   title={user?.email || undefined}
                 >
                   <span>
-                    {isAdmin ? 'Administrator' : 'Patient'}
+                    {isAdministrator
+                      ? t('role.admin')
+                      : isPatient
+                        ? t('role.patient')
+                        : user?.role || ''}
                   </span>
 
                   <strong>{user?.email}</strong>
@@ -189,7 +224,7 @@ function AppLayout() {
                   className="rc28-action rc28-action-outline"
                   onClick={handleLogout}
                 >
-                  Log out
+                  {t('nav.logout')}
                 </button>
               </>
             ) : (
@@ -211,21 +246,23 @@ function AppLayout() {
             )}
           </div>
 
-          {/* Tablet and mobile menu toggle */}
+          {/* Mobile navigation toggle */}
           <button
             type="button"
             ref={menuToggleRef}
             className="rc28-menu-toggle d-xl-none"
             aria-label={
               menuOpen
-                ? 'Close navigation menu'
-                : 'Open navigation menu'
+                ? t('nav.closeMenu')
+                : t('nav.openMenu')
             }
             aria-controls="rc28-mobile-menu"
             aria-expanded={menuOpen}
             onClick={() => {
               setMenuOpenAt((current) =>
-                current === location.key ? null : location.key
+                current === location.key
+                  ? null
+                  : location.key
               )
             }}
           >
@@ -246,6 +283,7 @@ function AppLayout() {
               )}
             </svg>
           </button>
+
         </div>
 
         {/* Tablet and mobile navigation */}
@@ -257,7 +295,7 @@ function AppLayout() {
           <div className="rc-container rc28-mobile-panel-inner">
             <nav
               className="rc28-mobile-nav"
-              aria-label="Mobile navigation"
+              aria-label={t('nav.mobile')}
             >
               {navigationItems.map((item) => (
                 <NavLink
@@ -276,9 +314,11 @@ function AppLayout() {
               <div className="rc28-mobile-account-actions">
                 <div className="rc28-mobile-account">
                   <span>
-                    {isAdmin
-                      ? 'Administrator account'
-                      : 'Patient account'}
+                    {isAdministrator
+                      ? t('role.adminAccount')
+                      : isPatient
+                        ? t('role.patientAccount')
+                        : user?.role || ''}
                   </span>
 
                   <strong>{user?.email}</strong>
@@ -289,7 +329,7 @@ function AppLayout() {
                   className="rc28-action rc28-action-outline"
                   onClick={handleLogout}
                 >
-                  Log out
+                  {t('nav.logout')}
                 </button>
               </div>
             ) : (
@@ -299,7 +339,7 @@ function AppLayout() {
                   className="rc28-action rc28-action-outline"
                   onClick={() => setMenuOpenAt(null)}
                 >
-                  Log in
+                  {t('nav.login')}
                 </Link>
 
                 <Link
@@ -307,7 +347,7 @@ function AppLayout() {
                   className="rc28-action rc28-action-primary"
                   onClick={() => setMenuOpenAt(null)}
                 >
-                  Get started
+                  {t('nav.getStarted')}
                 </Link>
               </div>
             )}
@@ -315,7 +355,7 @@ function AppLayout() {
         </div>
       </header>
 
-      {/* Main page content */}
+      {/* Main content */}
       <main>
         <Outlet />
       </main>
@@ -324,6 +364,7 @@ function AppLayout() {
       <footer className="footer rc28-footer">
         <div className="rc-container">
           <div className="row gy-4 gx-lg-5 rc28-footer-main">
+
             <div className="col-12 col-lg-5">
               <strong className="rc28-footer-brand">
                 RespiraCare
@@ -336,7 +377,7 @@ function AppLayout() {
 
             <div className="col-12 col-sm-6 col-lg-3">
               <h2 className="rc28-footer-heading">
-                Explore
+                {t('footer.explore')}
               </h2>
 
               <nav
@@ -344,28 +385,28 @@ function AppLayout() {
                 aria-label="Footer navigation"
               >
                 <Link to="/">
-                  Explore RespiraCare
+                  {t('footer.exploreApp')}
                 </Link>
 
                 {isAuthenticated ? (
-                  <Link to="/dashboard">
-                    Account overview
+                  <Link to={homePath}>
+                    {t('footer.account')}
                   </Link>
                 ) : (
                   <>
                     <Link to="/login">
-                      Sign in
+                      {t('footer.signin')}
                     </Link>
 
                     <Link to="/register">
-                      Create an account
+                      {t('footer.createAccount')}
                     </Link>
                   </>
                 )}
 
-                {isAdmin && (
+                {isAdministrator && (
                   <Link to="/admin">
-                    Administration
+                    {t('footer.administration')}
                   </Link>
                 )}
               </nav>
@@ -373,13 +414,14 @@ function AppLayout() {
 
             <div className="col-12 col-sm-6 col-lg-4">
               <h2 className="rc28-footer-heading">
-                Important information
+                {t('footer.info')}
               </h2>
 
               <p className="rc28-footer-disclaimer">
                 {t('footer.disclaimer')}
               </p>
             </div>
+
           </div>
 
           <div className="rc28-footer-bottom">

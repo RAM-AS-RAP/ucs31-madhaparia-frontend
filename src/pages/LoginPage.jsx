@@ -5,6 +5,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { useLanguage } from '../context/useLanguage'
 import { getApiErrorMessage } from '../services/api'
+import { resolvePostLoginPath } from '../utils/roleRouting'
 
 function LoginPage() {
   const location = useLocation()
@@ -20,14 +21,16 @@ function LoginPage() {
   const accountCreated = location.state?.accountCreated
   const authenticationRequired = location.state?.authenticationRequired
 
-  // Preserve the existing role-based redirects.
+  // Redirect only to pages permitted for this role.
   if (isAuthenticated) {
     const requestedRoute = location.state?.from
-    const defaultRoute = user?.role === 'admin'
-      ? '/admin'
-      : '/dashboard'
 
-    return <Navigate to={requestedRoute || defaultRoute} replace />
+    const destination = resolvePostLoginPath(
+      user?.role,
+      requestedRoute,
+    )
+
+    return <Navigate to={destination} replace />
   }
 
   async function handleSubmit(event) {
@@ -64,14 +67,16 @@ function LoginPage() {
   }
 
   return (
-    <section className="login-page" aria-labelledby="login-heading">
+    <section
+      className="login-page"
+      aria-labelledby="login-heading"
+    >
       <div className="rc-container">
         <div className="row align-items-center gx-xl-5 gy-5 login-grid">
 
           {/* Introduction */}
           <div className="col-12 col-lg-6 order-2 order-lg-1 d-none d-lg-block">
             <div className="login-editorial">
-
               <p className="login-eyebrow">
                 {t('login.eyebrow')}
               </p>
@@ -235,7 +240,6 @@ function LoginPage() {
                   </div>
                 </div>
 
-                {/* Submit */}
                 <button
                   type="submit"
                   className="btn btn-primary login-submit"
