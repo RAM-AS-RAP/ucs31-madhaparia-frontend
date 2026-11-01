@@ -1,22 +1,19 @@
-// Shown by the route guards when a saved session
-// exists but the backend could not be reached to
-// check it. The user stays signed in and can retry.
-function SessionUnavailable({
-  message,
-  onRetry,
-}) {
+
+import { useSharedText } from '../i18n/sharedTranslations'
+
+function SessionUnavailable({ message, onRetry }) {
+  const t = useSharedText()
+
   return (
     <div className="auth-loading-page">
-      <p role="alert">
-        {message}
-      </p>
+      <p role="alert">{message}</p>
 
       <button
         type="button"
         className="button button-primary"
         onClick={onRetry}
       >
-        Try again
+        {t('route.retry')}
       </button>
     </div>
   )

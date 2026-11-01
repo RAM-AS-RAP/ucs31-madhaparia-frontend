@@ -1,6 +1,7 @@
 
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
+import { usePatientText } from '../i18n/patientTranslations'
 
 function ArrowIcon() {
   return (
@@ -23,6 +24,14 @@ function ArrowIcon() {
 
 function PatientDashboardPage() {
   const { user } = useAuth()
+  const t = usePatientText()
+
+  const role =
+    user?.role === 'admin'
+      ? t('dashboard.admin')
+      : user?.role === 'patient'
+        ? t('dashboard.patient')
+        : user?.role || t('common.unavailable')
 
   return (
     <section
@@ -31,114 +40,88 @@ function PatientDashboardPage() {
     >
       <div className="rc-container">
 
-        {/* Welcome and account information */}
         <div className="row align-items-end g-4 patient32-header">
           <div className="col-12 col-lg-8">
             <p className="patient32-eyebrow">
-              Patient dashboard
+              {t('dashboard.eyebrow')}
             </p>
 
             <h1 id="patient32-title">
-              Welcome back.
-              <span>What would you like to do today?</span>
+              {t('dashboard.welcome')}
+              <span>{t('dashboard.question')}</span>
             </h1>
 
             <p className="patient32-intro">
-              Start a new symptom check or look back at
-              your previous sessions. Everything you
-              need is right here.
+              {t('dashboard.intro')}
             </p>
           </div>
 
           <div className="col-12 col-lg-4">
             <div className="patient32-account">
               <span className="patient32-account-label">
-                Signed in as
+                {t('dashboard.signedIn')}
               </span>
 
               <strong>
-                {user?.email || 'Email unavailable'}
+                {user?.email || t('dashboard.emailUnavailable')}
               </strong>
 
               <span className="patient32-account-role">
-                Account role: {user?.role || 'Unavailable'}
+                {t('dashboard.accountRole', { role })}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Main dashboard actions */}
         <div className="row g-4 patient32-actions">
-
-          {/* Primary action */}
           <div className="col-12 col-lg-7">
             <article className="patient32-primary-panel">
-
               <div className="patient32-panel-top">
-                <span>01 / START A NEW CHECK</span>
+                <span>{t('dashboard.startLabel')}</span>
               </div>
 
               <div className="patient32-panel-content">
-                <h2>Check your symptoms</h2>
-
-                <p>
-                  Describe how you're feeling in English,
-                  Kiswahili, or a mix of both. Review the
-                  symptoms the system recognises before
-                  receiving health-awareness guidance and,
-                  where appropriate, a preliminary prediction.
-                </p>
+                <h2>{t('dashboard.checkTitle')}</h2>
+                <p>{t('dashboard.checkDescription')}</p>
 
                 <Link
                   to="/symptoms"
                   className="patient32-primary-button"
                 >
-                  Check symptoms
+                  {t('dashboard.checkButton')}
                   <ArrowIcon />
                 </Link>
               </div>
 
               <div className="patient32-panel-footer">
-                <span>English + Kiswahili</span>
-                <span>Review symptoms before continuing</span>
+                <span>{t('common.both')}</span>
+                <span>{t('dashboard.reviewFirst')}</span>
               </div>
-
             </article>
           </div>
 
-          {/* History action */}
           <div className="col-12 col-lg-5">
             <article className="patient32-history-panel">
-
               <div className="patient32-panel-top">
-                <span>02 / YOUR RECORDS</span>
+                <span>{t('dashboard.historyLabel')}</span>
               </div>
 
               <div className="patient32-history-content">
-                <h2>Pick up where you left off.</h2>
-
-                <p>
-                  Your previous symptom checks are saved
-                  to your account. Return to earlier sessions
-                  to review the recorded results and
-                  health-awareness guidance.
-                </p>
+                <h2>{t('dashboard.historyTitle')}</h2>
+                <p>{t('dashboard.historyDescription')}</p>
               </div>
 
               <Link
                 to="/history"
                 className="patient32-history-link"
               >
-                View prediction history
+                {t('dashboard.historyButton')}
                 <ArrowIcon />
               </Link>
-
             </article>
           </div>
-
         </div>
 
-        {/* How the symptom process works */}
         <section
           className="patient32-guide"
           aria-labelledby="patient32-guide-title"
@@ -146,84 +129,47 @@ function PatientDashboardPage() {
           <div className="row g-4">
             <div className="col-12 col-lg-4">
               <p className="patient32-eyebrow">
-                How it works
+                {t('dashboard.how')}
               </p>
 
               <h2 id="patient32-guide-title">
-                Three simple steps.
+                {t('dashboard.stepsTitle')}
               </h2>
 
               <p className="patient32-guide-intro">
-                You'll have a chance to review your
-                information before proceeding.
+                {t('dashboard.stepsIntro')}
               </p>
             </div>
 
             <div className="col-12 col-lg-8">
               <ol className="patient32-steps">
+                {[
+                  ['dashboard.step1Title', 'dashboard.step1Description'],
+                  ['dashboard.step2Title', 'dashboard.step2Description'],
+                  ['dashboard.step3Title', 'dashboard.step3Description'],
+                ].map(([title, description], index) => (
+                  <li key={title}>
+                    <span className="patient32-step-number">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
 
-                <li>
-                  <span className="patient32-step-number">
-                    01
-                  </span>
-
-                  <div>
-                    <strong>Describe your symptoms</strong>
-                    <p>
-                      Tell the system how you're feeling
-                      using supported language input.
-                    </p>
-                  </div>
-                </li>
-
-                <li>
-                  <span className="patient32-step-number">
-                    02
-                  </span>
-
-                  <div>
-                    <strong>Review what was recognised</strong>
-                    <p>
-                      Check and confirm the symptoms
-                      identified from your description.
-                    </p>
-                  </div>
-                </li>
-
-                <li>
-                  <span className="patient32-step-number">
-                    03
-                  </span>
-
-                  <div>
-                    <strong>Receive health-awareness guidance</strong>
-                    <p>
-                      View appropriate guidance. Cases
-                      requiring urgent attention are handled
-                      separately from prediction.
-                    </p>
-                  </div>
-                </li>
-
+                    <div>
+                      <strong>{t(title)}</strong>
+                      <p>{t(description)}</p>
+                    </div>
+                  </li>
+                ))}
               </ol>
             </div>
           </div>
         </section>
 
-        {/* Medical information */}
         <aside
           className="patient32-safety"
-          aria-label="Important health information"
+          aria-label={t('dashboard.safetyLabel')}
         >
-          <strong>Important to know</strong>
-
-          <p>
-            RespiraCare is for health awareness, not medical
-            diagnosis. Predictions are preliminary and should
-            not replace professional medical advice. Seek
-            prompt medical attention for severe or rapidly
-            worsening symptoms.
-          </p>
+          <strong>{t('dashboard.safetyTitle')}</strong>
+          <p>{t('dashboard.safetyDescription')}</p>
         </aside>
 
       </div>

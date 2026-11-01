@@ -11,8 +11,11 @@ import {
 
 import { clearPredictionResult } from '../services/predictions'
 import { getApiErrorMessage } from '../services/api'
+import { useConfirmationText } from '../i18n/confirmationTranslations'
 
 function SymptomConfirmationPage() {
+  const t = useConfirmationText()
+
   const mapping = getSavedSymptomMapping()
   const recognised = mapping?.recognised_symptoms || []
 
@@ -45,9 +48,7 @@ function SymptomConfirmationPage() {
     setError('')
 
     if (selectedCodes.length === 0) {
-      setError(
-        'Please confirm at least one symptom or return to the previous step and revise your description.',
-      )
+      setError(t('noSelection'))
       return
     }
 
@@ -67,7 +68,7 @@ function SymptomConfirmationPage() {
       setError(
         getApiErrorMessage(
           requestError,
-          'Your symptoms could not be confirmed. Please try again.',
+          t('confirmError'),
         ),
       )
     } finally {
@@ -78,6 +79,7 @@ function SymptomConfirmationPage() {
   function handleReviewAgain() {
     setResult(null)
     setError('')
+
     clearSymptomConfirmation()
     clearPredictionResult()
   }
@@ -93,36 +95,34 @@ function SymptomConfirmationPage() {
     >
       <div className="rc-container sym33-container">
 
-        {/* Page heading */}
+        {/* Heading */}
         <div className="row g-4 align-items-end sym33-intro-row">
           <div className="col-12 col-lg-8">
             <p className="sym33-eyebrow">
-              Symptom review
+              {t('eyebrow')}
             </p>
 
             <h1 id="sym33-confirm-title">
-              Check what we recognised.
-              <span> You decide what's correct.</span>
+              {t('title1')}
+              <span> {t('title2')}</span>
             </h1>
 
             <p className="sym33-lead">
-              Review the symptoms identified from your
-              description. Keep the ones that match how
-              you feel and remove any that do not.
+              {t('intro')}
             </p>
           </div>
 
           <div className="col-12 col-lg-4">
             <div className="sym33-progress">
               <div className="sym33-progress-top">
-                <strong>Step 2 of 3</strong>
-                <span>Confirm symptoms</span>
+                <strong>{t('step')}</strong>
+                <span>{t('stepLabel')}</span>
               </div>
 
               <div
                 className="sym33-progress-track"
                 role="progressbar"
-                aria-label="Assessment progress"
+                aria-label={t('progress')}
                 aria-valuemin={0}
                 aria-valuemax={3}
                 aria-valuenow={2}
@@ -136,55 +136,49 @@ function SymptomConfirmationPage() {
         {!result ? (
           <div className="sym33-confirm-panel">
 
+            {/* Selection heading */}
             <div className="sym33-confirm-header">
               <div>
                 <p className="sym33-section-kicker">
-                  Recognised symptoms
+                  {t('recognised')}
                 </p>
 
-                <h2>Review your selections</h2>
+                <h2>{t('review')}</h2>
 
                 <p>
-                  {recognised.length} symptom
-                  {recognised.length === 1 ? '' : 's'} recognised
-                  from your description.
+                  {t('recognisedCount', {
+                    count: recognised.length,
+                  })}
                 </p>
               </div>
 
               <div className="sym33-total">
                 <strong>{selectedCodes.length}</strong>
-                <span>selected</span>
+                <span>{t('selectedCount')}</span>
               </div>
             </div>
 
+            {/* Original symptom description */}
             <div className="sym33-original-description">
-              <strong>Your original description</strong>
-
+              <strong>{t('original')}</strong>
               <p>“{mapping.input_text}”</p>
             </div>
 
+            {/* Red-flag warning */}
             {mapping.has_red_flag && (
               <div
                 className="sym33-alert sym33-alert-warning"
                 role="alert"
               >
-                <strong>
-                  Safety-sensitive wording detected
-                </strong>
-
-                <p>
-                  One or more recognised symptoms may
-                  need urgent attention. If your symptoms
-                  are severe, rapidly worsening, or involve
-                  breathing difficulty, seek medical
-                  attention promptly.
-                </p>
+                <strong>{t('warning')}</strong>
+                <p>{t('warningMessage')}</p>
               </div>
             )}
 
+            {/* Select recognised symptoms */}
             <div
               className="sym33-selection-list"
-              aria-label="Select your symptoms"
+              aria-label={t('selectSymptoms')}
             >
               {recognised.map((symptom) => {
                 const selected = selectedCodes.includes(
@@ -202,9 +196,7 @@ function SymptomConfirmationPage() {
                     }`}
                     aria-pressed={selected}
                     disabled={loading}
-                    onClick={() =>
-                      toggleSymptom(symptom.code)
-                    }
+                    onClick={() => toggleSymptom(symptom.code)}
                   >
                     <span
                       className="sym33-checkbox"
@@ -215,23 +207,27 @@ function SymptomConfirmationPage() {
 
                     <span className="sym33-selection-copy">
                       <span className="sym33-selection-title">
-                        <strong>{symptom.display_name}</strong>
+                        <strong>
+                          {symptom.display_name}
+                        </strong>
 
                         {symptom.is_red_flag && (
                           <span className="sym33-warning-tag">
-                            Safety-sensitive
+                            {t('safetySensitive')}
                           </span>
                         )}
                       </span>
 
                       <span className="sym33-selection-description">
-                        Recognised from{' '}
+                        {t('recognisedFrom')}{' '}
                         <b>“{symptom.matched_text}”</b>
                       </span>
                     </span>
 
                     <span className="sym33-selection-state">
-                      {selected ? 'Selected' : 'Not selected'}
+                      {selected
+                        ? t('selected')
+                        : t('notSelected')}
                     </span>
                   </button>
                 )
@@ -239,9 +235,7 @@ function SymptomConfirmationPage() {
             </div>
 
             <p className="sym33-selection-help">
-              Select a symptom to include it, or select
-              it again to remove it. At least one symptom
-              must remain selected.
+              {t('selectionHelp')}
             </p>
 
             {error && (
@@ -253,12 +247,13 @@ function SymptomConfirmationPage() {
               </div>
             )}
 
+            {/* Confirmation actions */}
             <div className="sym33-confirm-actions">
               <Link
                 to="/symptoms"
                 className="button button-secondary sym33-secondary-button"
               >
-                Back to symptom input
+                {t('back')}
               </Link>
 
               <button
@@ -268,8 +263,8 @@ function SymptomConfirmationPage() {
                 onClick={handleConfirmation}
               >
                 {loading
-                  ? 'Confirming...'
-                  : 'Confirm selected symptoms'}
+                  ? t('confirming')
+                  : t('confirm')}
 
                 {!loading && (
                   <span aria-hidden="true">→</span>
@@ -282,47 +277,33 @@ function SymptomConfirmationPage() {
             className="sym33-confirm-result"
             aria-live="polite"
           >
+
+            {/* Urgent and normal confirmation */}
             {isUrgent ? (
               <div
                 className="sym33-alert sym33-alert-urgent"
                 role="alert"
               >
                 <p className="sym33-section-kicker">
-                  Urgent review recommended
+                  {t('urgentLabel')}
                 </p>
 
-                <h2>
-                  A confirmed symptom needs prompt attention.
-                </h2>
-
-                <p>
-                  RespiraCare detected a safety-sensitive
-                  confirmed symptom. Seek prompt professional
-                  medical assessment, particularly if you
-                  have severe or worsening symptoms or
-                  difficulty breathing.
-                </p>
-
-                <p>
-                  This assessment will not continue to
-                  automated disease prediction.
-                </p>
+                <h2>{t('urgentTitle')}</h2>
+                <p>{t('urgentMessage')}</p>
+                <p>{t('urgentStop')}</p>
               </div>
             ) : (
               <div className="sym33-confirm-success">
                 <p className="sym33-section-kicker">
-                  Confirmation complete
+                  {t('complete')}
                 </p>
 
-                <h2>Your symptoms have been confirmed.</h2>
-
-                <p>
-                  Only the symptoms you selected will be
-                  used in the next stage of the assessment.
-                </p>
+                <h2>{t('completeTitle')}</h2>
+                <p>{t('completeMessage')}</p>
               </div>
             )}
 
+            {/* Confirmed symptoms */}
             <section
               className="sym33-confirm-summary"
               aria-labelledby="sym33-summary-title"
@@ -330,17 +311,17 @@ function SymptomConfirmationPage() {
               <div className="sym33-results-heading">
                 <div>
                   <p className="sym33-section-kicker">
-                    Your selection
+                    {t('yourSelection')}
                   </p>
 
                   <h2 id="sym33-summary-title">
-                    Confirmed symptoms
+                    {t('confirmedTitle')}
                   </h2>
                 </div>
 
                 <div className="sym33-total">
                   <strong>{confirmed.length}</strong>
-                  <span>confirmed</span>
+                  <span>{t('confirmedCount')}</span>
                 </div>
               </div>
 
@@ -351,27 +332,27 @@ function SymptomConfirmationPage() {
                     key={symptom.code}
                   >
                     <div>
-                      <strong>{symptom.display_name}</strong>
+                      <strong>
+                        {symptom.display_name}
+                      </strong>
+
                       <p>{symptom.matched_text}</p>
                     </div>
 
                     {symptom.is_red_flag && (
                       <span className="sym33-warning-tag">
-                        Safety-sensitive
+                        {t('safetySensitive')}
                       </span>
                     )}
                   </div>
                 ))}
               </div>
 
+              {/* Rejected symptoms */}
               {rejected.length > 0 && (
                 <div className="sym33-excluded">
-                  <h3>Not confirmed</h3>
-
-                  <p>
-                    These symptoms were excluded from
-                    your confirmed selection.
-                  </p>
+                  <h3>{t('excludedTitle')}</h3>
+                  <p>{t('excludedMessage')}</p>
 
                   <div className="sym33-excluded-list">
                     {rejected.map((symptom) => (
@@ -384,27 +365,23 @@ function SymptomConfirmationPage() {
               )}
             </section>
 
+            {/* Prediction is available only when not urgent */}
             {!isUrgent && (
               <div className="sym33-next">
                 <div>
                   <p className="sym33-section-kicker">
-                    Next step
+                    {t('next')}
                   </p>
 
-                  <h3>Generate your health-awareness result</h3>
-
-                  <p>
-                    Provide your age and sex in the next
-                    step to continue to the preliminary
-                    single-condition prediction.
-                  </p>
+                  <h3>{t('predictionTitle')}</h3>
+                  <p>{t('predictionMessage')}</p>
                 </div>
 
                 <Link
                   to="/prediction"
                   className="button button-primary sym33-primary-button"
                 >
-                  Continue to prediction
+                  {t('continue')}
                   <span aria-hidden="true">→</span>
                 </Link>
               </div>
@@ -416,7 +393,7 @@ function SymptomConfirmationPage() {
                 className="sym33-text-action"
                 onClick={handleReviewAgain}
               >
-                Review selections again
+                {t('reviewAgain')}
               </button>
 
               {isUrgent && (
@@ -424,26 +401,22 @@ function SymptomConfirmationPage() {
                   to="/dashboard"
                   className="button button-secondary sym33-secondary-button"
                 >
-                  Return to dashboard
+                  {t('dashboard')}
                 </Link>
               )}
             </div>
           </div>
         )}
 
+        {/* Disclaimer */}
         <div className="sym33-bottom-note">
           <div>
-            <strong>Health-awareness information only</strong>
-
-            <p>
-              RespiraCare provides preliminary
-              health-awareness support and is not a
-              medical diagnosis.
-            </p>
+            <strong>{t('disclaimerTitle')}</strong>
+            <p>{t('disclaimer')}</p>
           </div>
 
           <Link to="/dashboard">
-            Return to dashboard
+            {t('dashboard')}
           </Link>
         </div>
 

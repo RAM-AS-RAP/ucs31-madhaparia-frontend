@@ -1,28 +1,29 @@
 
 import { useAccessibility } from '../context/useAccessibility'
+import { useLanguage } from '../context/useLanguage'
 
 const textSizes = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'large', label: 'Large' },
-  { value: 'extra-large', label: 'Extra Large' },
-  { value: 'huge', label: 'Huge' },
+  { value: 'normal', labelKey: 'a11y.normal' },
+  { value: 'large', labelKey: 'a11y.large' },
+  { value: 'extra-large', labelKey: 'a11y.extraLarge' },
+  { value: 'huge', labelKey: 'a11y.huge' },
 ]
 
 const toggles = [
   {
     id: 'highContrast',
-    title: 'High Contrast Mode',
-    description: 'Use stronger colours and clearer borders.',
+    titleKey: 'a11y.highContrast',
+    descriptionKey: 'a11y.highContrastDescription',
   },
   {
     id: 'boldText',
-    title: 'Bold Text',
-    description: 'Make interface text thicker and easier to read.',
+    titleKey: 'a11y.boldText',
+    descriptionKey: 'a11y.boldTextDescription',
   },
   {
     id: 'reduceMotion',
-    title: 'Reduce Motion',
-    description: 'Minimise animations and visual transitions.',
+    titleKey: 'a11y.reduceMotion',
+    descriptionKey: 'a11y.reduceMotionDescription',
   },
 ]
 
@@ -33,22 +34,24 @@ function AccessibilitySettings() {
     resetAccessibility,
   } = useAccessibility()
 
+  const { t } = useLanguage()
+
   return (
     <section
       className="settings-panel accessibility-panel"
       aria-labelledby="accessibility-title"
     >
       <div className="accessibility-heading">
-        <h2 id="accessibility-title">Accessibility</h2>
+        <h2 id="accessibility-title">{t('a11y.title')}</h2>
         <p className="settings-help">
-          Adjust text, contrast and motion to suit your needs.
+          {t('a11y.intro')}
         </p>
       </div>
 
       <fieldset className="accessibility-fieldset">
-        <legend>Text Size</legend>
+        <legend>{t('a11y.textSize')}</legend>
         <p className="settings-help">
-          Choose a comfortable reading size.
+          {t('a11y.sizeHelp')}
         </p>
 
         <div className="accessibility-size-options">
@@ -70,7 +73,7 @@ function AccessibilitySettings() {
                   setPreference('textSize', option.value)
                 }
               />
-              <span>{option.label}</span>
+              <span>{t(option.labelKey)}</span>
             </label>
           ))}
         </div>
@@ -83,8 +86,8 @@ function AccessibilitySettings() {
             className="accessibility-toggle-row"
           >
             <span className="accessibility-toggle-copy">
-              <strong>{option.title}</strong>
-              <small>{option.description}</small>
+              <strong>{t(option.titleKey)}</strong>
+              <small>{t(option.descriptionKey)}</small>
             </span>
 
             <input
@@ -105,7 +108,7 @@ function AccessibilitySettings() {
           className="accessibility-reset"
           onClick={resetAccessibility}
         >
-          Reset accessibility settings
+          {t('a11y.reset')}
         </button>
       </div>
     </section>

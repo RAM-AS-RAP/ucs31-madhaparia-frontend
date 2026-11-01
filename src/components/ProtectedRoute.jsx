@@ -1,13 +1,16 @@
+
 import {
   Navigate,
   useLocation,
 } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
+import { useSharedText } from '../i18n/sharedTranslations'
 import SessionUnavailable from './SessionUnavailable'
 
 function ProtectedRoute({ children }) {
   const location = useLocation()
+  const t = useSharedText()
 
   const {
     isAuthenticated,
@@ -19,11 +22,12 @@ function ProtectedRoute({ children }) {
   if (loading) {
     return (
       <div className="auth-loading-page">
-        <div className="auth-loading-spinner" />
+        <div
+          className="auth-loading-spinner"
+          aria-hidden="true"
+        />
 
-        <p>
-          Checking your RespiraCare session...
-        </p>
+        <p>{t('route.checkSession')}</p>
       </div>
     )
   }

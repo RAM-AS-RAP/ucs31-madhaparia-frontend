@@ -2,11 +2,20 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { useLanguage } from '../context/useLanguage'
 import { getApiErrorMessage } from '../services/api'
 import { registerPatient } from '../services/auth'
 
+const strengthLabels = [
+  'register.strength0',
+  'register.strength1',
+  'register.strength2',
+  'register.strength3',
+]
+
 function RegisterPage() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   const [email, setEmail] = useState('')
   const [emailVisited, setEmailVisited] = useState(false)
@@ -21,10 +30,12 @@ function RegisterPage() {
   const trimmedEmail = email.trim()
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)
   const passwordValid = password.length >= 8
-  const passwordsMatch =
-    confirmPassword.length > 0 && password === confirmPassword
 
-  // Guidance only: the minimum requirement remains 8 characters.
+  const passwordsMatch =
+    confirmPassword.length > 0 &&
+    password === confirmPassword
+
+  // Keep the existing password-strength calculation.
   const strengthLevel = !password
     ? 0
     : !passwordValid
@@ -35,36 +46,30 @@ function RegisterPage() {
         ? 3
         : 2
 
-  const strengthLabels = [
-    'Not entered',
-    'Below minimum',
-    'Meets minimum',
-    'Better length and variety',
-  ]
-
   async function handleSubmit(event) {
     event.preventDefault()
+
     setError('')
     setEmailVisited(true)
     setPasswordVisited(true)
 
     if (!trimmedEmail) {
-      setError('Please enter your email address.')
+      setError(t('register.errorEmail'))
       return
     }
 
     if (!emailValid) {
-      setError('Please enter a valid email address.')
+      setError(t('register.errorInvalidEmail'))
       return
     }
 
     if (!passwordValid) {
-      setError('Please use a password with at least 8 characters.')
+      setError(t('register.errorPassword'))
       return
     }
 
     if (!confirmPassword || !passwordsMatch) {
-      setError('The passwords do not match.')
+      setError(t('register.errorMismatch'))
       return
     }
 
@@ -80,14 +85,14 @@ function RegisterPage() {
       const status = requestError.response?.status
 
       if (status === 409) {
-        setError('An account with this email already exists.')
+        setError(t('register.errorExists'))
       } else if (status === 422) {
-        setError('Please check your email and password details.')
+        setError(t('register.errorValidation'))
       } else {
         setError(
           getApiErrorMessage(
             requestError,
-            'Your account could not be created. Please try again.',
+            t('register.errorGeneric'),
           ),
         )
       }
@@ -107,19 +112,18 @@ function RegisterPage() {
           {/* Desktop introduction */}
           <div className="col-12 col-lg-6 d-none d-lg-block">
             <div className="register-editorial">
+
               <p className="register-eyebrow">
-                Getting started with RespiraCare
+                {t('register.eyebrow')}
               </p>
 
               <h2>
-                Better understanding begins{' '}
-                <span>with your words.</span>
+                {t('register.title1')}{' '}
+                <span>{t('register.title2')}</span>
               </h2>
 
               <p className="register-intro">
-                Create an account to describe your symptoms,
-                confirm what the system recognises and keep
-                your health-awareness history in one place.
+                {t('register.intro')}
               </p>
 
               <div className="register-benefits">
@@ -127,8 +131,8 @@ function RegisterPage() {
                   <span aria-hidden="true">01</span>
 
                   <div>
-                    <strong>Describe symptoms naturally</strong>
-                    <p>Use English, Kiswahili, or a mix of both.</p>
+                    <strong>{t('login.benefit2')}</strong>
+                    <p>{t('login.benefit2Description')}</p>
                   </div>
                 </div>
 
@@ -136,18 +140,14 @@ function RegisterPage() {
                   <span aria-hidden="true">02</span>
 
                   <div>
-                    <strong>Review before continuing</strong>
-                    <p>
-                      Check recognised symptoms before
-                      receiving guidance.
-                    </p>
+                    <strong>{t('register.benefit2')}</strong>
+                    <p>{t('register.benefit2Description')}</p>
                   </div>
                 </div>
               </div>
 
               <p className="register-editorial-note">
-                This tool supports health awareness.
-                It does not provide a medical diagnosis.
+                {t('register.note')}
               </p>
             </div>
           </div>
@@ -157,15 +157,15 @@ function RegisterPage() {
             <div className="register-panel">
 
               <p className="register-panel-eyebrow">
-                Patient registration
+                {t('register.patient')}
               </p>
 
               <h1 id="register-heading">
-                Create your account
+                {t('register.title')}
               </h1>
 
               <p className="register-panel-description">
-                A few details and you're ready to begin.
+                {t('register.welcome')}
               </p>
 
               {error && (
@@ -189,7 +189,7 @@ function RegisterPage() {
                     className="form-label"
                     htmlFor="register-email"
                   >
-                    Email address
+                    {t('auth.email')}
                   </label>
 
                   <input
@@ -221,8 +221,8 @@ function RegisterPage() {
                     }`}
                   >
                     {emailVisited && !emailValid
-                      ? 'Enter a valid email address.'
-                      : 'You will use this email to log in.'}
+                      ? t('register.emailInvalid')
+                      : t('register.emailHelp')}
                   </p>
                 </div>
 
@@ -232,7 +232,7 @@ function RegisterPage() {
                     className="form-label"
                     htmlFor="register-password"
                   >
-                    Password
+                    {t('auth.password')}
                   </label>
 
                   <div className="register-password-wrap">
@@ -246,7 +246,7 @@ function RegisterPage() {
                         setError('')
                       }}
                       onBlur={() => setPasswordVisited(true)}
-                      placeholder="At least 8 characters"
+                      placeholder={t('register.passwordPlaceholder')}
                       autoComplete="new-password"
                       minLength={8}
                       aria-invalid={
@@ -262,24 +262,27 @@ function RegisterPage() {
                       aria-pressed={showPassword}
                       aria-label={
                         showPassword
-                          ? 'Hide password'
-                          : 'Show password'
+                          ? t('auth.hidePassword')
+                          : t('auth.showPassword')
                       }
                       onClick={() =>
                         setShowPassword((current) => !current)
                       }
                     >
-                      {showPassword ? 'Hide' : 'Show'}
+                      {showPassword
+                        ? t('auth.hide')
+                        : t('auth.show')}
                     </button>
                   </div>
 
+                  {/* Password strength */}
                   <div
                     className="register-strength-heading"
                     aria-live="polite"
                   >
-                    <span>Password feedback</span>
+                    <span>{t('register.passwordFeedback')}</span>
                     <strong>
-                      {strengthLabels[strengthLevel]}
+                      {t(strengthLabels[strengthLevel])}
                     </strong>
                   </div>
 
@@ -303,9 +306,7 @@ function RegisterPage() {
                     id="register-password-help"
                     className="register-field-note"
                   >
-                    At least 8 characters required.
-                    A longer, less predictable password is
-                    recommended. This is only a simple estimate.
+                    {t('register.passwordHelp')}
                   </p>
                 </div>
 
@@ -315,7 +316,7 @@ function RegisterPage() {
                     className="form-label"
                     htmlFor="register-confirm"
                   >
-                    Confirm password
+                    {t('auth.confirmPassword')}
                   </label>
 
                   <div className="register-password-wrap">
@@ -332,7 +333,7 @@ function RegisterPage() {
                         setConfirmPassword(event.target.value)
                         setError('')
                       }}
-                      placeholder="Enter password again"
+                      placeholder={t('register.confirmPlaceholder')}
                       autoComplete="new-password"
                       aria-invalid={
                         confirmPassword.length > 0 &&
@@ -348,8 +349,8 @@ function RegisterPage() {
                       aria-pressed={showConfirmPassword}
                       aria-label={
                         showConfirmPassword
-                          ? 'Hide confirmation password'
-                          : 'Show confirmation password'
+                          ? t('auth.hideConfirm')
+                          : t('auth.showConfirm')
                       }
                       onClick={() =>
                         setShowConfirmPassword(
@@ -357,7 +358,9 @@ function RegisterPage() {
                         )
                       }
                     >
-                      {showConfirmPassword ? 'Hide' : 'Show'}
+                      {showConfirmPassword
+                        ? t('auth.hide')
+                        : t('auth.show')}
                     </button>
                   </div>
 
@@ -375,10 +378,10 @@ function RegisterPage() {
                     aria-live="polite"
                   >
                     {!confirmPassword
-                      ? 'Re-enter your password to confirm it.'
+                      ? t('register.confirmEmpty')
                       : passwordsMatch
-                        ? 'Passwords match.'
-                        : 'Passwords do not match yet.'}
+                        ? t('register.confirmMatch')
+                        : t('register.confirmMismatch')}
                   </p>
                 </div>
 
@@ -386,12 +389,7 @@ function RegisterPage() {
                 <div className="register-role-note">
                   <span aria-hidden="true">✓</span>
 
-                  <p>
-                    Registration creates a{' '}
-                    <strong>patient account</strong>.
-                    Administrator accounts cannot be
-                    created here.
-                  </p>
+                  <p>{t('register.roleNote')}</p>
                 </div>
 
                 {/* Submit */}
@@ -402,8 +400,8 @@ function RegisterPage() {
                 >
                   <span>
                     {loading
-                      ? 'Creating account...'
-                      : 'Create account'}
+                      ? t('register.creating')
+                      : t('register.create')}
                   </span>
 
                   {!loading && (
@@ -413,13 +411,14 @@ function RegisterPage() {
               </form>
 
               <p className="register-switch">
-                Already have an account?{' '}
-                <Link to="/login">Log in</Link>
+                {t('register.existing')}{' '}
+                <Link to="/login">
+                  {t('nav.login')}
+                </Link>
               </p>
 
               <p className="register-disclaimer">
-                RespiraCare provides health-awareness
-                information only, not a medical diagnosis.
+                {t('register.disclaimer')}
               </p>
 
             </div>

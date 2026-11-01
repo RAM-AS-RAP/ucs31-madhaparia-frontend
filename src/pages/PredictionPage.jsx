@@ -17,8 +17,11 @@ import {
 
 import { getApiErrorMessage } from '../services/api'
 import PredictionFeedback from '../components/PredictionFeedback'
+import { usePredictionText } from '../i18n/predictionTranslations'
 
 function PredictionPage() {
+  const t = usePredictionText()
+
   const mapping = getSavedSymptomMapping()
   const confirmation = getSavedSymptomConfirmation()
 
@@ -27,8 +30,7 @@ function PredictionPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Keep a saved result only when it belongs to
-  // this exact symptom description and selection.
+  // Restore only a result belonging to the current symptoms.
   const [result, setResult] = useState(() => {
     const saved = getSavedPredictionResult()
 
@@ -42,8 +44,7 @@ function PredictionPage() {
       return null
     }
 
-    // An urgent confirmation must never reuse
-    // an ordinary disease prediction.
+    // Never reuse a normal prediction for an urgent case.
     if (
       confirmation?.safety_status === 'urgent_review' &&
       saved?.status !== 'urgent_review'
@@ -61,13 +62,10 @@ function PredictionPage() {
   const isConfirmedUrgent =
     confirmation.safety_status === 'urgent_review'
 
-  const confirmedSymptoms =
-    confirmation.confirmed_symptoms || []
+  const confirmedSymptoms = confirmation.confirmed_symptoms || []
+  const confirmedCodes = confirmation.confirmed_codes || []
 
-  const confirmedCodes =
-    confirmation.confirmed_codes || []
-
-  // The patient-facing UI always shows one condition.
+  // Show only one condition, never a ranked list.
   const prediction = Array.isArray(result?.predictions)
     ? result.predictions[0] || null
     : null
@@ -98,19 +96,17 @@ function PredictionPage() {
       numericAge < 0 ||
       numericAge > 120
     ) {
-      setError('Please enter a valid age between 0 and 120.')
+      setError(t('errorAge'))
       return
     }
 
     if (sex !== 'M' && sex !== 'F') {
-      setError('Please select your sex before continuing.')
+      setError(t('errorSex'))
       return
     }
 
     if (confirmedCodes.length === 0) {
-      setError(
-        'No confirmed symptoms are available for prediction.',
-      )
+      setError(t('errorSymptoms'))
       return
     }
 
@@ -126,16 +122,12 @@ function PredictionPage() {
         confirmedCodes,
       })
 
-      // The backend is responsible for red-flag routing.
-      // Do not accept a disease prediction for a known
-      // urgent-review confirmation.
+      // Red-flag cases must never display disease predictions.
       if (
         isConfirmedUrgent &&
         response.status !== 'urgent_review'
       ) {
-        setError(
-          'Urgent safety guidance could not be confirmed. Please seek prompt medical assessment rather than relying on an automated prediction.',
-        )
+        setError(t('errorSafety'))
         return
       }
 
@@ -143,21 +135,19 @@ function PredictionPage() {
       savePredictionResult(response, mapping.input_text)
     } catch (requestError) {
       if (requestError.response?.status === 401) {
-        setError(
-          'Your login session is no longer valid. Please log in again.',
-        )
+        setError(t('errorSession'))
       } else if (requestError.response?.status === 422) {
         setError(
           getApiErrorMessage(
             requestError,
-            'Please check your details and confirmed symptoms before trying again.',
+            t('errorValidation'),
           ),
         )
       } else {
         setError(
           getApiErrorMessage(
             requestError,
-            'RespiraCare could not generate the result. Please try again.',
+            t('errorGeneric'),
           ),
         )
       }
@@ -181,39 +171,36 @@ function PredictionPage() {
     >
       <div className="rc-container pred34-container">
 
-        {/* Shared page introduction */}
+        {/* Page introduction */}
         <div className="row g-4 align-items-end pred34-intro">
           <div className="col-12 col-lg-8">
             <p className="pred34-eyebrow">
-              Health awareness
+              {t('eyebrow')}
             </p>
 
             <h1 id="pred34-title">
-              Understand your
-              <span> symptom pattern.</span>
+              {t('title1')}{' '}
+              <span>{t('title2')}</span>
             </h1>
 
             <p className="pred34-lead">
-              RespiraCare compares your confirmed symptoms
-              with patterns learned by the trained model.
-              The information is for health awareness,
-              not a medical diagnosis.
+              {t('intro')}
             </p>
           </div>
 
           <div className="col-12 col-lg-4">
             <div className="pred34-progress">
               <div className="pred34-progress-labels">
-                <strong>Step 3 of 3</strong>
+                <strong>{t('step')}</strong>
                 <span>
-                  {result ? 'Assessment complete' : 'Health awareness'}
+                  {result ? t('complete') : t('eyebrow')}
                 </span>
               </div>
 
               <div
                 className="pred34-progress-track"
                 role="progressbar"
-                aria-label="Assessment progress"
+                aria-label={t('progress')}
                 aria-valuemin={0}
                 aria-valuemax={3}
                 aria-valuenow={result ? 3 : 2}
@@ -228,7 +215,7 @@ function PredictionPage() {
           </div>
         </div>
 
-        {/* Before a prediction is submitted */}
+        {/* Assessment form */}
         {!result && (
           <div className="row g-4 pred34-workspace">
             <div className="col-12 col-lg-8">
@@ -239,31 +226,31 @@ function PredictionPage() {
                 <div className="pred34-panel-header">
                   <div>
                     <p className="pred34-kicker">
-                      Final step
+                      {t('finalStep')}
                     </p>
 
                     <h2 id="pred34-form-title">
-                      Complete your information
+                      {t('formTitle')}
                     </h2>
 
-                    <p>
-                      Enter the remaining details required
-                      for this assessment.
-                    </p>
+                    <p>{t('formIntro')}</p>
                   </div>
 
                   {!isConfirmedUrgent && (
                     <span className="pred34-ready">
-                      Ready
+                      {t('ready')}
                     </span>
                   )}
                 </div>
 
+                {/* Confirmed symptoms */}
                 <div className="pred34-confirmed">
                   <div className="pred34-confirmed-heading">
-                    <strong>Confirmed symptoms</strong>
+                    <strong>{t('confirmed')}</strong>
                     <span>
-                      {confirmedCodes.length} selected
+                      {t('selected', {
+                        count: confirmedCodes.length,
+                      })}
                     </span>
                   </div>
 
@@ -285,17 +272,9 @@ function PredictionPage() {
                     role="alert"
                   >
                     <strong>
-                      Safety-sensitive symptom confirmed
+                      {t('warningTitle')}
                     </strong>
-
-                    <p>
-                      Your confirmed symptoms require
-                      urgent-review handling. This page
-                      can request the backend's safety
-                      response, but must not generate a
-                      disease prediction for this case.
-                      Seek prompt medical assessment.
-                    </p>
+                    <p>{t('warningText')}</p>
                   </div>
                 )}
 
@@ -307,7 +286,7 @@ function PredictionPage() {
                     <div className="col-12 col-md-6">
                       <div className="pred34-field">
                         <label htmlFor="prediction-age">
-                          Age
+                          {t('age')}
                         </label>
 
                         <input
@@ -318,7 +297,7 @@ function PredictionPage() {
                           min="0"
                           max="120"
                           value={age}
-                          placeholder="e.g. 25"
+                          placeholder={t('agePlaceholder')}
                           onChange={(event) => {
                             setAge(event.target.value)
                             setError('')
@@ -330,7 +309,7 @@ function PredictionPage() {
                     <div className="col-12 col-md-6">
                       <div className="pred34-field">
                         <label htmlFor="prediction-sex">
-                          Sex
+                          {t('sex')}
                         </label>
 
                         <select
@@ -343,15 +322,13 @@ function PredictionPage() {
                           }}
                         >
                           <option value="">
-                            Select
+                            {t('select')}
                           </option>
-
                           <option value="M">
-                            Male
+                            {t('male')}
                           </option>
-
                           <option value="F">
-                            Female
+                            {t('female')}
                           </option>
                         </select>
                       </div>
@@ -359,18 +336,8 @@ function PredictionPage() {
                   </div>
 
                   <div className="pred34-input-note">
-                    <strong>
-                      Why are these required?
-                    </strong>
-
-                    <p>
-                      Age and sex are part of the
-                      assessment request. For normal cases,
-                      the trained model uses them alongside
-                      your confirmed symptom features.
-                      Urgent cases receive safety guidance
-                      instead of a disease prediction.
-                    </p>
+                    <strong>{t('whyRequired')}</strong>
+                    <p>{t('requiredExplanation')}</p>
                   </div>
 
                   {error && (
@@ -387,7 +354,7 @@ function PredictionPage() {
                       to="/symptoms/confirm"
                       className="button button-secondary pred34-secondary"
                     >
-                      Back to confirmation
+                      {t('back')}
                     </Link>
 
                     <button
@@ -396,10 +363,10 @@ function PredictionPage() {
                       disabled={loading}
                     >
                       {loading
-                        ? 'Generating result...'
+                        ? t('generating')
                         : isConfirmedUrgent
-                          ? 'Continue safety review'
-                          : 'Generate awareness result'}
+                          ? t('safetyReview')
+                          : t('generate')}
 
                       {!loading && (
                         <span aria-hidden="true">→</span>
@@ -410,58 +377,44 @@ function PredictionPage() {
               </section>
             </div>
 
+            {/* What happens next */}
             <div className="col-12 col-lg-4">
               <aside className="pred34-aside">
                 <p className="pred34-kicker">
-                  Before you continue
+                  {t('before')}
                 </p>
 
-                <h2>What happens next?</h2>
+                <h2>{t('whatNext')}</h2>
 
-                <div className="pred34-aside-step">
-                  <span>01</span>
-                  <div>
-                    <strong>Submit your details</strong>
-                    <p>
-                      We use your confirmed symptoms
-                      and the details you provide.
-                    </p>
-                  </div>
-                </div>
+                {[
+                  ['step1Title', 'step1Text'],
+                  ['step2Title', 'step2Text'],
+                  ['step3Title', 'step3Text'],
+                ].map(([title, description], index) => (
+                  <div
+                    className="pred34-aside-step"
+                    key={title}
+                  >
+                    <span>
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
 
-                <div className="pred34-aside-step">
-                  <span>02</span>
-                  <div>
-                    <strong>Review the result</strong>
-                    <p>
-                      Non-urgent cases receive one
-                      condition pattern and a model
-                      confidence score.
-                    </p>
+                    <div>
+                      <strong>{t(title)}</strong>
+                      <p>{t(description)}</p>
+                    </div>
                   </div>
-                </div>
-
-                <div className="pred34-aside-step">
-                  <span>03</span>
-                  <div>
-                    <strong>Read the guidance</strong>
-                    <p>
-                      Understand the limitations and
-                      when to seek medical help.
-                    </p>
-                  </div>
-                </div>
+                ))}
 
                 <p className="pred34-aside-footnote">
-                  A model result cannot confirm or rule out
-                  any disease.
+                  {t('asideNote')}
                 </p>
               </aside>
             </div>
           </div>
         )}
 
-        {/* Result returned by the backend */}
+        {/* Prediction or urgent safety result */}
         {result && (
           <div className="pred34-results">
             {isUrgentResult ? (
@@ -471,40 +424,35 @@ function PredictionPage() {
                 role="alert"
               >
                 <p className="pred34-kicker">
-                  Urgent review
+                  {t('urgent')}
                 </p>
 
                 <h2 id="pred34-urgent-title">
-                  Seek prompt medical assessment.
+                  {t('urgentHeading')}
                 </h2>
 
                 <p>
                   {result.health_guidance ||
-                    'Your confirmed symptoms may need prompt medical attention. Please consult a qualified healthcare professional.'}
+                    t('urgentFallback')}
                 </p>
 
                 <p className="pred34-urgent-footnote">
-                  No automated disease prediction is
-                  displayed for this urgent-review case.
+                  {t('urgentNote')}
                 </p>
               </section>
             ) : (
               <>
                 <div className="pred34-result-intro">
                   <p className="pred34-kicker">
-                    Analysis complete
+                    {t('analysisComplete')}
                   </p>
 
-                  <h2>Your health-awareness result</h2>
-
-                  <p>
-                    The result below describes the condition
-                    pattern selected by the trained model.
-                    It does not establish what illness you have.
-                  </p>
+                  <h2>{t('resultTitle')}</h2>
+                  <p>{t('resultIntro')}</p>
                 </div>
 
                 <div className="row g-4">
+                  {/* Single predicted condition */}
                   <div className="col-12 col-lg-8">
                     <section
                       className="pred34-condition-panel"
@@ -515,7 +463,7 @@ function PredictionPage() {
                           <div className="pred34-condition-top">
                             <div>
                               <p className="pred34-kicker">
-                                Condition pattern
+                                {t('condition')}
                               </p>
 
                               <h3 id="pred34-condition-title">
@@ -528,8 +476,9 @@ function PredictionPage() {
                                 <strong>
                                   {rawConfidence}%
                                 </strong>
+
                                 <span>
-                                  model confidence
+                                  {t('confidence')}
                                 </span>
                               </div>
                             )}
@@ -555,9 +504,7 @@ function PredictionPage() {
                               </div>
 
                               <p>
-                                A model score, not the
-                                probability that you have
-                                this condition.
+                                {t('confidenceWarning')}
                               </p>
                             </div>
                           )}
@@ -565,28 +512,27 @@ function PredictionPage() {
                       ) : (
                         <div className="pred34-no-condition">
                           <h3 id="pred34-condition-title">
-                            No condition result was returned
+                            {t('noCondition')}
                           </h3>
-                          <p>
-                            Please review the guidance
-                            provided with this assessment.
-                          </p>
+
+                          <p>{t('noConditionNote')}</p>
                         </div>
                       )}
                     </section>
                   </div>
 
+                  {/* Confidence explanation */}
                   <div className="col-12 col-lg-4">
                     <aside className="pred34-confidence-note">
                       <p className="pred34-kicker">
-                        Reading your result
+                        {t('readingResult')}
                       </p>
 
-                      <h3>About model confidence</h3>
+                      <h3>{t('aboutConfidence')}</h3>
 
                       <p>
                         {result.confidence_explanation ||
-                          'Model confidence describes the score assigned to a condition pattern. It is not a clinical diagnosis.'}
+                          t('confidenceFallback')}
                       </p>
 
                       {result.score_note && (
@@ -596,6 +542,7 @@ function PredictionPage() {
                   </div>
                 </div>
 
+                {/* V2 uncertainty guidance */}
                 {result.uncertain === true &&
                   result.uncertainty_message && (
                     <div
@@ -603,7 +550,7 @@ function PredictionPage() {
                       role="status"
                     >
                       <strong>
-                        Important information about this result
+                        {t('uncertaintyTitle')}
                       </strong>
 
                       <p>
@@ -612,6 +559,7 @@ function PredictionPage() {
                     </div>
                   )}
 
+                {/* Unsupported model features */}
                 {Array.isArray(
                   result.unsupported_model_features,
                 ) &&
@@ -619,33 +567,32 @@ function PredictionPage() {
                     <div
                       className="pred34-warning"
                       role="note"
-                      aria-label="Unsupported symptom information"
+                      aria-label={t('unsupportedLabel')}
                     >
                       <strong>
-                        Some symptom details were not used
+                        {t('unsupportedTitle')}
                       </strong>
 
                       <p>
-                        {result.unsupported_model_features.length}{' '}
-                        confirmed symptom detail(s) could
-                        not be used by this prediction model.
-                        They were excluded from the model
-                        calculation. This does not mean those
-                        symptoms are absent.
+                        {t('unsupportedText', {
+                          count:
+                            result.unsupported_model_features.length,
+                        })}
                       </p>
                     </div>
                   )}
 
+                {/* Health-awareness guidance */}
                 <section
                   className="pred34-guidance"
                   aria-labelledby="pred34-guidance-title"
                 >
                   <p className="pred34-kicker">
-                    Health guidance
+                    {t('guidance')}
                   </p>
 
                   <h3 id="pred34-guidance-title">
-                    What to do next
+                    {t('nextSteps')}
                   </h3>
 
                   <p>{result.health_guidance}</p>
@@ -653,15 +600,16 @@ function PredictionPage() {
               </>
             )}
 
+            {/* Medical disclaimer */}
             <section
               className="pred34-disclaimer"
-              aria-label="Medical disclaimer"
+              aria-label={t('disclaimerLabel')}
             >
-              <strong>Important</strong>
-
+              <strong>{t('important')}</strong>
               <p>{result.disclaimer}</p>
             </section>
 
+            {/* Existing prediction feedback */}
             <div className="pred34-feedback">
               <PredictionFeedback
                 key={result.prediction_id}
@@ -670,7 +618,7 @@ function PredictionPage() {
             </div>
 
             <div className="pred34-reference">
-              <span>Session reference</span>
+              <span>{t('reference')}</span>
               <code>{result.prediction_id}</code>
             </div>
 
@@ -680,35 +628,32 @@ function PredictionPage() {
                 className="button button-secondary pred34-secondary"
                 onClick={handleStartAgain}
               >
-                Review another result
+                {t('reviewAnother')}
               </button>
 
               <Link
                 to="/dashboard"
                 className="button button-primary pred34-primary"
               >
-                Return to dashboard
+                {t('dashboard')}
                 <span aria-hidden="true">→</span>
               </Link>
             </div>
           </div>
         )}
 
+        {/* Bottom disclaimer */}
         <div className="pred34-bottom-note">
           <div>
             <strong>
-              Health-awareness information only
+              {t('awarenessOnly')}
             </strong>
 
-            <p>
-              RespiraCare is not a substitute for
-              assessment by a qualified healthcare
-              professional.
-            </p>
+            <p>{t('bottomNote')}</p>
           </div>
 
           <Link to="/dashboard">
-            Return to dashboard
+            {t('dashboard')}
           </Link>
         </div>
       </div>
