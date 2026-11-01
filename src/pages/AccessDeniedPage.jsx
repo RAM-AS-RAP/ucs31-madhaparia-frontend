@@ -1,31 +1,28 @@
+
 import { Link } from 'react-router-dom'
+import { useSharedText } from '../i18n/sharedTranslations'
 
 function AccessDeniedPage() {
+  const t = useSharedText()
+
   return (
     <section className="access-denied-page">
       <div className="access-denied-card">
-        <div className="access-denied-icon">
+        <div className="access-denied-icon" aria-hidden="true">
           !
         </div>
 
-        <span>
-          Access restricted
-        </span>
+        <span>{t('denied.label')}</span>
 
-        <h1>
-          Administrator access required.
-        </h1>
+        <h1>{t('denied.title')}</h1>
 
-        <p>
-          Your RespiraCare account does not have
-          permission to access this area.
-        </p>
+        <p>{t('denied.message')}</p>
 
         <Link
           to="/dashboard"
           className="button button-primary"
         >
-          Return to dashboard
+          {t('denied.dashboard')}
         </Link>
       </div>
     </section>

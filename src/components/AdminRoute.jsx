@@ -1,13 +1,16 @@
+
 import {
   Navigate,
   useLocation,
 } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
+import { useSharedText } from '../i18n/sharedTranslations'
 import SessionUnavailable from './SessionUnavailable'
 
 function AdminRoute({ children }) {
   const location = useLocation()
+  const t = useSharedText()
 
   const {
     isAuthenticated,
@@ -20,11 +23,12 @@ function AdminRoute({ children }) {
   if (loading) {
     return (
       <div className="auth-loading-page">
-        <div className="auth-loading-spinner" />
+        <div
+          className="auth-loading-spinner"
+          aria-hidden="true"
+        />
 
-        <p>
-          Checking administrator access...
-        </p>
+        <p>{t('route.checkAdmin')}</p>
       </div>
     )
   }

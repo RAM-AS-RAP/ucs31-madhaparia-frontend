@@ -9,6 +9,7 @@ import './styles/global.css'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import { AccessibilityProvider } from './context/AccessibilityContext.jsx'
 import './styles/accessibility.css'
+import { LanguageProvider } from './context/LanguageContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -16,7 +17,9 @@ createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <ThemeProvider>
           <AccessibilityProvider>
-            <App />
+            <LanguageProvider>
+              <App />
+            </LanguageProvider>
           </AccessibilityProvider>
         </ThemeProvider>
       </AuthProvider>

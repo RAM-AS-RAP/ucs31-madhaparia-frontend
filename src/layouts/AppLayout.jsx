@@ -14,6 +14,7 @@ import {
   clearSymptomConfirmation,
   clearSymptomMapping,
 } from '../services/symptoms'
+import { useLanguage } from '../context/useLanguage'
 
 const FOOTER_YEAR = new Date().getFullYear()
 
@@ -50,6 +51,7 @@ function BrandMark() {
 }
 
 function AppLayout() {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   const logoutPending = useRef(false)
@@ -112,15 +114,14 @@ function AppLayout() {
     logoutPending.current = true
     navigate('/')
   }
-
   const navigationItems = [
-    { to: '/', label: 'Home', end: true },
-      { to: '/settings', label: 'Settings', end: true },
+    { to: '/', label: t('nav.home'), end: true },
+    { to: '/settings', label: t('nav.settings'), end: true },
     ...(isAuthenticated
-      ? [{ to: '/dashboard', label: 'Dashboard', end: false }]
+      ? [{ to: '/dashboard', label: t('nav.dashboard'), end: false }]
       : []),
     ...(isAdmin
-      ? [{ to: '/admin', label: 'Admin', end: false }]
+      ? [{ to: '/admin', label: t('nav.admin'), end: false }]
       : []),
   ]
 
@@ -146,7 +147,7 @@ function AppLayout() {
               </span>
 
               <span className="brand-subtitle">
-                Respiratory Health Awareness
+                {t('brand.subtitle')}
               </span>
             </span>
           </Link>
@@ -197,14 +198,14 @@ function AppLayout() {
                   to="/login"
                   className="rc28-action rc28-action-text"
                 >
-                  Log in
+                  {t('nav.login')}
                 </Link>
 
                 <Link
                   to="/register"
                   className="rc28-action rc28-action-primary"
                 >
-                  Get started
+                  {t('nav.getStarted')}
                 </Link>
               </>
             )}
@@ -329,8 +330,7 @@ function AppLayout() {
               </strong>
 
               <p className="rc28-footer-description">
-                Respiratory health awareness supported
-                by intelligent symptom analysis.
+                {t('footer.description')}
               </p>
             </div>
 
@@ -377,9 +377,7 @@ function AppLayout() {
               </h2>
 
               <p className="rc28-footer-disclaimer">
-                For health-awareness and educational
-                purposes only. This system does not
-                provide a medical diagnosis.
+                {t('footer.disclaimer')}
               </p>
             </div>
           </div>
@@ -390,7 +388,7 @@ function AppLayout() {
             </span>
 
             <span>
-              Information for awareness, not diagnosis.
+              {t('footer.note')}
             </span>
           </div>
         </div>

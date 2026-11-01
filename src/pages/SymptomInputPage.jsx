@@ -11,29 +11,32 @@ import {
 
 import { clearPredictionResult } from '../services/predictions'
 import { getApiErrorMessage } from '../services/api'
+import { usePatientText } from '../i18n/patientTranslations'
 
-function languageLabel(language) {
-  if (language === 'en') return 'English'
-  if (language === 'sw') return 'Kiswahili'
-  return language || 'Unspecified'
+function languageLabel(language, t) {
+  if (language === 'en') return t('common.english')
+  if (language === 'sw') return t('common.swahili')
+  return language || t('common.unspecified')
 }
 
 const examples = [
   {
-    label: 'English + Kiswahili',
+    labelKey: 'input.mixedExample',
     text: 'I have fever na kikohozi',
   },
   {
-    label: 'Misspelled symptoms',
+    labelKey: 'input.misspelled',
     text: 'I have a couhg and feaver',
   },
   {
-    label: 'Unmatched wording',
+    labelKey: 'input.unmatchedExample',
     text: 'I have fever and a skin rash',
   },
 ]
 
 function SymptomInputPage() {
+  const t = usePatientText()
+
   const [text, setText] = useState('')
   const [mapping, setMapping] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -74,15 +77,11 @@ function SymptomInputPage() {
     const cleanedText = text.trim()
 
     if (!cleanedText) {
-      setError(
-        'Please describe at least one symptom before continuing.',
-      )
+      setError(t('input.errorEmpty'))
       return
     }
 
     setLoading(true)
-
-    // Invalidate older results before a new analysis.
     invalidatePreviousResults()
 
     try {
@@ -91,14 +90,12 @@ function SymptomInputPage() {
       saveSymptomMapping(result)
     } catch (requestError) {
       if (requestError.response?.status === 422) {
-        setError(
-          'Please check your symptom description and try again.',
-        )
+        setError(t('input.errorValidation'))
       } else {
         setError(
           getApiErrorMessage(
             requestError,
-            'Your symptoms could not be analysed. Please try again.',
+            t('input.errorGeneric'),
           ),
         )
       }
@@ -117,32 +114,31 @@ function SymptomInputPage() {
         {/* Page heading */}
         <div className="row g-4 align-items-end sym33-intro-row">
           <div className="col-12 col-lg-8">
-            <p className="sym33-eyebrow">Symptom awareness</p>
+            <p className="sym33-eyebrow">
+              {t('input.eyebrow')}
+            </p>
 
             <h1 id="sym33-input-title">
-              Tell us how you're feeling.
-              <span> Use your own words.</span>
+              {t('input.title1')}
+              <span> {t('input.title2')}</span>
             </h1>
 
             <p className="sym33-lead">
-              Describe your symptoms naturally in English,
-              Kiswahili, or a mix of both. We'll show you
-              what RespiraCare recognises before you confirm
-              anything.
+              {t('input.intro')}
             </p>
           </div>
 
           <div className="col-12 col-lg-4">
             <div className="sym33-progress">
               <div className="sym33-progress-top">
-                <strong>Step 1 of 3</strong>
-                <span>Describe symptoms</span>
+                <strong>{t('input.step')}</strong>
+                <span>{t('input.stepLabel')}</span>
               </div>
 
               <div
                 className="sym33-progress-track"
                 role="progressbar"
-                aria-label="Assessment progress"
+                aria-label={t('input.progress')}
                 aria-valuemin={0}
                 aria-valuemax={3}
                 aria-valuenow={1}
@@ -160,14 +156,14 @@ function SymptomInputPage() {
               <div className="sym33-section-heading">
                 <div>
                   <p className="sym33-section-kicker">
-                    Your description
+                    {t('input.yourDescription')}
                   </p>
 
-                  <h2>Describe your symptoms</h2>
+                  <h2>{t('input.describe')}</h2>
                 </div>
 
                 <span className="sym33-language-label">
-                  English + Kiswahili
+                  {t('common.both')}
                 </span>
               </div>
 
@@ -176,15 +172,14 @@ function SymptomInputPage() {
                   className="sym33-field-label"
                   htmlFor="symptom-text"
                 >
-                  Symptom description
+                  {t('input.fieldLabel')}
                 </label>
 
                 <p
                   className="sym33-field-help"
                   id="sym33-text-help"
                 >
-                  Include the symptoms you're experiencing.
-                  You don't need to use medical terms.
+                  {t('input.fieldHelp')}
                 </p>
 
                 <textarea
@@ -192,7 +187,7 @@ function SymptomInputPage() {
                   className="form-control sym33-textarea"
                   value={text}
                   onChange={handleTextChange}
-                  placeholder="For example: I have fever na kikohozi and I feel tired..."
+                  placeholder={t('input.placeholder')}
                   rows={6}
                   maxLength={1000}
                   aria-describedby="sym33-text-help sym33-character-count"
@@ -201,10 +196,10 @@ function SymptomInputPage() {
 
                 <div className="sym33-input-meta">
                   <span id="sym33-character-count">
-                    {text.length} / 1000 characters
+                    {t('input.characters', { count: text.length })}
                   </span>
 
-                  <span>Write naturally, in either language.</span>
+                  <span>{t('input.writeNaturally')}</span>
                 </div>
 
                 {error && (
@@ -224,7 +219,7 @@ function SymptomInputPage() {
                       onClick={handleReset}
                       disabled={loading}
                     >
-                      Clear description
+                      {t('input.clear')}
                     </button>
                   )}
 
@@ -234,10 +229,10 @@ function SymptomInputPage() {
                     disabled={loading}
                   >
                     {loading
-                      ? 'Analysing symptoms...'
+                      ? t('input.loading')
                       : mapping
-                        ? 'Analyse again'
-                        : 'Analyse symptoms'}
+                        ? t('input.analyseAgain')
+                        : t('input.analyse')}
 
                     {!loading && (
                       <span aria-hidden="true">→</span>
@@ -246,27 +241,23 @@ function SymptomInputPage() {
                 </div>
               </form>
 
-              {/* Examples */}
+              {/* Example symptom descriptions */}
               <div className="sym33-examples">
                 <p className="sym33-section-kicker">
-                  Need an example?
+                  {t('input.examples')}
                 </p>
 
-                <p>
-                  Select an example below to fill in the
-                  description. You can edit it before
-                  analysing.
-                </p>
+                <p>{t('input.exampleHelp')}</p>
 
                 <div className="sym33-example-actions">
                   {examples.map((example) => (
                     <button
                       type="button"
-                      key={example.label}
+                      key={example.labelKey}
                       onClick={() => loadExample(example.text)}
                       disabled={loading}
                     >
-                      {example.label}
+                      {t(example.labelKey)}
                     </button>
                   ))}
                 </div>
@@ -278,38 +269,34 @@ function SymptomInputPage() {
           <div className="col-12 col-lg-4">
             <aside className="sym33-help-panel">
               <p className="sym33-section-kicker">
-                Writing guidance
+                {t('input.writingGuidance')}
               </p>
 
-              <h2>Speak naturally.</h2>
+              <h2>{t('input.speakNaturally')}</h2>
 
               <p className="sym33-help-intro">
-                A short description in everyday language
-                is enough to get started.
+                {t('input.helpIntro')}
               </p>
 
               <div className="sym33-language-examples">
                 <div>
-                  <strong>English</strong>
+                  <strong>{t('common.english')}</strong>
                   <p>“I have a cough and fever.”</p>
                 </div>
 
                 <div>
-                  <strong>Kiswahili</strong>
+                  <strong>{t('common.swahili')}</strong>
                   <p>“Nina kikohozi na homa.”</p>
                 </div>
 
                 <div>
-                  <strong>Mixed language</strong>
+                  <strong>{t('input.mixedLanguage')}</strong>
                   <p>“I have fever na kikohozi.”</p>
                 </div>
               </div>
 
               <p className="sym33-help-note">
-                The NLP system can recognise some spelling
-                mistakes using fuzzy matching. You will
-                still review the recognised symptoms
-                yourself.
+                {t('input.fuzzyNote')}
               </p>
             </aside>
           </div>
@@ -324,22 +311,19 @@ function SymptomInputPage() {
             <div className="sym33-results-heading">
               <div>
                 <p className="sym33-section-kicker">
-                  Analysis complete
+                  {t('input.complete')}
                 </p>
 
                 <h2 id="sym33-results-title">
-                  Here's what we recognised.
+                  {t('input.recognisedTitle')}
                 </h2>
 
-                <p>
-                  Review the results below. You can choose
-                  which symptoms are correct in the next step.
-                </p>
+                <p>{t('input.recognisedDescription')}</p>
               </div>
 
               <div className="sym33-total">
                 <strong>{recognised.length}</strong>
-                <span>recognised</span>
+                <span>{t('input.recognised')}</span>
               </div>
             </div>
 
@@ -348,18 +332,8 @@ function SymptomInputPage() {
                 className="sym33-alert sym33-alert-warning"
                 role="alert"
               >
-                <strong>
-                  Safety-sensitive wording detected
-                </strong>
-
-                <p>
-                  A recognised phrase may indicate a
-                  potentially urgent symptom. If you
-                  are experiencing severe symptoms or
-                  breathing difficulty, seek medical
-                  attention promptly rather than waiting
-                  for this assessment.
-                </p>
+                <strong>{t('input.warningTitle')}</strong>
+                <p>{t('input.warningDescription')}</p>
               </div>
             )}
 
@@ -380,13 +354,13 @@ function SymptomInputPage() {
 
                         {symptom.is_red_flag && (
                           <span className="sym33-warning-tag">
-                            Safety-sensitive
+                            {t('input.sensitive')}
                           </span>
                         )}
                       </div>
 
                       <p>
-                        Recognised from{' '}
+                        {t('input.recognisedFrom')}{' '}
                         <strong>
                           “{symptom.matched_text}”
                         </strong>
@@ -396,16 +370,18 @@ function SymptomInputPage() {
                     <div className="sym33-recognised-meta">
                       <span>
                         {symptom.match_type === 'fuzzy'
-                          ? 'Fuzzy match'
-                          : 'Exact match'}
+                          ? t('input.fuzzyMatch')
+                          : t('input.exactMatch')}
                       </span>
 
                       <span>
-                        {languageLabel(symptom.language)}
+                        {languageLabel(symptom.language, t)}
                       </span>
 
                       <span>
-                        {symptom.match_score}% match score
+                        {t('input.matchScore', {
+                          score: symptom.match_score,
+                        })}
                       </span>
                     </div>
                   </article>
@@ -413,28 +389,19 @@ function SymptomInputPage() {
               </div>
             ) : (
               <div className="sym33-empty-state">
-                <h3>No supported symptoms were recognised</h3>
-
-                <p>
-                  Try using different wording or review
-                  the unmatched phrases below.
-                </p>
+                <h3>{t('input.emptyTitle')}</h3>
+                <p>{t('input.emptyDescription')}</p>
               </div>
             )}
 
             {unmatched.length > 0 && (
               <section className="sym33-unmatched">
                 <p className="sym33-section-kicker">
-                  Needs review
+                  {t('input.needsReview')}
                 </p>
 
-                <h3>Unmatched wording</h3>
-
-                <p>
-                  These phrases were not automatically
-                  accepted as recognised symptoms.
-                  Suggestions are shown for reference only.
-                </p>
+                <h3>{t('input.unmatchedTitle')}</h3>
+                <p>{t('input.unmatchedDescription')}</p>
 
                 {unmatched.map((item, index) => (
                   <div
@@ -453,17 +420,14 @@ function SymptomInputPage() {
                           >
                             {suggestion.suggested_alias}
                             {' · '}
-                            {languageLabel(suggestion.language)}
+                            {languageLabel(suggestion.language, t)}
                             {' · '}
                             {suggestion.score}%
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <p>
-                        No close supported suggestion
-                        was found.
-                      </p>
+                      <p>{t('input.noSuggestion')}</p>
                     )}
                   </div>
                 ))}
@@ -474,22 +438,18 @@ function SymptomInputPage() {
               <div className="sym33-next">
                 <div>
                   <p className="sym33-section-kicker">
-                    Next step
+                    {t('input.next')}
                   </p>
 
-                  <h3>Review and confirm your symptoms</h3>
-
-                  <p>
-                    Select only the recognised symptoms
-                    that correctly describe how you feel.
-                  </p>
+                  <h3>{t('input.confirmTitle')}</h3>
+                  <p>{t('input.confirmDescription')}</p>
                 </div>
 
                 <Link
                   to="/symptoms/confirm"
                   className="button button-primary sym33-primary-button"
                 >
-                  Continue to confirmation
+                  {t('input.continue')}
                   <span aria-hidden="true">→</span>
                 </Link>
               </div>
@@ -499,15 +459,12 @@ function SymptomInputPage() {
 
         <div className="sym33-bottom-note">
           <div>
-            <strong>Health-awareness information only</strong>
-            <p>
-              Symptom recognition is not a medical diagnosis
-              or a substitute for professional medical care.
-            </p>
+            <strong>{t('common.safetyTitle')}</strong>
+            <p>{t('input.safetyDescription')}</p>
           </div>
 
           <Link to="/dashboard">
-            Return to dashboard
+            {t('common.returnDashboard')}
           </Link>
         </div>
       </div>

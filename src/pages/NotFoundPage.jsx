@@ -1,24 +1,24 @@
+
 import { Link } from 'react-router-dom'
+import { useSharedText } from '../i18n/sharedTranslations'
 
 function NotFoundPage() {
+  const t = useSharedText()
+
   return (
     <section className="not-found-page">
       <div className="not-found-content">
         <span>404</span>
 
-        <h1>
-          Page not found
-        </h1>
+        <h1>{t('notFound.title')}</h1>
 
-        <p>
-          The page you are looking for does not exist.
-        </p>
+        <p>{t('notFound.message')}</p>
 
         <Link
           to="/"
           className="button button-primary"
         >
-          Return home
+          {t('notFound.home')}
         </Link>
       </div>
     </section>
