@@ -3,22 +3,25 @@ import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import AdminRoute from './components/AdminRoute'
+import PatientRoute from './components/PatientRoute'
 import ProtectedRoute from './components/ProtectedRoute'
+
 import AppLayout from './layouts/AppLayout'
+
 import AccessDeniedPage from './pages/AccessDeniedPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PatientDashboardPage from './pages/PatientDashboardPage'
 import RegisterPage from './pages/RegisterPage'
+import SettingsPage from './pages/SettingsPage'
 import SymptomInputPage from './pages/SymptomInputPage'
 import SymptomConfirmationPage from './pages/SymptomConfirmationPage'
 import PredictionPage from './pages/PredictionPage'
 import PatientHistoryPage from './pages/PatientHistoryPage'
 import PatientHistoryDetailPage from './pages/PatientHistoryDetailPage'
-import SettingsPage from './pages/SettingsPage'
 
-// Load administrator pages only when they are needed.
+// Load administrator pages only when needed.
 const AdminDashboardPage = lazy(
   () => import('./pages/AdminDashboardPage'),
 )
@@ -44,66 +47,84 @@ function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path="/" element={<HomePage />} />
 
-        <Route path="/login" element={<LoginPage />} />
+        {/* Public routes */}
+        <Route
+          path="/"
+          element={<HomePage />}
+        />
 
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/login"
+          element={<LoginPage />}
+        />
 
+        <Route
+          path="/register"
+          element={<RegisterPage />}
+        />
+
+        <Route
+          path="/settings"
+          element={<SettingsPage />}
+        />
+
+        {/* Patient-only routes */}
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <PatientRoute>
               <PatientDashboardPage />
-            </ProtectedRoute>
+            </PatientRoute>
           }
         />
 
         <Route
           path="/symptoms"
           element={
-            <ProtectedRoute>
+            <PatientRoute>
               <SymptomInputPage />
-            </ProtectedRoute>
+            </PatientRoute>
           }
         />
 
         <Route
           path="/symptoms/confirm"
           element={
-            <ProtectedRoute>
+            <PatientRoute>
               <SymptomConfirmationPage />
-            </ProtectedRoute>
+            </PatientRoute>
           }
         />
 
         <Route
           path="/prediction"
           element={
-            <ProtectedRoute>
+            <PatientRoute>
               <PredictionPage />
-            </ProtectedRoute>
+            </PatientRoute>
           }
         />
 
         <Route
           path="/history"
           element={
-            <ProtectedRoute>
+            <PatientRoute>
               <PatientHistoryPage />
-            </ProtectedRoute>
+            </PatientRoute>
           }
         />
 
         <Route
           path="/history/:predictionId"
           element={
-            <ProtectedRoute>
+            <PatientRoute>
               <PatientHistoryDetailPage />
-            </ProtectedRoute>
+            </PatientRoute>
           }
         />
 
+        {/* Administrator-only routes */}
         <Route
           path="/admin"
           element={
@@ -126,6 +147,7 @@ function App() {
           }
         />
 
+        {/* Access denied for signed-in users */}
         <Route
           path="/access-denied"
           element={
@@ -135,8 +157,12 @@ function App() {
           }
         />
 
-        <Route path="*" element={<NotFoundPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        {/* Unknown routes */}
+        <Route
+          path="*"
+          element={<NotFoundPage />}
+        />
+
       </Route>
     </Routes>
   )
