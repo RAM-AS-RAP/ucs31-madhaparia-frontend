@@ -18,6 +18,7 @@ import {
 import { getApiErrorMessage } from '../services/api'
 import PredictionFeedback from '../components/PredictionFeedback'
 import { usePredictionText } from '../i18n/predictionTranslations'
+import CandidateAssessmentResult from '../components/CandidateAssessmentResult'
 
 function PredictionPage() {
   const t = usePredictionText()
@@ -417,7 +418,12 @@ function PredictionPage() {
         {/* Prediction or urgent safety result */}
         {result && (
           <div className="pred34-results">
-            {isUrgentResult ? (
+            {result.assessment?.contract_version === 1 ? (
+              <CandidateAssessmentResult
+                result={result}
+                confirmedSymptoms={confirmedSymptoms}
+              />
+            ) : isUrgentResult ? (
               <section
                 className="pred34-urgent-result"
                 aria-labelledby="pred34-urgent-title"
