@@ -1,22 +1,15 @@
-
 import {
+  act,
   fireEvent,
   render,
   screen,
   waitFor,
 } from '@testing-library/react'
-
 import { MemoryRouter } from 'react-router-dom'
-
-import {
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import SymptomConfirmationPage from '../SymptomConfirmationPage'
+import api from '../../services/api'
 
 vi.mock('../../services/api', async (importOriginal) => {
   const actual = await importOriginal()
@@ -28,8 +21,6 @@ vi.mock('../../services/api', async (importOriginal) => {
     },
   }
 })
-
-import api from '../../services/api'
 
 const mapping = {
   input_text: 'I have fever and cough',
@@ -50,17 +41,70 @@ const mapping = {
   has_red_flag: false,
 }
 
-function renderConfirmationPage() {
-  return render(
+const redFlag = {
+  code: 'blue_lips',
+  display_name: 'Blue lips',
+  matched_text: 'blue lips',
+  is_red_flag: true,
+}
+
+const urgentConfirmation = {
+  input_text: 'I have blue lips',
+  safety_status: 'urgent_review',
+  has_red_flag: true,
+  confirmed_codes: ['blue_lips'],
+  confirmed_symptoms: [redFlag],
+  rejected_symptoms: [],
+}
+
+const savedReview = {
+  prediction_id: 'urgent-review-1',
+  status: 'urgent_review',
+  has_red_flag: true,
+  confirmed_codes: ['blue_lips'],
+  predictions: [],
+  assessment: {
+    prediction_performed: false,
+  },
+}
+
+const saveFailureMessage =
+  'Your safety guidance is still valid, but this review could not be saved to your history.'
+
+function seedUrgentMapping() {
+  sessionStorage.setItem(
+    'respiracare_symptom_mapping',
+    JSON.stringify({
+      input_text: 'I have blue lips',
+      recognised_symptoms: [redFlag],
+      has_red_flag: true,
+    }),
+  )
+}
+
+function confirmationTree() {
+  return (
     <MemoryRouter>
       <SymptomConfirmationPage />
-    </MemoryRouter>,
+    </MemoryRouter>
+  )
+}
+
+function renderConfirmationPage() {
+  return render(confirmationTree())
+}
+
+function clickConfirm() {
+  fireEvent.click(
+    screen.getByRole('button', {
+      name: 'Confirm selected symptoms',
+    }),
   )
 }
 
 describe('Symptom confirmation workflow', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
     sessionStorage.clear()
 
     sessionStorage.setItem(
@@ -69,10 +113,11 @@ describe('Symptom confirmation workflow', () => {
     )
   })
 
-  it('sends only selected symptoms to the backend', async () => {
+  it('sends only selected symptoms and does not save a nonurgent review', async () => {
     api.post.mockResolvedValueOnce({
       data: {
-        safety_status: 'safe',
+        safety_status: 'continue',
+        confirmed_codes: ['fever'],
         confirmed_symptoms: [mapping.recognised_symptoms[0]],
         rejected_symptoms: [mapping.recognised_symptoms[1]],
       },
@@ -80,122 +125,214 @@ describe('Symptom confirmation workflow', () => {
 
     renderConfirmationPage()
 
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: /Cough/,
-      }),
-    )
-
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: 'Confirm selected symptoms',
-      }),
-    )
-
-    await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith(
-        '/symptoms/confirm',
-        {
-          text: 'I have fever and cough',
-          confirmed_codes: ['fever'],
-        },
-      )
-    })
+    fireEvent.click(screen.getByRole('button', { name: /Cough/ }))
+    clickConfirm()
 
     expect(
       await screen.findByText('Confirmation complete'),
     ).toBeInTheDocument()
 
-    const saved = JSON.parse(
-      sessionStorage.getItem(
-        'respiracare_symptom_confirmation',
-      ),
+    expect(api.post).toHaveBeenCalledWith(
+      '/symptoms/confirm',
+      {
+        text: 'I have fever and cough',
+        confirmed_codes: ['fever'],
+      },
     )
 
-    expect(saved.confirmed_symptoms).toHaveLength(1)
+    expect(api.post).toHaveBeenCalledTimes(1)
+
+    expect(
+      screen.getByRole('link', { name: /Continue to prediction/ }),
+    ).toBeInTheDocument()
   })
 
   it('prevents confirmation when no symptoms are selected', () => {
     renderConfirmationPage()
 
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: /Fever/,
-      }),
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Fever/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Cough/ }))
+    clickConfirm()
 
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: /Cough/,
-      }),
-    )
-
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: 'Confirm selected symptoms',
-      }),
-    )
-
-    expect(
-      screen.getByRole('alert'),
-    ).toHaveTextContent(
+    expect(screen.getByRole('alert')).toHaveTextContent(
       'Please confirm at least one symptom',
     )
 
     expect(api.post).not.toHaveBeenCalled()
   })
 
-  it('shows urgent guidance for a confirmed red flag', async () => {
-    const redFlag = {
-      code: 'breathing_difficulty',
-      display_name: 'Difficulty breathing',
-      matched_text: 'difficulty breathing',
-      is_red_flag: true,
-    }
+  it('shows urgent guidance before saving finishes, then links to the saved review', async () => {
+    seedUrgentMapping()
 
-    sessionStorage.setItem(
-      'respiracare_symptom_mapping',
-      JSON.stringify({
-        input_text: 'I have difficulty breathing',
-        recognised_symptoms: [redFlag],
-        has_red_flag: true,
-      }),
-    )
+    let finishSaving
 
-    api.post.mockResolvedValueOnce({
-      data: {
-        safety_status: 'urgent_review',
-        confirmed_symptoms: [redFlag],
-        rejected_symptoms: [],
-      },
+    const pendingSave = new Promise((resolve) => {
+      finishSaving = resolve
     })
 
-    renderConfirmationPage()
+    api.post
+      .mockResolvedValueOnce({ data: urgentConfirmation })
+      .mockReturnValueOnce(pendingSave)
 
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: 'Confirm selected symptoms',
+    renderConfirmationPage()
+    clickConfirm()
+
+    expect(
+      await screen.findByText('Urgent review recommended'),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText('A confirmed symptom needs prompt attention.'),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText('Saving this safety review to your history...'),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.queryByRole('link', { name: /Continue to prediction/ }),
+    ).not.toBeInTheDocument()
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/safety/reviews',
+      {
+        text: 'I have blue lips',
+        confirmed_codes: ['blue_lips'],
+      },
+      expect.objectContaining({
+        signal: expect.anything(),
       }),
     )
+
+    expect(
+      api.post.mock.calls.some(([url]) => url === '/predict'),
+    ).toBe(false)
+
+    await act(async () => {
+      finishSaving({ data: savedReview })
+    })
 
     expect(
       await screen.findByText(
-        'Urgent review recommended',
+        'This safety review has been saved to your history.',
       ),
     ).toBeInTheDocument()
 
     expect(
-      screen.getByText(
-        /A confirmed symptom needs prompt attention/,
+      screen.getByRole('link', { name: 'View saved review' }),
+    ).toHaveAttribute('href', '/history/urgent-review-1')
+
+    expect(api.post).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps urgent guidance visible after a save failure and allows retry', async () => {
+    seedUrgentMapping()
+
+    api.post
+      .mockResolvedValueOnce({ data: urgentConfirmation })
+      .mockRejectedValueOnce(new Error('Synthetic save failure'))
+      .mockResolvedValueOnce({ data: savedReview })
+
+    renderConfirmationPage()
+    clickConfirm()
+
+    expect(
+      await screen.findByText(saveFailureMessage),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText('A confirmed symptom needs prompt attention.'),
+    ).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Retry saving review' }),
+    )
+
+    expect(
+      await screen.findByRole('link', { name: 'View saved review' }),
+    ).toHaveAttribute('href', '/history/urgent-review-1')
+
+    expect(
+      api.post.mock.calls.filter(([url]) => url === '/symptoms/confirm'),
+    ).toHaveLength(1)
+
+    expect(
+      api.post.mock.calls.filter(([url]) => url === '/safety/reviews'),
+    ).toHaveLength(2)
+
+    expect(
+      api.post.mock.calls.some(([url]) => url === '/predict'),
+    ).toBe(false)
+  })
+
+  it('does not report success for a response containing disease predictions', async () => {
+    seedUrgentMapping()
+
+    api.post
+      .mockResolvedValueOnce({ data: urgentConfirmation })
+      .mockResolvedValueOnce({
+        data: {
+          ...savedReview,
+          predictions: [{ display_name: 'Unexpected condition' }],
+        },
+      })
+
+    renderConfirmationPage()
+    clickConfirm()
+
+    expect(
+      await screen.findByText(saveFailureMessage),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.queryByRole('link', { name: 'View saved review' }),
+    ).not.toBeInTheDocument()
+
+    expect(
+      screen.queryByText('Unexpected condition'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('does not save again merely because the page rerenders', async () => {
+    seedUrgentMapping()
+
+    api.post
+      .mockResolvedValueOnce({ data: urgentConfirmation })
+      .mockResolvedValueOnce({ data: savedReview })
+
+    const view = renderConfirmationPage()
+    clickConfirm()
+
+    await screen.findByRole('link', { name: 'View saved review' })
+
+    view.rerender(confirmationTree())
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledTimes(2)
+    })
+
+    expect(
+      screen.getByRole('link', { name: 'View saved review' }),
+    ).toBeInTheDocument()
+  })
+
+  it('does not attempt to save when symptom confirmation fails', async () => {
+    api.post.mockRejectedValueOnce(
+      new Error('Synthetic confirmation failure'),
+    )
+
+    renderConfirmationPage()
+    clickConfirm()
+
+    expect(
+      await screen.findByText(
+        'Your symptoms could not be confirmed. Please try again.',
       ),
     ).toBeInTheDocument()
 
-    expect(api.post).toHaveBeenCalledWith(
-      '/symptoms/confirm',
-      {
-        text: 'I have difficulty breathing',
-        confirmed_codes: ['breathing_difficulty'],
-      },
-    )
+    expect(api.post).toHaveBeenCalledTimes(1)
+    expect(
+      api.post.mock.calls.some(([url]) => url === '/safety/reviews'),
+    ).toBe(false)
   })
 })

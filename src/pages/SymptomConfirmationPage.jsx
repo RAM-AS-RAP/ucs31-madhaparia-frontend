@@ -12,9 +12,12 @@ import {
 import { clearPredictionResult } from '../services/predictions'
 import { getApiErrorMessage } from '../services/api'
 import { useConfirmationText } from '../i18n/confirmationTranslations'
+import UrgentReviewSaveStatus from '../components/UrgentReviewSaveStatus'
+import { useUrgentReviewSave } from '../hooks/useUrgentReviewSave'
 
 function SymptomConfirmationPage() {
   const t = useConfirmationText()
+    const urgentReview = useUrgentReviewSave()
 
   const mapping = getSavedSymptomMapping()
   const recognised = mapping?.recognised_symptoms || []
@@ -64,6 +67,13 @@ function SymptomConfirmationPage() {
 
       setResult(confirmation)
       saveSymptomConfirmation(confirmation)
+
+      if (confirmation.safety_status === 'urgent_review') {
+        void urgentReview.save(
+          mapping.input_text,
+          confirmation.confirmed_codes ?? selectedCodes,
+        )
+      }
     } catch (requestError) {
       setError(
         getApiErrorMessage(
@@ -77,6 +87,7 @@ function SymptomConfirmationPage() {
   }
 
   function handleReviewAgain() {
+    urgentReview.reset()
     setResult(null)
     setError('')
 
@@ -301,6 +312,18 @@ function SymptomConfirmationPage() {
                 <h2>{t('completeTitle')}</h2>
                 <p>{t('completeMessage')}</p>
               </div>
+            )}
+
+                        {isUrgent && (
+              <UrgentReviewSaveStatus
+                state={urgentReview.state}
+                onRetry={() => {
+                  void urgentReview.save(
+                    mapping.input_text,
+                    result.confirmed_codes ?? selectedCodes,
+                  )
+                }}
+              />
             )}
 
             {/* Confirmed symptoms */}
