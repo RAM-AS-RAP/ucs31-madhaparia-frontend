@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
@@ -12,6 +12,7 @@ import {
 import { clearPredictionResult } from '../services/predictions'
 import { getApiErrorMessage } from '../services/api'
 import { usePatientText } from '../i18n/patientTranslations'
+import { getAuthToken } from '../services/authToken'
 
 function languageLabel(language, t) {
   if (language === 'en') return t('common.english')
@@ -41,11 +42,21 @@ function SymptomInputPage() {
   const [mapping, setMapping] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const requestVersion = useRef(0)
+
+  useEffect(() => {
+    return () => {
+      // Responses from a page that has been left must not restore data.
+      requestVersion.current += 1
+    }
+  }, [])
 
   const recognised = mapping?.recognised_symptoms || []
   const unmatched = mapping?.unmatched_wording || []
 
   function invalidatePreviousResults() {
+    requestVersion.current += 1
+    setLoading(false)
     setMapping(null)
     clearSymptomMapping()
     clearSymptomConfirmation()
@@ -81,14 +92,30 @@ function SymptomInputPage() {
       return
     }
 
-    setLoading(true)
     invalidatePreviousResults()
+
+    const submittedVersion = requestVersion.current
+    const submittedToken = getAuthToken()
+
+    setLoading(true)
+
+    function isCurrentRequest() {
+      return (
+        requestVersion.current === submittedVersion &&
+        getAuthToken() === submittedToken
+      )
+    }
 
     try {
       const result = await mapSymptoms(cleanedText)
+
+      if (!isCurrentRequest()) return
+
       setMapping(result)
       saveSymptomMapping(result)
     } catch (requestError) {
+      if (!isCurrentRequest()) return
+
       if (requestError.response?.status === 422) {
         setError(t('input.errorValidation'))
       } else {
@@ -100,7 +127,9 @@ function SymptomInputPage() {
         )
       }
     } finally {
-      setLoading(false)
+      if (isCurrentRequest()) {
+        setLoading(false)
+      }
     }
   }
 
