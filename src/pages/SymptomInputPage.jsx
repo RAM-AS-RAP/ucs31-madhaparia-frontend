@@ -13,6 +13,7 @@ import { clearPredictionResult } from '../services/predictions'
 import { getApiErrorMessage } from '../services/api'
 import { usePatientText } from '../i18n/patientTranslations'
 import { getAuthToken } from '../services/authToken'
+import { clearCandidateFollowUp } from '../services/candidateFollowUp'
 
 function languageLabel(language, t) {
   if (language === 'en') return t('common.english')
@@ -49,6 +50,10 @@ function SymptomInputPage() {
       // Responses from a page that has been left must not restore data.
       requestVersion.current += 1
     }
+  }, [])
+
+  useEffect(() => {
+    clearCandidateFollowUp()
   }, [])
 
   const recognised = mapping?.recognised_symptoms || []

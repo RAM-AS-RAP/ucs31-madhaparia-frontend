@@ -4,6 +4,7 @@ const ASSESSMENT_KEYS = [
   'respiracare_symptom_mapping',
   'respiracare_symptom_confirmation',
   'respiracare_prediction_result',
+  'respiracare_candidate_followup_v1',
 ]
 
 export const AUTH_EXPIRED_EVENT = 'respiracare:auth-expired'
