@@ -6,6 +6,7 @@ import { getAdminHistoryItem } from '../services/admin'
 import { getApiErrorMessage } from '../services/api'
 import { useLanguage } from '../context/useLanguage'
 import { useAdminText } from '../i18n/adminTranslations'
+import CandidateAssessmentResult from '../components/CandidateAssessmentResult'
 
 function formatDate(value, language, t) {
   if (!value) return t('dateUnavailable')
@@ -115,7 +116,8 @@ function AdminHistoryDetailPage() {
 
   const urgent =
     session.status === 'urgent_review' ||
-    session.has_red_flag === true
+    session.has_red_flag === true ||
+    session.assessment?.status === 'safety_review_required'
 
   // Older records may contain several predictions.
   // Display only the first saved condition.
@@ -274,8 +276,20 @@ function AdminHistoryDetailPage() {
           </div>
         </section>
 
-        {/* Urgent or normal result */}
-        {urgent ? (
+        {/* Saved candidate assessment, with fallback for older records */}
+        {session.assessment != null ? (
+          <CandidateAssessmentResult
+            result={
+              urgent
+                ? { ...session, status: 'urgent_review' }
+                : session
+            }
+            confirmedSymptoms={codes.map((code) => ({
+              code,
+              display_name: String(code).replaceAll('_', ' '),
+            }))}
+          />
+        ) : urgent ? (
           <section
             className="adm36-urgent-detail"
             role="alert"
