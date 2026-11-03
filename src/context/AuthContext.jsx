@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -14,6 +15,7 @@ import {
   hasAuthToken,
   loginPatient,
   saveAuthToken,
+  updateCurrentUser,
 } from '../services/auth'
 
 import { getApiErrorMessage } from '../services/api'
@@ -158,12 +160,36 @@ export function AuthProvider({
     setSessionError('')
   }
 
+  const updateProfile = useCallback(async (profile) => {
+    const token = getAuthToken()
+
+    if (!token) {
+      throw new Error('Authentication is required.')
+    }
+
+    const updatedUser = await updateCurrentUser(profile)
+
+    if (getAuthToken() !== token) {
+      throw new Error('The authentication session changed.')
+    }
+
+    if (!updatedUser?.id || updatedUser.id !== user?.id) {
+      throw new Error('The profile response does not match this account.')
+    }
+
+    setUser(updatedUser)
+    setSessionError('')
+
+    return updatedUser
+  }, [user?.id])
+
   const value = useMemo(
     () => ({
       user,
       loading,
       login,
       logout,
+      updateProfile,
       sessionError,
       retrySession,
       isAuthenticated:
@@ -171,7 +197,7 @@ export function AuthProvider({
       isAdmin:
         user?.role === 'admin',
     }),
-    [user, loading, sessionError],
+    [user, loading, sessionError, updateProfile],
   )
 
   return (

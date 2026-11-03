@@ -10,6 +10,7 @@ import {
 
 import { useAuth } from '../context/useAuth'
 import { useLanguage } from '../context/useLanguage'
+import { useAccountText } from '../i18n/accountTranslations'
 import { getRoleHomePath } from '../utils/roleRouting'
 import { clearPredictionResult } from '../services/predictions'
 import {
@@ -53,6 +54,7 @@ function BrandMark() {
 
 function AppLayout() {
   const { t } = useLanguage()
+  const accountText = useAccountText()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -105,6 +107,13 @@ function AppLayout() {
           to: '/admin',
           label: t('nav.admin'),
           end: false,
+        }]
+      : []),
+    ...(isAuthenticated
+      ? [{
+          to: '/profile',
+          label: accountText('nav'),
+          end: true,
         }]
       : []),
   ]
