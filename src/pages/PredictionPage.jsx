@@ -66,6 +66,17 @@ function PredictionPage() {
   const confirmedSymptoms = confirmation.confirmed_symptoms || []
   const confirmedCodes = confirmation.confirmed_codes || []
 
+  const confirmedPhrases = confirmedSymptoms.map(
+    (symptom) => symptom.matched_text,
+  )
+  const followUpText =
+    confirmedPhrases.length === confirmedCodes.length &&
+    confirmedPhrases.every(
+      (phrase) => typeof phrase === 'string' && phrase.trim(),
+    )
+      ? confirmedPhrases.join(' and ')
+      : ''
+
   // Show only one condition, never a ranked list.
   const prediction = Array.isArray(result?.predictions)
     ? result.predictions[0] || null
@@ -184,9 +195,11 @@ function PredictionPage() {
               <span>{t('title2')}</span>
             </h1>
 
-            <p className="pred34-lead">
-              {t('intro')}
-            </p>
+            {(!result || result.assessment?.contract_version !== 1) && (
+              <p className="pred34-lead">
+                {t('intro')}
+              </p>
+            )}
           </div>
 
           <div className="col-12 col-lg-4">
@@ -422,6 +435,9 @@ function PredictionPage() {
               <CandidateAssessmentResult
                 result={result}
                 confirmedSymptoms={confirmedSymptoms}
+                confirmedCodes={confirmedCodes}
+                followUpText={followUpText}
+                onFollowUpResult={setResult}
               />
             ) : isUrgentResult ? (
               <section
@@ -648,20 +664,19 @@ function PredictionPage() {
           </div>
         )}
 
-        {/* Bottom disclaimer */}
-        <div className="pred34-bottom-note">
-          <div>
-            <strong>
-              {t('awarenessOnly')}
-            </strong>
+                {/* The result above already includes its disclaimer. */}
+        {!result && (
+          <div className="pred34-bottom-note">
+            <div>
+              <strong>{t('awarenessOnly')}</strong>
+              <p>{t('bottomNote')}</p>
+            </div>
 
-            <p>{t('bottomNote')}</p>
+            <Link to="/dashboard">
+              {t('dashboard')}
+            </Link>
           </div>
-
-          <Link to="/dashboard">
-            {t('dashboard')}
-          </Link>
-        </div>
+        )}
       </div>
     </section>
   )

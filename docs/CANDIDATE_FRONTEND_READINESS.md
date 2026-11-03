@@ -109,9 +109,12 @@ users. An accepted prediction can still be misleading; the frozen
 tiredness and chest-pain example returns Pulmonary neoplasm. Frontend
 readiness does not resolve that model limitation.
 
-Adaptive follow-up questions are not implemented. The current policy
-withholds results when information is insufficient rather than asking
-many additional questions.
+The frontend now offers one optional follow-up after an insufficient
+candidate result, with at most three fixed symptom choices. The backend
+reconfirms the combined symptoms and runs a new assessment using the
+previous age and sex. Another result may still be withheld. The frontend
+does not keep asking questions after that attempt. These fixed choices
+have not been evaluated as an optimal diagnostic question sequence.
 
 Do not activate the candidate for application users based only on this
 frontend PR. Review the staged browser results, model limitations, and
