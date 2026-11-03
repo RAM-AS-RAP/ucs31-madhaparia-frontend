@@ -7,6 +7,7 @@ import { getPatientHistoryItem } from '../services/history'
 import PredictionFeedback from '../components/PredictionFeedback'
 import { useLanguage } from '../context/useLanguage'
 import { useHistoryText } from '../i18n/historyTranslations'
+import CandidateAssessmentResult from '../components/CandidateAssessmentResult'
 
 function formatDate(value, language, t) {
   if (!value) return t('dateUnavailable')
@@ -132,7 +133,8 @@ function PatientHistoryDetailPage() {
 
   const urgent =
     session.status === 'urgent_review' ||
-    session.has_red_flag === true
+    session.has_red_flag === true ||
+    session.assessment?.status === 'safety_review_required'
 
   // Older sessions may have multiple predictions.
   // Display only the first saved condition.
@@ -296,8 +298,20 @@ function PatientHistoryDetailPage() {
           </div>
         </section>
 
-        {/* Urgent-review pathway */}
-        {urgent ? (
+        {/* Saved candidate assessment, with fallback for older records */}
+        {session.assessment != null ? (
+          <CandidateAssessmentResult
+            result={
+              urgent
+                ? { ...session, status: 'urgent_review' }
+                : session
+            }
+            confirmedSymptoms={confirmedCodes.map((code) => ({
+              code,
+              display_name: String(code).replaceAll('_', ' '),
+            }))}
+          />
+        ) : urgent ? (
           <section
             className="hist35-urgent-detail"
             role="alert"
