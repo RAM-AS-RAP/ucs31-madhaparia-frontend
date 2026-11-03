@@ -6,6 +6,7 @@ import { getApiErrorMessage } from '../services/api'
 import { getPatientHistory } from '../services/history'
 import { useLanguage } from '../context/useLanguage'
 import { useHistoryText } from '../i18n/historyTranslations'
+import { getCandidateHistoryDisplay } from '../utils/candidateHistory'
 
 function formatDate(value, language, t) {
   if (!value) return t('dateUnavailable')
@@ -28,11 +29,15 @@ function sexLabel(value, t) {
 function isUrgentSession(item) {
   return (
     item.status === 'urgent_review' ||
-    item.has_red_flag === true
+    item.has_red_flag === true ||
+    item.assessment?.status === 'safety_review_required'
   )
 }
 
-function statusLabel(item, t) {
+function statusLabel(item, t, language) {
+  const candidate = getCandidateHistoryDisplay(item, language)
+  if (candidate) return candidate.label
+
   if (isUrgentSession(item)) {
     return t('urgentReview')
   }
@@ -105,9 +110,14 @@ function PatientHistoryPage() {
 
       if (!searchTerm) return true
 
+      const candidate = getCandidateHistoryDisplay(item, language)
       const searchable = [
         item.input_text,
-        item.predictions?.[0]?.display_name,
+        candidate
+          ? candidate.prediction?.display_name
+          : !urgent
+            ? item.predictions?.[0]?.display_name
+            : null,
         item.prediction_id,
       ]
         .filter(Boolean)
@@ -325,9 +335,12 @@ function PatientHistoryPage() {
                 {visibleHistory.map((item) => {
                   const urgent = isUrgentSession(item)
 
-                  // Display a single condition only.
-                  const topPrediction =
-                    !urgent && Array.isArray(item.predictions)
+                  const candidate = getCandidateHistoryDisplay(item, language)
+
+                  // Display a candidate condition only when it was accepted.
+                  const topPrediction = candidate
+                    ? candidate.prediction
+                    : !urgent && Array.isArray(item.predictions)
                       ? item.predictions[0]
                       : null
 
@@ -359,6 +372,7 @@ function PatientHistoryPage() {
                             {urgent
                               ? t('urgentSession')
                               : topPrediction?.display_name ||
+                                candidate?.label ||
                                 t('predictionSession')}
                           </h2>
                         </div>
@@ -368,7 +382,7 @@ function PatientHistoryPage() {
                             urgent ? ' is-urgent' : ''
                           }`}
                         >
-                          {statusLabel(item, t)}
+                          {statusLabel(item, t, language)}
                         </span>
                       </div>
 

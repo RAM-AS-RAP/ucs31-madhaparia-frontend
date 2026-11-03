@@ -9,6 +9,7 @@ import { getAdminFeedback, getAdminHistory } from '../services/admin'
 import { getApiErrorMessage } from '../services/api'
 import { useLanguage } from '../context/useLanguage'
 import { useAdminText } from '../i18n/adminTranslations'
+import { getCandidateHistoryDisplay } from '../utils/candidateHistory'
 
 const PURPLE = '#70549a'
 const LILAC = '#a78bc7'
@@ -26,7 +27,11 @@ const baseChart = {
 }
 
 function isUrgent(item) {
-  return item.status === 'urgent_review' || item.has_red_flag === true
+  return (
+    item.status === 'urgent_review' ||
+    item.has_red_flag === true ||
+    item.assessment?.status === 'safety_review_required'
+  )
 }
 
 function newestFirst(a, b) {
@@ -118,6 +123,9 @@ function AdminDashboardPage() {
   }
 
   function statusLabel(item) {
+    const candidate = getCandidateHistoryDisplay(item, language)
+    if (candidate) return candidate.label
+
     if (isUrgent(item)) return t('urgentReview')
     if (item.status === 'prediction_complete') return t('predictionComplete')
     return item.status?.replaceAll('_', ' ') || t('statusUnavailable')
@@ -143,11 +151,16 @@ function AdminDashboardPage() {
       if (historyFilter === 'urgent' && !urgent) return false
       if (historyFilter === 'normal' && urgent) return false
 
+      const candidate = getCandidateHistoryDisplay(item, language)
       const searchable = [
         item.user_id,
         item.prediction_id,
         item.input_text,
-        !urgent ? item.predictions?.[0]?.display_name : '',
+        candidate
+          ? candidate.prediction?.display_name
+          : !urgent
+            ? item.predictions?.[0]?.display_name
+            : null,
       ].filter(Boolean).join(' ').toLowerCase()
 
       return searchable.includes(historySearch.trim().toLowerCase())
@@ -392,7 +405,12 @@ function AdminDashboardPage() {
               <div className="adm36-record-list">
                 {sessions.map((item) => {
                   const urgent = isUrgent(item)
-                  const prediction = !urgent ? item.predictions?.[0] : null
+                  const candidate = getCandidateHistoryDisplay(item, language)
+                  const prediction = candidate
+                    ? candidate.prediction
+                    : !urgent
+                      ? item.predictions?.[0]
+                      : null
 
                   return (
                     <article
@@ -405,7 +423,9 @@ function AdminDashboardPage() {
                           <h3>
                             {urgent
                               ? t('urgentSession')
-                              : prediction?.display_name || t('predictionSession')}
+                              : prediction?.display_name ||
+                                candidate?.label ||
+                                t('predictionSession')}
                           </h3>
                         </div>
                         <span className={`adm36-status${urgent ? ' is-urgent' : ''}`}>
