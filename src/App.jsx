@@ -14,6 +14,7 @@ import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PatientDashboardPage from './pages/PatientDashboardPage'
 import RegisterPage from './pages/RegisterPage'
+import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
 import SymptomInputPage from './pages/SymptomInputPage'
 import SymptomConfirmationPage from './pages/SymptomConfirmationPage'
@@ -67,6 +68,15 @@ function App() {
         <Route
           path="/settings"
           element={<SettingsPage />}
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
         />
 
         {/* Patient-only routes */}

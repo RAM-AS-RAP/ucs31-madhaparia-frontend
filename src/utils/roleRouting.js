@@ -26,6 +26,13 @@ export function resolvePostLoginPath(role, requestedPath) {
     return fallback
   }
 
+  if (
+    requestedPath === '/profile' &&
+    (role === 'patient' || role === 'admin')
+  ) {
+    return '/profile'
+  }
+
   if (role === 'patient') {
     const allowed =
       PATIENT_ROUTES.has(requestedPath) ||

@@ -1,103 +1,155 @@
-
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useLanguage } from '../context/useLanguage'
-import { getApiErrorMessage } from '../services/api'
+import { useAccountText } from '../i18n/accountTranslations'
 import { registerPatient } from '../services/auth'
+import {
+  passwordStrength,
+  profilePayload,
+  validateRegistration,
+} from '../utils/accountValidation'
 
-const strengthLabels = [
-  'register.strength0',
-  'register.strength1',
-  'register.strength2',
-  'register.strength3',
-]
+const initialValues = {
+  fullName: '',
+  phoneNumber: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+}
 
-function RegisterPage() {
+export default function RegisterPage() {
   const navigate = useNavigate()
   const { t } = useLanguage()
+  const a = useAccountText()
 
-  const [email, setEmail] = useState('')
-  const [emailVisited, setEmailVisited] = useState(false)
-  const [password, setPassword] = useState('')
-  const [passwordVisited, setPasswordVisited] = useState(false)
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [values, setValues] = useState(initialValues)
+  const [touched, setTouched] = useState({})
+  const [attempted, setAttempted] = useState(false)
+  const [showPasswords, setShowPasswords] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [errorKey, setErrorKey] = useState('')
 
-  const trimmedEmail = email.trim()
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)
-  const passwordValid = password.length >= 8
+  const pending = useRef(false)
+  const active = useRef(true)
 
-  const passwordsMatch =
-    confirmPassword.length > 0 &&
-    password === confirmPassword
+  useEffect(() => {
+    active.current = true
 
-  // Keep the existing password-strength calculation.
-  const strengthLevel = !password
-    ? 0
-    : !passwordValid
-      ? 1
-      : password.length >= 12 &&
-          /[a-zA-Z]/.test(password) &&
-          /[^a-zA-Z]/.test(password)
-        ? 3
-        : 2
+    return () => {
+      active.current = false
+    }
+  }, [])
+
+  const errors = validateRegistration(values)
+  const strength = passwordStrength(values.password)
+
+  const fields = [
+    {
+      key: 'fullName',
+      label: a('fullName'),
+      type: 'text',
+      autoComplete: 'name',
+      maxLength: 200,
+      help: a('nameHelp'),
+    },
+    {
+      key: 'phoneNumber',
+      label: a('phoneNumber'),
+      type: 'tel',
+      autoComplete: 'tel',
+      maxLength: 64,
+      help: a('phoneHelp'),
+      optional: true,
+    },
+    {
+      key: 'email',
+      label: t('auth.email'),
+      type: 'email',
+      autoComplete: 'email',
+      maxLength: 254,
+      placeholder: 'you@example.com',
+      help: t('register.emailHelp'),
+    },
+    {
+      key: 'password',
+      label: t('auth.password'),
+      type: showPasswords ? 'text' : 'password',
+      autoComplete: 'new-password',
+      maxLength: 128,
+      help: a('passwordHelp'),
+    },
+    {
+      key: 'confirmPassword',
+      label: t('auth.confirmPassword'),
+      type: showPasswords ? 'text' : 'password',
+      autoComplete: 'new-password',
+      maxLength: 128,
+      help: t('register.confirmEmpty'),
+    },
+  ]
+
+  function changeValue(key, value) {
+    setValues((current) => ({
+      ...current,
+      [key]: value,
+    }))
+    setErrorKey('')
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
 
-    setError('')
-    setEmailVisited(true)
-    setPasswordVisited(true)
+    if (pending.current) return
 
-    if (!trimmedEmail) {
-      setError(t('register.errorEmail'))
+    setAttempted(true)
+    setErrorKey('')
+
+    const firstInvalid = fields.find(
+      (field) => errors[field.key],
+    )
+
+    if (firstInvalid) {
+      event.currentTarget
+        .querySelector(`#register-${firstInvalid.key}`)
+        ?.focus()
       return
     }
 
-    if (!emailValid) {
-      setError(t('register.errorInvalidEmail'))
-      return
-    }
-
-    if (!passwordValid) {
-      setError(t('register.errorPassword'))
-      return
-    }
-
-    if (!confirmPassword || !passwordsMatch) {
-      setError(t('register.errorMismatch'))
-      return
-    }
-
+    pending.current = true
     setLoading(true)
 
     try {
-      await registerPatient(trimmedEmail, password)
+      await registerPatient(
+        values.email.trim().toLowerCase(),
+        values.password,
+        profilePayload(values.fullName, values.phoneNumber),
+      )
+
+      if (!active.current) return
 
       navigate('/login', {
+        replace: true,
         state: { accountCreated: true },
       })
-    } catch (requestError) {
-      const status = requestError.response?.status
+    } catch (error) {
+      if (!active.current) return
 
-      if (status === 409) {
-        setError(t('register.errorExists'))
-      } else if (status === 422) {
-        setError(t('register.errorValidation'))
-      } else {
-        setError(
-          getApiErrorMessage(
-            requestError,
-            t('register.errorGeneric'),
-          ),
-        )
-      }
+      const status = error.response?.status
+
+      setErrorKey(
+        status === 409
+          ? 'exists'
+          : status === 422
+            ? 'invalidRegistration'
+            : 'registrationFailed',
+      )
     } finally {
-      setLoading(false)
+      pending.current = false
+
+      if (active.current) {
+        setLoading(false)
+      }
     }
   }
 
@@ -108,11 +160,8 @@ function RegisterPage() {
     >
       <div className="rc-container">
         <div className="row align-items-center gx-xl-5 gy-5 register-grid">
-
-          {/* Desktop introduction */}
           <div className="col-12 col-lg-6 d-none d-lg-block">
             <div className="register-editorial">
-
               <p className="register-eyebrow">
                 {t('register.eyebrow')}
               </p>
@@ -129,7 +178,6 @@ function RegisterPage() {
               <div className="register-benefits">
                 <div className="register-benefit">
                   <span aria-hidden="true">01</span>
-
                   <div>
                     <strong>{t('login.benefit2')}</strong>
                     <p>{t('login.benefit2Description')}</p>
@@ -138,7 +186,6 @@ function RegisterPage() {
 
                 <div className="register-benefit">
                   <span aria-hidden="true">02</span>
-
                   <div>
                     <strong>{t('register.benefit2')}</strong>
                     <p>{t('register.benefit2Description')}</p>
@@ -152,10 +199,8 @@ function RegisterPage() {
             </div>
           </div>
 
-          {/* Registration form */}
           <div className="col-12 col-lg-6">
             <div className="register-panel">
-
               <p className="register-panel-eyebrow">
                 {t('register.patient')}
               </p>
@@ -168,266 +213,156 @@ function RegisterPage() {
                 {t('register.welcome')}
               </p>
 
-              {error && (
+              {errorKey && (
                 <div
                   className="form-message error-message"
                   role="alert"
                 >
-                  {error}
+                  {a(errorKey)}
                 </div>
               )}
 
               <form
                 className="register-form"
                 onSubmit={handleSubmit}
+                aria-busy={loading}
                 noValidate
               >
-
-                {/* Email */}
-                <div className="register-field">
-                  <label
-                    className="form-label"
-                    htmlFor="register-email"
-                  >
-                    {t('auth.email')}
-                  </label>
-
-                  <input
-                    id="register-email"
-                    className="form-control register-input"
-                    type="email"
-                    inputMode="email"
-                    value={email}
-                    onChange={(event) => {
-                      setEmail(event.target.value)
-                      setError('')
-                    }}
-                    onBlur={() => setEmailVisited(true)}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    aria-invalid={emailVisited && !emailValid}
-                    aria-describedby="register-email-help"
-                    required
-                  />
-
-                  <p
-                    id="register-email-help"
-                    className={`register-field-note ${
-                      emailVisited && !emailValid
-                        ? 'register-field-note-error'
-                        : ''
-                    }`}
-                  >
-                    {emailVisited && !emailValid
-                      ? t('register.emailInvalid')
-                      : t('register.emailHelp')}
-                  </p>
-                </div>
-
-                {/* Password */}
-                <div className="register-field">
-                  <label
-                    className="form-label"
-                    htmlFor="register-password"
-                  >
-                    {t('auth.password')}
-                  </label>
-
-                  <div className="register-password-wrap">
-                    <input
-                      id="register-password"
-                      className="form-control register-input"
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(event) => {
-                        setPassword(event.target.value)
-                        setError('')
-                      }}
-                      onBlur={() => setPasswordVisited(true)}
-                      placeholder={t('register.passwordPlaceholder')}
-                      autoComplete="new-password"
-                      minLength={8}
-                      aria-invalid={
-                        passwordVisited && !passwordValid
-                      }
-                      aria-describedby="register-password-help"
-                      required
-                    />
-
-                    <button
-                      className="register-password-toggle"
-                      type="button"
-                      aria-pressed={showPassword}
-                      aria-label={
-                        showPassword
-                          ? t('auth.hidePassword')
-                          : t('auth.showPassword')
-                      }
-                      onClick={() =>
-                        setShowPassword((current) => !current)
-                      }
-                    >
-                      {showPassword
-                        ? t('auth.hide')
-                        : t('auth.show')}
-                    </button>
-                  </div>
-
-                  {/* Password strength */}
-                  <div
-                    className="register-strength-heading"
-                    aria-live="polite"
-                  >
-                    <span>{t('register.passwordFeedback')}</span>
-                    <strong>
-                      {t(strengthLabels[strengthLevel])}
-                    </strong>
-                  </div>
-
-                  <div
-                    className="register-strength-bars"
-                    aria-hidden="true"
-                  >
-                    {[1, 2, 3].map((level) => (
-                      <span
-                        key={level}
-                        className={
-                          level <= strengthLevel
-                            ? 'is-filled'
-                            : ''
-                        }
-                      />
-                    ))}
-                  </div>
-
-                  <p
-                    id="register-password-help"
-                    className="register-field-note"
-                  >
-                    {t('register.passwordHelp')}
-                  </p>
-                </div>
-
-                {/* Confirm password */}
-                <div className="register-field">
-                  <label
-                    className="form-label"
-                    htmlFor="register-confirm"
-                  >
-                    {t('auth.confirmPassword')}
-                  </label>
-
-                  <div className="register-password-wrap">
-                    <input
-                      id="register-confirm"
-                      className="form-control register-input"
-                      type={
-                        showConfirmPassword
-                          ? 'text'
-                          : 'password'
-                      }
-                      value={confirmPassword}
-                      onChange={(event) => {
-                        setConfirmPassword(event.target.value)
-                        setError('')
-                      }}
-                      placeholder={t('register.confirmPlaceholder')}
-                      autoComplete="new-password"
-                      aria-invalid={
-                        confirmPassword.length > 0 &&
-                        !passwordsMatch
-                      }
-                      aria-describedby="register-confirm-help"
-                      required
-                    />
-
-                    <button
-                      className="register-password-toggle"
-                      type="button"
-                      aria-pressed={showConfirmPassword}
-                      aria-label={
-                        showConfirmPassword
-                          ? t('auth.hideConfirm')
-                          : t('auth.showConfirm')
-                      }
-                      onClick={() =>
-                        setShowConfirmPassword(
-                          (current) => !current,
-                        )
-                      }
-                    >
-                      {showConfirmPassword
-                        ? t('auth.hide')
-                        : t('auth.show')}
-                    </button>
-                  </div>
-
-                  <p
-                    id="register-confirm-help"
-                    className={[
-                      'register-field-note',
-                      confirmPassword && !passwordsMatch
-                        ? 'register-field-note-error'
-                        : '',
-                      passwordsMatch
-                        ? 'register-field-note-valid'
-                        : '',
-                    ].filter(Boolean).join(' ')}
-                    aria-live="polite"
-                  >
-                    {!confirmPassword
-                      ? t('register.confirmEmpty')
-                      : passwordsMatch
-                        ? t('register.confirmMatch')
-                        : t('register.confirmMismatch')}
-                  </p>
-                </div>
-
-                {/* Patient role notice */}
-                <div className="register-role-note">
-                  <span aria-hidden="true">✓</span>
-
-                  <p>{t('register.roleNote')}</p>
-                </div>
-
-                {/* Submit */}
-                <button
-                  type="submit"
-                  className="btn btn-primary register-submit"
+                <fieldset
                   disabled={loading}
+                  className="border-0 p-0 m-0"
                 >
-                  <span>
+                  {fields.map((field) => {
+                    const showError =
+                      Boolean(errors[field.key]) &&
+                      (attempted || touched[field.key])
+
+                    const id = `register-${field.key}`
+
+                    return (
+                      <div className="register-field" key={field.key}>
+                        <label className="form-label" htmlFor={id}>
+                          {field.label}
+                        </label>
+
+                        <input
+                          id={id}
+                          className="form-control register-input"
+                          type={field.type}
+                          value={values[field.key]}
+                          autoComplete={field.autoComplete}
+                          maxLength={field.maxLength}
+                          placeholder={field.placeholder}
+                          required={!field.optional}
+                          aria-invalid={Boolean(showError)}
+                          aria-describedby={`${id}-help`}
+                          onChange={(event) =>
+                            changeValue(field.key, event.target.value)
+                          }
+                          onBlur={() =>
+                            setTouched((current) => ({
+                              ...current,
+                              [field.key]: true,
+                            }))
+                          }
+                        />
+
+                        <p
+                          id={`${id}-help`}
+                          className={`register-field-note${
+                            showError
+                              ? ' register-field-note-error'
+                              : ''
+                          }`}
+                        >
+                          {showError
+                            ? a(errors[field.key])
+                            : field.help}
+                        </p>
+
+                        {field.key === 'password' && (
+                          <>
+                            <div
+                              className="register-strength-heading"
+                              aria-live="polite"
+                            >
+                              <span>
+                                {t('register.passwordFeedback')}
+                              </span>
+                              <strong>
+                                {a(`strength${strength}`)}
+                              </strong>
+                            </div>
+
+                            <div
+                              className="register-strength-bars"
+                              aria-hidden="true"
+                            >
+                              {[1, 2, 3].map((level) => (
+                                <span
+                                  key={level}
+                                  className={
+                                    level <= strength
+                                      ? 'is-filled'
+                                      : ''
+                                  }
+                                />
+                              ))}
+                            </div>
+
+                            <p className="register-field-note">
+                              {a('strengthNote')}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    )
+                  })}
+
+                  <button
+                    type="button"
+                    className="button button-secondary mb-3"
+                    aria-pressed={showPasswords}
+                    onClick={() =>
+                      setShowPasswords((current) => !current)
+                    }
+                  >
+                    {a(
+                      showPasswords
+                        ? 'hidePasswords'
+                        : 'showPasswords',
+                    )}
+                  </button>
+
+                  <div className="register-role-note">
+                    <span aria-hidden="true">✓</span>
+                    <p>{t('register.roleNote')}</p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary register-submit"
+                    disabled={loading}
+                  >
                     {loading
                       ? t('register.creating')
                       : t('register.create')}
-                  </span>
-
-                  {!loading && (
-                    <span aria-hidden="true">→</span>
-                  )}
-                </button>
+                  </button>
+                </fieldset>
               </form>
 
               <p className="register-switch">
                 {t('register.existing')}{' '}
-                <Link to="/login">
-                  {t('nav.login')}
-                </Link>
+                <Link to="/login">{t('nav.login')}</Link>
               </p>
 
               <p className="register-disclaimer">
                 {t('register.disclaimer')}
               </p>
-
             </div>
           </div>
-
         </div>
       </div>
     </section>
   )
 }
-
-export default RegisterPage
