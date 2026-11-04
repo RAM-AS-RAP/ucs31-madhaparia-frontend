@@ -11,6 +11,7 @@ import AppLayout from './layouts/AppLayout'
 import AccessDeniedPage from './pages/AccessDeniedPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PatientDashboardPage from './pages/PatientDashboardPage'
 import RegisterPage from './pages/RegisterPage'
@@ -63,6 +64,11 @@ function App() {
         <Route
           path="/register"
           element={<RegisterPage />}
+        />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPasswordPage />}
         />
 
         <Route
