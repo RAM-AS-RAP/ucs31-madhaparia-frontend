@@ -6,11 +6,13 @@ import { useAuth } from '../context/useAuth'
 import { useLanguage } from '../context/useLanguage'
 import { getApiErrorMessage } from '../services/api'
 import { resolvePostLoginPath } from '../utils/roleRouting'
+import { usePasswordResetText } from '../i18n/passwordResetTranslations'
 
 function LoginPage() {
   const location = useLocation()
   const { isAuthenticated, login, user } = useAuth()
   const { t } = useLanguage()
+  const resetText = usePasswordResetText()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -152,6 +154,12 @@ function LoginPage() {
                 </div>
               )}
 
+              {location.state?.passwordReset && (
+                <div className="form-message success-message" role="status">
+                  {resetText('success')}
+                </div>
+              )}
+
               {authenticationRequired && (
                 <div
                   className="form-message info-message"
@@ -238,6 +246,10 @@ function LoginPage() {
                         : t('auth.show')}
                     </button>
                   </div>
+                </div>
+
+                <div className="login-recovery">
+                  <Link to="/forgot-password">{resetText('forgotLink')}</Link>
                 </div>
 
                 <button
