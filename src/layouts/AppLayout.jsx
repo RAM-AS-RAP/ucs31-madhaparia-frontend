@@ -106,7 +106,11 @@ function AppLayout() {
       ? [{
           to: '/admin',
           label: t('nav.admin'),
-          end: false,
+          end: location.pathname.startsWith('/admin/users'),
+        }, {
+          to: '/admin/users',
+          label: t('nav.users'),
+          end: true,
         }]
       : []),
     ...(isAuthenticated

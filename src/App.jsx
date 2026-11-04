@@ -32,6 +32,8 @@ const AdminHistoryDetailPage = lazy(
   () => import('./pages/AdminHistoryDetailPage'),
 )
 
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'))
+
 function AdminPageLoading() {
   return (
     <section
@@ -141,6 +143,16 @@ function App() {
         />
 
         {/* Administrator-only routes */}
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<AdminPageLoading />}>
+                <AdminUsersPage />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
         <Route
           path="/admin"
           element={

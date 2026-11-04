@@ -4,6 +4,7 @@ import AdminMonitoringCharts from '../components/AdminMonitoringCharts'
 import { useAuth } from '../context/useAuth'
 import { getAuthToken } from '../services/authToken'
 import { useAdminMonitoringText } from '../i18n/adminMonitoringTranslations'
+import { useAdminUsersText } from '../i18n/adminUsersTranslations'
 import { ADMIN_RECORD_LIMIT, buildAdminAnalytics, filterByDate, isCalendarDate, isUrgentSession as isUrgent } from '../utils/adminAnalytics'
 
 import { getAdminFeedback, getAdminHistory } from '../services/admin'
@@ -26,6 +27,7 @@ function AdminDashboardPage() {
   const { language } = useLanguage()
   const t = useAdminText()
   const m = useAdminMonitoringText()
+  const usersText = useAdminUsersText()
   const { user } = useAuth()
 
   const [history, setHistory] = useState([])
@@ -227,7 +229,10 @@ function AdminDashboardPage() {
 
         <div className="adm71-toolbar">
           <p className="adm71-updated">{refreshedAt && m('updated', { time: formatDate(refreshedAt) })}</p>
-          <button type="button" className="button button-secondary" onClick={() => setReload((value) => value + 1)}>{m('refresh')}</button>
+          <div className="adm71-actions">
+            <Link to="/admin/users" className="button button-secondary">{usersText('nav')}</Link>
+            <button type="button" className="button button-secondary" onClick={() => setReload((value) => value + 1)}>{m('refresh')}</button>
+          </div>
         </div>
         <section className="adm71-controls" aria-labelledby="adm71-dates-title">
           <div className="adm71-controls-heading">
