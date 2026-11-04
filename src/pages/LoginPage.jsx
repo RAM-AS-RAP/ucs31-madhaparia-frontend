@@ -50,8 +50,11 @@ function LoginPage() {
       await login(email.trim(), password)
     } catch (requestError) {
       const status = requestError.response?.status
+      const code = requestError.response?.data?.detail?.code
 
-      if (status === 401) {
+      if (status === 403 && ['account_blocked', 'account_deactivated'].includes(code)) {
+        setError(t(code === 'account_blocked' ? 'login.errorBlocked' : 'login.errorDeactivated'))
+      } else if (status === 401) {
         setError(t('login.errorInvalid'))
       } else if (status === 422) {
         setError(t('login.errorValidation'))

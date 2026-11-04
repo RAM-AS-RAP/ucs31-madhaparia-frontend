@@ -6,6 +6,7 @@ export const messages = {
     'nav.settings': 'Settings',
     'nav.dashboard': 'Dashboard',
     'nav.admin': 'Admin',
+    'nav.users': 'Users',
     'nav.login': 'Log in',
     'nav.logout': 'Log out',
     'nav.getStarted': 'Get started',
@@ -120,6 +121,10 @@ export const messages = {
       'Please enter your email address and password.',
     'login.errorInvalid':
       'The email or password you entered is incorrect.',
+    'login.errorBlocked':
+      'Your account has been blocked. Contact an administrator.',
+    'login.errorDeactivated':
+      'Your account has been deactivated. Contact an administrator.',
     'login.errorValidation':
       'Please check your email address and password.',
     'login.errorGeneric':
@@ -179,6 +184,7 @@ export const messages = {
     'nav.settings': 'Mipangilio',
     'nav.dashboard': 'Dashibodi',
     'nav.admin': 'Usimamizi',
+    'nav.users': 'Watumiaji',
     'nav.login': 'Ingia',
     'nav.logout': 'Toka',
     'nav.getStarted': 'Anza sasa',
@@ -301,6 +307,10 @@ export const messages = {
       'Tafadhali weka barua pepe na nenosiri lako.',
     'login.errorInvalid':
       'Barua pepe au nenosiri uliloweka si sahihi.',
+    'login.errorBlocked':
+      'Akaunti yako imezuiwa. Wasiliana na msimamizi.',
+    'login.errorDeactivated':
+      'Akaunti yako imezimwa. Wasiliana na msimamizi.',
     'login.errorValidation':
       'Tafadhali hakiki barua pepe na nenosiri lako.',
     'login.errorGeneric':
