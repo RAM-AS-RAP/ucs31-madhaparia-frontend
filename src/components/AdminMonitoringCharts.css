@@ -1,0 +1,60 @@
+.adm71-controls { margin: 0 0 1.5rem; padding: 1.3rem; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.adm71-controls h2 { margin: 0; font-size: 1.18rem; }
+.adm71-controls-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.adm71-controls-title { display: flex; align-items: center; gap: .8rem; }
+.adm71-controls .adm71-controls-title p { margin: .25rem 0 0; font-size: .88rem; }
+.adm71-calendar-icon { display: grid; place-items: center; width: 2.8rem; height: 2.8rem; flex-shrink: 0; background: var(--surface-soft); border: 1px solid var(--border); color: var(--rc-primary-hover); border-radius: 12px; }
+.adm71-calendar-icon svg { width: 1.4rem; height: 1.4rem; }
+.adm71-window-badge { padding: .35rem .7rem; border: 1px solid var(--border); border-radius: 99px; color: var(--text-soft); font-size: .8rem; line-height: 1.5; }
+.adm71-controls form { display: flex; flex-wrap: wrap; gap: 1rem; align-items: end; }
+.adm71-field { display: grid; gap: .4rem; flex: 1 1 11rem; min-width: 0; }
+.adm71-field label { font-weight: 700; }
+.adm71-field input { width: 100%; min-width: 0; padding: .65rem .75rem; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--surface); }
+.adm71-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+.adm71-controls p, .adm71-chart-help, .adm71-updated { color: var(--text-soft); font-size: .95rem; line-height: 1.6; }
+.adm71-controls p { margin: .8rem 0 0; }
+.adm71-controls [role='alert'] { color: var(--text); font-weight: 700; border-left: 4px solid #b36b13; padding-left: .75rem; }
+.adm71-filter-footer { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.adm71-filter-status { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; flex: 1 1 auto; min-width: 0; }
+.adm71-range-badge, .adm71-count-badge { display: inline-flex; align-items: center; flex-wrap: wrap; gap: .4rem; padding: .4rem .7rem; border-radius: 8px; font-size: .85rem; line-height: 1.5; }
+.adm71-range-badge { background: var(--surface-soft); color: var(--rc-primary-hover); font-weight: 700; }
+.adm71-count-badge { border: 1px solid var(--border); color: var(--text-soft); }
+.adm71-count-badge strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.adm71-filter-help { margin-left: auto; font-size: .85rem; }
+.adm71-filter-help[open] { flex-basis: 100%; }
+.adm71-filter-help summary { display: flex; align-items: center; gap: .4rem; width: fit-content; margin-left: auto; cursor: pointer; color: var(--rc-primary-hover); font-weight: 650; padding: .35rem 0; list-style: none; }
+.adm71-filter-help summary::-webkit-details-marker { display: none; }
+.adm71-info-icon { display: inline-grid; place-items: center; width: 1rem; height: 1rem; border: 1px solid currentColor; border-radius: 50%; font-size: .7rem; font-style: normal; font-weight: 750; }
+.adm71-help-content { margin-top: .6rem; padding: .85rem 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); }
+.adm71-help-content p:first-child { margin-top: 0; }
+.adm71-controls .adm71-help-content p { font-size: .88rem; }
+.adm71-toolbar { display: flex; gap: 1rem; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 1rem 0; }
+.adm71-toolbar p { margin: 0; }
+.adm71-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; margin-bottom: 2rem; }
+.adm71-card { min-width: 0; display: flex; flex-direction: column; background: var(--surface); }
+.adm71-card h2 { font-size: 1.3rem; overflow-wrap: anywhere; }
+.adm71-card > p { font-size: .95rem; }
+.adm71-card .adm71-chart-subtitle { margin: .4rem 0 .65rem; font-size: .85rem; color: var(--text-soft); }
+.adm71-card .adm71-chart-caution { font-size: .8rem; margin: 0 0 .5rem; color: var(--text-soft); }
+.adm71-card .adm36-chart { margin-top: auto; }
+.adm71-chart-toolbar { display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; margin: 1.5rem 0 1rem; }
+.adm71-chart-toolbar h2 { font-size: 1.25rem; margin: 0; }
+.adm71-chart-guide { font-size: .85rem; color: var(--text-soft); }
+.adm71-chart-guide summary { cursor: pointer; color: var(--rc-primary-hover); }
+.adm71-chart-guide[open] { flex: 1 1 100%; }
+.adm71-chart-guide p { margin: .5rem 0 0; line-height: 1.6; }
+.adm71-chart-footer { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: .5rem 1rem; margin-top: 1rem; border-top: 1px solid var(--border); padding-top: .75rem; }
+.adm71-chart-footer details[open] { grid-column: 1 / -1; }
+.adm71-chart-footer summary { cursor: pointer; font-weight: 650; color: var(--rc-primary-hover); padding: .3rem 0; font-size: .82rem; }
+.adm71-chart-info p { margin: .5rem 0; color: var(--text-soft); font-size: .88rem; line-height: 1.6; }
+.adm71-data { min-width: 0; }
+.adm71-table-scroll { max-height: 21rem; overflow: auto; margin-top: .7rem; }
+.adm71-data table { width: 100%; border-collapse: collapse; font-size: .95rem; color: var(--text); }
+.adm71-data caption { color: var(--text-soft); caption-side: top; padding: .5rem; }
+.adm71-data th, .adm71-data td { border-bottom: 1px solid var(--border); padding: .65rem; text-align: left; overflow-wrap: anywhere; }
+.adm71-data th { font-weight: 700; }
+.adm71-data th:last-child, .adm71-data td:last-child { text-align: right; }
+.adm71-chart-footer summary:focus-visible, .adm71-filter-help summary:focus-visible, .adm71-chart-guide summary:focus-visible, .adm71-table-scroll:focus-visible, .adm71-field input:focus-visible { outline: 3px solid var(--rc-lilac); outline-offset: 3px; }
+@media (max-width: 1050px) { .adm71-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 540px) { .adm71-controls { padding: 1rem; } .adm71-actions { width: 100%; } .adm71-actions button { flex: 1 1 auto; } .adm71-card { padding: 1rem; } }
+@media (forced-colors: active) { .adm71-controls, .adm71-card, .adm71-data { border-color: CanvasText; } }

@@ -2,10 +2,12 @@ import api from './api'
 
 export async function getAdminHistory(
   limit = 500,
+  { signal } = {},
 ) {
   const response = await api.get(
     '/admin/history',
     {
+      signal,
       params: {
         limit,
       },
@@ -27,10 +29,12 @@ export async function getAdminHistoryItem(
 
 export async function getAdminFeedback(
   limit = 500,
+  { signal } = {},
 ) {
   const response = await api.get(
     '/admin/feedback',
     {
+      signal,
       params: {
         limit,
       },

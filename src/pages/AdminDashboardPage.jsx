@@ -1,38 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Chart } from '@highcharts/react'
-import { PieSeries } from '@highcharts/react/series/Pie'
-import { ColumnSeries } from '@highcharts/react/series/Column'
-import { Accessibility } from '@highcharts/react/modules/Accessibility'
+import AdminMonitoringCharts from '../components/AdminMonitoringCharts'
+import { useAuth } from '../context/useAuth'
+import { getAuthToken } from '../services/authToken'
+import { useAdminMonitoringText } from '../i18n/adminMonitoringTranslations'
+import { ADMIN_RECORD_LIMIT, buildAdminAnalytics, filterByDate, isCalendarDate, isUrgentSession as isUrgent } from '../utils/adminAnalytics'
 
 import { getAdminFeedback, getAdminHistory } from '../services/admin'
 import { getApiErrorMessage } from '../services/api'
 import { useLanguage } from '../context/useLanguage'
 import { useAdminText } from '../i18n/adminTranslations'
 import { getCandidateHistoryDisplay } from '../utils/candidateHistory'
-
-const PURPLE = '#70549a'
-const LILAC = '#a78bc7'
-const AMBER = '#c18535'
-
-const baseChart = {
-  chart: {
-    backgroundColor: 'transparent',
-    height: 280,
-    animation: false,
-  },
-  title: { text: undefined },
-  legend: { enabled: false },
-  plotOptions: { series: { animation: false } },
-}
-
-function isUrgent(item) {
-  return (
-    item.status === 'urgent_review' ||
-    item.has_red_flag === true ||
-    item.assessment?.status === 'safety_review_required'
-  )
-}
 
 function newestFirst(a, b) {
   const first = new Date(a.created_at).getTime()
@@ -47,6 +25,8 @@ function newestFirst(a, b) {
 function AdminDashboardPage() {
   const { language } = useLanguage()
   const t = useAdminText()
+  const m = useAdminMonitoringText()
+  const { user } = useAuth()
 
   const [history, setHistory] = useState([])
   const [feedback, setFeedback] = useState([])
@@ -56,31 +36,38 @@ function AdminDashboardPage() {
   const [historyFilter, setHistoryFilter] = useState('all')
   const [historySearch, setHistorySearch] = useState('')
   const [feedbackSearch, setFeedbackSearch] = useState('')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [range, setRange] = useState({ from: '', to: '' })
+  const [rangeError, setRangeError] = useState(false)
+  const [reload, setReload] = useState(0)
+  const [refreshedAt, setRefreshedAt] = useState(null)
 
   useEffect(() => {
     let active = true
+    const controller = new AbortController()
+    const token = getAuthToken()
+    const current = () => active && token === getAuthToken()
 
     async function loadAdminData() {
+      setLoading(true)
+      setError(null)
       try {
         const [historyResponse, feedbackResponse] = await Promise.all([
-          getAdminHistory(),
-          getAdminFeedback(),
+          getAdminHistory(ADMIN_RECORD_LIMIT, { signal: controller.signal }),
+          getAdminFeedback(ADMIN_RECORD_LIMIT, { signal: controller.signal }),
         ])
 
-        if (!active) return
+        if (!current()) return
 
-        setHistory(
-          Array.isArray(historyResponse?.history)
-            ? historyResponse.history
-            : [],
-        )
-        setFeedback(
-          Array.isArray(feedbackResponse?.feedback)
-            ? feedbackResponse.feedback
-            : [],
-        )
+        if (!Array.isArray(historyResponse?.history) || !Array.isArray(feedbackResponse?.feedback)) {
+          throw new Error('Invalid administrator response')
+        }
+        setHistory(historyResponse.history)
+        setFeedback(feedbackResponse.feedback)
+        setRefreshedAt(new Date().toISOString())
       } catch (requestError) {
-        if (!active) return
+        if (!current()) return
 
         const status = requestError.response?.status
 
@@ -95,7 +82,7 @@ function AdminDashboardPage() {
                 },
         )
       } finally {
-        if (active) setLoading(false)
+        if (current()) setLoading(false)
       }
     }
 
@@ -103,8 +90,9 @@ function AdminDashboardPage() {
 
     return () => {
       active = false
+      controller.abort()
     }
-  }, [])
+  }, [user?.id, reload])
 
   function formatDate(value) {
     if (!value) return t('dateUnavailable')
@@ -122,29 +110,47 @@ function AdminDashboardPage() {
     return value || t('notRecorded')
   }
 
+  function formatDay(value) {
+    return new Date(`${value}T12:00:00`).toLocaleDateString(
+      language === 'sw' ? 'sw-KE' : 'en-KE',
+      { day: 'numeric', month: 'short', year: 'numeric' },
+    )
+  }
+
   function statusLabel(item) {
+    if (isUrgent(item)) return t('urgentReview')
     const candidate = getCandidateHistoryDisplay(item, language)
     if (candidate) return candidate.label
 
-    if (isUrgent(item)) return t('urgentReview')
     if (item.status === 'prediction_complete') return t('predictionComplete')
     return item.status?.replaceAll('_', ' ') || t('statusUnavailable')
   }
 
-  const urgentCount = history.filter(isUrgent).length
-  const nonUrgentCount = history.length - urgentCount
-  const helpfulCount = feedback.filter(
-    (item) => item.was_helpful === true,
-  ).length
-  const notHelpfulCount = feedback.filter(
-    (item) => item.was_helpful === false,
-  ).length
-  const ratedCount = helpfulCount + notHelpfulCount
-  const helpfulPercent = ratedCount
-    ? Math.round((helpfulCount / ratedCount) * 100)
-    : null
+  function applyDates(event) {
+    event.preventDefault()
+    if ((from && !isCalendarDate(from)) || (to && !isCalendarDate(to)) || (from && to && from > to)) {
+      setRangeError(true)
+      return
+    }
+    setRangeError(false)
+    setRange({ from, to })
+  }
 
-  const sessions = history
+  function clearDates() {
+    setFrom('')
+    setTo('')
+    setRange({ from: '', to: '' })
+    setRangeError(false)
+  }
+
+  const rangeHistory = filterByDate(history, range)
+  const rangeFeedback = filterByDate(feedback, range)
+  const analytics = buildAdminAnalytics(rangeHistory, rangeFeedback)
+  const { urgent: urgentCount, nonUrgent: nonUrgentCount, helpful: helpfulCount, notHelpful: notHelpfulCount } = analytics
+  const ratedCount = helpfulCount + notHelpfulCount
+  const helpfulPercent = ratedCount ? Math.round((helpfulCount / ratedCount) * 100) : null
+
+  const sessions = rangeHistory
     .filter((item) => {
       const urgent = isUrgent(item)
 
@@ -156,7 +162,7 @@ function AdminDashboardPage() {
         item.user_id,
         item.prediction_id,
         item.input_text,
-        candidate
+        !urgent && candidate
           ? candidate.prediction?.display_name
           : !urgent
             ? item.predictions?.[0]?.display_name
@@ -167,7 +173,7 @@ function AdminDashboardPage() {
     })
     .sort(newestFirst)
 
-  const visibleFeedback = feedback
+  const visibleFeedback = rangeFeedback
     .filter((item) => (
       [item.comment, item.prediction_id, item.feedback_id]
         .filter(Boolean)
@@ -192,6 +198,9 @@ function AdminDashboardPage() {
                 ? error.message || t(error.key)
                 : t('loadingDescription')}
             </p>
+            {error && !['accessRequired', 'sessionExpired'].includes(error.key) && (
+              <button type="button" className="button button-secondary" onClick={() => setReload((value) => value + 1)}>{m('retry')}</button>
+            )}
           </div>
         </div>
       </section>
@@ -199,10 +208,10 @@ function AdminDashboardPage() {
   }
 
   const statistics = [
-    ['savedSessions', history.length, 'savedSessionsNote'],
+    ['savedSessions', rangeHistory.length, 'savedSessionsNote'],
     ['nonUrgent', nonUrgentCount, 'nonUrgentNote'],
     ['urgentReviews', urgentCount, 'urgentReviewsNote'],
-    ['feedbackResponses', feedback.length, null],
+    ['feedbackResponses', rangeFeedback.length, null],
   ]
 
   return (
@@ -213,8 +222,60 @@ function AdminDashboardPage() {
           <h1 id="adm36-title">
             {t('title')} <span>{t('overview')}</span>
           </h1>
-          <p>{t('intro')}</p>
+          <p>{m('intro')}</p>
         </header>
+
+        <div className="adm71-toolbar">
+          <p className="adm71-updated">{refreshedAt && m('updated', { time: formatDate(refreshedAt) })}</p>
+          <button type="button" className="button button-secondary" onClick={() => setReload((value) => value + 1)}>{m('refresh')}</button>
+        </div>
+        <section className="adm71-controls" aria-labelledby="adm71-dates-title">
+          <div className="adm71-controls-heading">
+            <div className="adm71-controls-title">
+              <span className="adm71-calendar-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M7 3v4m10-4v4M3 11h18m-14 4h3m4 0h3" /></svg>
+              </span>
+              <div>
+                <h2 id="adm71-dates-title">{m('dateRange')}</h2>
+                <p>{m('filterSubtitle')}</p>
+              </div>
+            </div>
+            <span className="adm71-window-badge">{m('recentWindow')}</span>
+          </div>
+          <span id="adm71-date-instructions" className="visually-hidden">{m('dateInstructions')}</span>
+          <form onSubmit={applyDates} noValidate>
+            <div className="adm71-field">
+              <label htmlFor="adm71-from">{m('from')}</label>
+              <input id="adm71-from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} aria-describedby="adm71-date-instructions" aria-invalid={rangeError || undefined} />
+            </div>
+            <div className="adm71-field">
+              <label htmlFor="adm71-to">{m('to')}</label>
+              <input id="adm71-to" type="date" value={to} onChange={(event) => setTo(event.target.value)} aria-describedby="adm71-date-instructions" aria-invalid={rangeError || undefined} />
+            </div>
+            <div className="adm71-actions">
+              <button type="submit" className="button button-primary">{m('apply')}</button>
+              <button type="button" className="button button-secondary" onClick={clearDates}>{m('clear')}</button>
+            </div>
+          </form>
+          {rangeError && <p role="alert">{m('invalidRange')}</p>}
+          <div className="adm71-filter-footer">
+            <div className="adm71-filter-status" role="status" aria-live="polite" aria-atomic="true">
+              <span className="adm71-range-badge">{range.from || range.to
+                ? `${range.from ? formatDay(range.from) : m('earliest')} – ${range.to ? formatDay(range.to) : m('latest')}`
+                : m('allDates')}</span>
+              <span className="adm71-count-badge"><strong>{rangeHistory.length}</strong> {m('count')}</span>
+              <span className="adm71-count-badge"><strong>{rangeFeedback.length}</strong> {t('feedbackResponses')}</span>
+              <span className="visually-hidden">{m('filtered', { sessions: rangeHistory.length, feedback: rangeFeedback.length })}</span>
+            </div>
+            <details className="adm71-filter-help">
+              <summary><span aria-hidden="true" className="adm71-info-icon">i</span>{m('filterHelp')}</summary>
+              <div className="adm71-help-content">
+                <p>{m('rangeHelp')}</p>
+                <p>{m('scope')}</p>
+              </div>
+            </details>
+          </div>
+        </section>
 
         <div className="row g-3 adm36-stat-row" aria-label={t('statistics')}>
           {statistics.map(([label, value, note]) => (
@@ -236,104 +297,7 @@ function AdminDashboardPage() {
           ))}
         </div>
 
-        <div className="row g-4 adm36-charts">
-          <div className="col-12 col-lg-6">
-            <section
-              className="adm36-chart-panel"
-              aria-labelledby="adm36-outcomes-title"
-            >
-              <p className="adm36-kicker">{t('sessionOutcomes')}</p>
-              <h2 id="adm36-outcomes-title">{t('assessmentRoutes')}</h2>
-              <p>{t('basedOnRecords')}</p>
-
-              {history.length === 0 ? (
-                <p className="adm36-chart-empty">{t('noChartSessions')}</p>
-              ) : (
-                <>
-                  <div className="adm36-chart" aria-label={t('sessionChartLabel')}>
-                    <Chart options={{
-                      ...baseChart,
-                      tooltip: { pointFormat: `<b>{point.y}</b> ${t('sessions')}` },
-                      plotOptions: {
-                        series: { animation: false },
-                        pie: {
-                          innerSize: '65%',
-                          dataLabels: { enabled: false },
-                          borderWidth: 0,
-                        },
-                      },
-                    }}>
-                      <Accessibility />
-                      <PieSeries name={t('sessions')} data={[
-                        { name: t('nonUrgentShort'), y: nonUrgentCount, color: PURPLE },
-                        { name: t('urgentReview'), y: urgentCount, color: AMBER },
-                      ]} />
-                    </Chart>
-                  </div>
-
-                  <div className="adm36-key">
-                    <span>
-                      <i className="adm36-dot" />
-                      {t('nonUrgentShort')}: {nonUrgentCount}
-                    </span>
-                    <span>
-                      <i className="adm36-dot is-amber" />
-                      {t('urgent')}: {urgentCount}
-                    </span>
-                  </div>
-                </>
-              )}
-            </section>
-          </div>
-
-          <div className="col-12 col-lg-6">
-            <section
-              className="adm36-chart-panel"
-              aria-labelledby="adm36-feedback-title"
-            >
-              <p className="adm36-kicker">{t('patientResponses')}</p>
-              <h2 id="adm36-feedback-title">{t('feedbackOverview')}</h2>
-              <p>{t('feedbackChartDescription')}</p>
-
-              {ratedCount === 0 ? (
-                <p className="adm36-chart-empty">{t('noChartFeedback')}</p>
-              ) : (
-                <>
-                  <div className="adm36-chart" aria-label={t('feedbackChartLabel')}>
-                    <Chart options={{
-                      ...baseChart,
-                      chart: { ...baseChart.chart, type: 'column' },
-                      xAxis: { categories: [t('helpful'), t('notHelpful')] },
-                      yAxis: {
-                        min: 0,
-                        allowDecimals: false,
-                        title: { text: t('responses') },
-                      },
-                      tooltip: { pointFormat: `<b>{point.y}</b> ${t('responses')}` },
-                      plotOptions: {
-                        series: { animation: false },
-                        column: { borderWidth: 0, borderRadius: 4 },
-                      },
-                    }}>
-                      <Accessibility />
-                      <ColumnSeries name={t('feedback')} data={[
-                        { y: helpfulCount, color: PURPLE },
-                        { y: notHelpfulCount, color: LILAC },
-                      ]} />
-                    </Chart>
-                  </div>
-
-                  <p className="adm36-chart-summary">
-                    {t('responseCount', {
-                      helpful: helpfulCount,
-                      notHelpful: notHelpfulCount,
-                    })}
-                  </p>
-                </>
-              )}
-            </section>
-          </div>
-        </div>
+        <AdminMonitoringCharts analytics={analytics} sessionCount={rangeHistory.length} feedbackCount={rangeFeedback.length} />
 
         <div className="adm36-tabs" role="group" aria-label={t('recordView')}>
           {['history', 'feedback'].map((view) => (
@@ -346,7 +310,7 @@ function AdminDashboardPage() {
             >
               {t(view === 'history' ? 'predictionHistory' : 'feedback')}
               {' '}
-              <span>{view === 'history' ? history.length : feedback.length}</span>
+              <span>{view === 'history' ? rangeHistory.length : rangeFeedback.length}</span>
             </button>
           ))}
         </div>
@@ -392,7 +356,7 @@ function AdminDashboardPage() {
             <p className="adm36-showing" role="status">
               {t('showingSessions', {
                 visible: sessions.length,
-                total: history.length,
+                total: rangeHistory.length,
               })}
             </p>
 
@@ -406,11 +370,9 @@ function AdminDashboardPage() {
                 {sessions.map((item) => {
                   const urgent = isUrgent(item)
                   const candidate = getCandidateHistoryDisplay(item, language)
-                  const prediction = candidate
+                  const prediction = urgent ? null : candidate
                     ? candidate.prediction
-                    : !urgent
-                      ? item.predictions?.[0]
-                      : null
+                    : item.predictions?.[0]
 
                   return (
                     <article
@@ -490,7 +452,7 @@ function AdminDashboardPage() {
             <p className="adm36-showing" role="status">
               {t('showingFeedback', {
                 visible: visibleFeedback.length,
-                total: feedback.length,
+                total: rangeFeedback.length,
               })}
             </p>
 
