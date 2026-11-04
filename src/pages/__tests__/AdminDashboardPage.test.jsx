@@ -118,9 +118,9 @@ describe('actual administrator dashboard route', () => {
 
     expect(getAdminHistory).toHaveBeenCalled()
     expect(getAdminFeedback).toHaveBeenCalled()
-    expect(screen.getByText('Synthetic condition')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Synthetic condition' })).toBeInTheDocument()
     expect(screen.queryByText('Must remain hidden')).not.toBeInTheDocument()
-    expect(screen.getAllByTestId('chart')).toHaveLength(2)
+    expect(screen.getAllByTestId('chart')).toHaveLength(4)
 
     expect(
       screen.getAllByRole('link', { name: /View session/ }),
@@ -145,7 +145,7 @@ describe('actual administrator dashboard route', () => {
 
   it('filters urgent sessions and searches patient records', async () => {
     renderDashboard()
-    await screen.findByText('Synthetic condition')
+    await screen.findByRole('heading', { name: 'Synthetic condition' })
 
     fireEvent.click(
       screen.getByRole('button', {
@@ -154,7 +154,7 @@ describe('actual administrator dashboard route', () => {
       }),
     )
 
-    expect(screen.queryByText('Synthetic condition')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Synthetic condition' })).not.toBeInTheDocument()
 
     expect(
       screen.getByRole('link', { name: /View session/ }),
@@ -171,7 +171,7 @@ describe('actual administrator dashboard route', () => {
       target: { value: 'patient-a' },
     })
 
-    expect(screen.getByText('Synthetic condition')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Synthetic condition' })).toBeInTheDocument()
 
     expect(
       screen.getByRole('link', { name: /View session/ }),
@@ -180,7 +180,7 @@ describe('actual administrator dashboard route', () => {
 
   it('opens feedback and searches comments', async () => {
     renderDashboard()
-    await screen.findByText('Synthetic condition')
+    await screen.findByRole('heading', { name: 'Synthetic condition' })
 
     fireEvent.click(
       screen.getByRole('button', {

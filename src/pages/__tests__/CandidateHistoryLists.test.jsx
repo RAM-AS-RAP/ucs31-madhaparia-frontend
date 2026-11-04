@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import PatientHistoryPage from '../PatientHistoryPage'
 import AdminDashboardPage from '../AdminDashboardPage'
 import LanguageContext from '../../context/LanguageContextBase'
+import AuthContext from '../../context/AuthContextBase'
 import { getPatientHistory } from '../../services/history'
 import { getAdminHistory, getAdminFeedback } from '../../services/admin'
 import {
@@ -89,7 +90,9 @@ describe.each(pages)(
       return render(
         <LanguageContext.Provider value={{ language }}>
           <MemoryRouter>
-            <Page />
+            <AuthContext.Provider value={{ user: { id: 'test-admin', role: 'admin' } }}>
+              <Page />
+            </AuthContext.Provider>
           </MemoryRouter>
         </LanguageContext.Provider>,
       )

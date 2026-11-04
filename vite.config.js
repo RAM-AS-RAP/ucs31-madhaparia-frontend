@@ -25,6 +25,15 @@ export default defineConfig(({ command, mode }) => {
   return {
     plugins: [react()],
 
+    // Preserve Highcharts' ESM initialization order during development.
+    optimizeDeps: { exclude: ['highcharts'] },
+
+    // Highcharts registers base series before dependent series execute.
+    // Keep that order when the production bundler splits its ESM graph.
+    build: {
+      rolldownOptions: { output: { strictExecutionOrder: true } },
+    },
+
     test: {
       environment: 'jsdom',
       setupFiles: './src/test/setup.js',
