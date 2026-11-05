@@ -5,6 +5,7 @@ import { useAuth } from '../context/useAuth'
 import { getAuthToken } from '../services/authToken'
 import { useAdminMonitoringText } from '../i18n/adminMonitoringTranslations'
 import { useAdminUsersText } from '../i18n/adminUsersTranslations'
+import { useAdminSystemText } from '../i18n/adminSystemTranslations'
 import { ADMIN_RECORD_LIMIT, buildAdminAnalytics, filterByDate, isCalendarDate, isUrgentSession as isUrgent } from '../utils/adminAnalytics'
 
 import { getAdminFeedback, getAdminHistory } from '../services/admin'
@@ -28,6 +29,7 @@ function AdminDashboardPage() {
   const t = useAdminText()
   const m = useAdminMonitoringText()
   const usersText = useAdminUsersText()
+  const systemText = useAdminSystemText()
   const { user } = useAuth()
 
   const [history, setHistory] = useState([])
@@ -231,6 +233,7 @@ function AdminDashboardPage() {
           <p className="adm71-updated">{refreshedAt && m('updated', { time: formatDate(refreshedAt) })}</p>
           <div className="adm71-actions">
             <Link to="/admin/users" className="button button-secondary">{usersText('nav')}</Link>
+            <Link to="/admin/system" className="button button-secondary">{systemText('nav')}</Link>
             <button type="button" className="button button-secondary" onClick={() => setReload((value) => value + 1)}>{m('refresh')}</button>
           </div>
         </div>

@@ -106,10 +106,14 @@ function AppLayout() {
       ? [{
           to: '/admin',
           label: t('nav.admin'),
-          end: location.pathname.startsWith('/admin/users'),
+          end: ['/admin/users', '/admin/system'].some((path) => location.pathname.startsWith(path)),
         }, {
           to: '/admin/users',
           label: t('nav.users'),
+          end: true,
+        }, {
+          to: '/admin/system',
+          label: t('nav.system'),
           end: true,
         }]
       : []),
