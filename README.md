@@ -1,5 +1,7 @@
 # RespiraCare Frontend
 
+> **Merged release:** partner pages/features are preserved with V3 assessment, safety, explicit symptom corrections, optional duration context and saved-history rendering. See [merged setup and verification](MERGED_RELEASE.md). Set `VITE_API_BASE_URL` to the merged API before building; keep your own deployment URL for production.
+
 Frontend application for the **Respiratory Health Awareness and Prediction System**.
 
 RespiraCare is a health-awareness web application that allows users to enter respiratory symptoms, review recognised symptoms, confirm them, receive respiratory condition pattern predictions, view previous prediction sessions and provide feedback.

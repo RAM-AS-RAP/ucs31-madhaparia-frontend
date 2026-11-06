@@ -17,6 +17,13 @@ const labels = {
 
 export function getCandidateHistoryDisplay(item, language = 'en') {
   const assessment = item?.assessment
+  if (assessment?.contract_version === 2) {
+    const text = labels[language === 'sw' ? 'sw' : 'en']
+    const urgent = item.status === 'urgent_review'
+    const pattern = !urgent && item.status === 'research_pattern' ? assessment.research_pattern : null
+    return { label: urgent ? text.urgent : pattern ? (language === 'sw' ? 'Ulinganisho wa utafiti' : 'Research comparison') : text.insufficient,
+      prediction: pattern ? { condition: pattern.condition, display_name: `${language === 'sw' ? 'Mfumo wa utafiti' : 'Research pattern'}: ${pattern.display_name}` } : null, urgent }
+  }
 
   // Older V1/V2 records keep their existing presentation.
   if (assessment?.contract_version !== 1) return null

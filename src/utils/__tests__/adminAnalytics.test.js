@@ -15,6 +15,23 @@ const candidate = (overrides = {}) => session({ assessment: {
 } })
 
 describe('administrator monitoring aggregation', () => {
+  it('counts published V3 patterns without converting research scores to confidence percentages', () => {
+    const pattern = { condition: 'Influenza', display_name: 'FLU(influenza)' }
+    const result = session({ status: 'research_pattern', predictions: [], assessment: {
+      contract_version: 2, research_pattern: pattern,
+      research_rankings: [{ condition: 'Influenza', raw_relative_score: 0.95 }],
+      unmatched_wording: [], unsupported_symptoms: [],
+    } })
+    expect(publishedPrediction(result)).toEqual({ ...pattern, score: null })
+    const withheld = { ...result, status: 'insufficient_information' }
+    const urgent = { ...result, status: 'urgent_review' }
+    const a = buildAdminAnalytics([result, withheld, urgent], [])
+    expect(a.published).toBe(1)
+    expect(a.scored).toBe(0)
+    expect(a.confidence).toEqual([0, 0, 0, 0, 0])
+    expect(a.conditions).toEqual([{ name: 'FLU(influenza)', count: 1 }])
+    expect(a.nlpAvailable).toBe(3)
+  })
   it('reads the existing backend contract fixtures for legacy and candidate scores', () => {
     const a = buildAdminAnalytics([acceptedCandidate, legacyHistory, insufficientCandidate, urgentCandidate], [])
     expect(a.published).toBe(2)

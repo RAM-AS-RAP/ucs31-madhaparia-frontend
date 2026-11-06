@@ -1,11 +1,12 @@
 import api from './api'
 
-export async function saveUrgentReview(text, confirmedCodes, signal) {
+export async function saveUrgentReview(text, confirmedCodes, signal, corrections) {
   const response = await api.post(
     '/safety/reviews',
     {
       text,
       confirmed_codes: confirmedCodes,
+      ...(corrections?.length ? { corrections } : {}),
     },
     { signal },
   )

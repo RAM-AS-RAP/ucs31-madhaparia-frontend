@@ -30,7 +30,7 @@ export function useUrgentReviewSave() {
     setState(initialState())
   }
 
-  async function save(text, confirmedCodes) {
+  async function save(text, confirmedCodes, corrections) {
     if (pending.current) return
 
     const request = {
@@ -58,6 +58,7 @@ export function useUrgentReviewSave() {
         text,
         confirmedCodes,
         request.controller.signal,
+        corrections,
       )
 
       if (!isCurrentRequest()) return

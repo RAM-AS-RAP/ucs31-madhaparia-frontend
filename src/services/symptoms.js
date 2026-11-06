@@ -4,6 +4,9 @@ const MAPPING_KEY = 'respiracare_symptom_mapping'
 const CONFIRMATION_KEY = 'respiracare_symptom_confirmation'
 
 export async function mapSymptoms(text) {
+  const safety = await api.post('/safety/check', { text }, { skipAuth: true })
+  if (safety.data.has_red_flag) return safety.data
+
   const response = await api.post('/nlp/map', {
     text,
   })
@@ -14,12 +17,14 @@ export async function mapSymptoms(text) {
 export async function confirmSymptoms(
   text,
   confirmedCodes,
+  corrections,
 ) {
   const response = await api.post(
     '/symptoms/confirm',
     {
       text,
       confirmed_codes: confirmedCodes,
+      ...(corrections?.length ? { corrections } : {}),
     },
   )
 

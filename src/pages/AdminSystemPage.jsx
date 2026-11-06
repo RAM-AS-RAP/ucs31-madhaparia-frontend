@@ -38,6 +38,10 @@ function ModelPanel({ data }) {
       <div className="s73-evaluations">{['validation', 'test'].map((split) => <article className="s73-panel" key={split}>
         <h2>{t(split)}</h2><MetricPreview values={model[`${split}_metrics`]} />
       </article>)}</div>
+      {model.selection_evaluation && <details className="s73-help"><summary>{t('policyEvaluation')}</summary>
+        <p>{model.selection_evaluation.scope}</p><p>{model.selection_evaluation.policy_id}</p>
+        <MetricTable values={model.selection_evaluation} />
+      </details>}
       {Object.keys(model.sample_count_definitions || {}).length > 0 && <details className="s73-help"><summary>{t('sampleScope')}</summary>
         <dl>{Object.entries(model.sample_count_definitions).map(([key, value]) => <div key={key}><dt>{key.replaceAll('_', ' ')}</dt><dd>{value}</dd></div>)}</dl>
       </details>}

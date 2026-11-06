@@ -42,6 +42,21 @@ beforeEach(() => {
 })
 
 describe('administrator system management', () => {
+  it('shows the active research model and its selection-policy evidence without calling V3 a Random Forest', async () => {
+    getSystemSection.mockResolvedValue({ state: 'ready', model: { ...model.model,
+      name: 'Partial-evidence likelihood research', version: 'v3_partial_evidence',
+      validation_metrics: {}, test_metrics: {}, selection_evaluation: {
+        policy_id: 'ddxplus_selective_research_v1', scope: 'Synthetic-source research selection, not clinical accuracy.',
+        test: { up_to_3: { accepted_rows: 13911 } },
+      },
+    } })
+    show()
+    await screen.findByRole('heading', { name: 'Partial-evidence likelihood research' })
+    expect(screen.getByText('Active research model')).toBeInTheDocument()
+    expect(screen.queryByText('Active Random Forest')).not.toBeInTheDocument()
+    expect(screen.getByText('Recorded selection-policy evaluation')).toBeInTheDocument()
+    expect(screen.getByText('13911')).toBeInTheDocument()
+  })
   it('loads the protected route and active model rather than legacy model status', async () => {
     show('model', { route: true })
     await screen.findByRole('heading', { name: model.model.name }, { timeout: 10000 })

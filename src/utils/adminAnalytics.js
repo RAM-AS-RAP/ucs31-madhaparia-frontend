@@ -31,7 +31,12 @@ export function filterByDate(records, { from = '', to = '' } = {}) {
 
 // A session contributes only its published result, never a withheld ranking.
 export function publishedPrediction(item) {
-  if (isUrgentSession(item) || item.status !== 'prediction_complete') return null
+  if (isUrgentSession(item)) return null
+  if (item.assessment?.contract_version === 2) {
+    const pattern = item.status === 'research_pattern' ? item.assessment.research_pattern : null
+    return pattern ? { ...pattern, score: null } : null
+  }
+  if (item.status !== 'prediction_complete') return null
   const candidate = getCandidateHistoryDisplay(item)
   if (candidate) {
     const score = item.assessment.model_score
@@ -93,11 +98,11 @@ export function buildAdminAnalytics(history, feedback) {
       scored += 1
     }
   })
-  const context = history.filter((item) => item.assessment?.contract_version === 1 &&
+  const context = history.filter((item) => [1, 2].includes(item.assessment?.contract_version) &&
     Array.isArray(item.confirmed_codes) &&
-    ['unmatched_wording', 'unsupported_symptoms', 'clarification_required'].every(
+    ['unmatched_wording', 'unsupported_symptoms'].every(
       (field) => Array.isArray(item.assessment[field]),
-    ))
+    ) && (item.assessment.contract_version === 2 || Array.isArray(item.assessment.clarification_required)))
   return {
     urgent, nonUrgent: history.length - urgent, helpful, notHelpful,
     unrated: feedback.length - helpful - notHelpful,
@@ -109,7 +114,7 @@ export function buildAdminAnalytics(history, feedback) {
     nlp: [
       context.filter((item) => item.confirmed_codes.length > 0).length,
       ...['unmatched_wording', 'unsupported_symptoms', 'clarification_required'].map(
-        (field) => context.filter((item) => item.assessment[field].length > 0).length,
+        (field) => context.filter((item) => (item.assessment[field] || []).length > 0).length,
       ),
     ],
   }

@@ -8,6 +8,7 @@ import PredictionFeedback from '../components/PredictionFeedback'
 import { useLanguage } from '../context/useLanguage'
 import { useHistoryText } from '../i18n/historyTranslations'
 import CandidateAssessmentResult from '../components/CandidateAssessmentResult'
+import AwarenessResult from '../components/AwarenessResult'
 
 function formatDate(value, language, t) {
   if (!value) return t('dateUnavailable')
@@ -45,6 +46,9 @@ function PatientHistoryDetailPage() {
     let active = true
 
     async function loadSession() {
+      setLoading(true)
+      setError(null)
+      setSession(null)
       try {
         const data = await getPatientHistoryItem(predictionId)
 
@@ -299,7 +303,9 @@ function PatientHistoryDetailPage() {
         </section>
 
         {/* Saved candidate assessment, with fallback for older records */}
-        {session.assessment != null ? (
+        {session.assessment?.contract_version === 2 ? (
+          <AwarenessResult result={session} />
+        ) : session.assessment != null ? (
           <CandidateAssessmentResult
             result={
               urgent

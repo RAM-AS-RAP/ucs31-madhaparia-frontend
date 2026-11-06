@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../services/api'
 import { useLanguage } from '../context/useLanguage'
 import { useAdminText } from '../i18n/adminTranslations'
 import CandidateAssessmentResult from '../components/CandidateAssessmentResult'
+import AwarenessResult from '../components/AwarenessResult'
 
 function formatDate(value, language, t) {
   if (!value) return t('dateUnavailable')
@@ -40,6 +41,9 @@ function AdminHistoryDetailPage() {
     let active = true
 
     async function loadSession() {
+      setLoading(true)
+      setError(null)
+      setSession(null)
       try {
         const data = await getAdminHistoryItem(predictionId)
 
@@ -277,7 +281,9 @@ function AdminHistoryDetailPage() {
         </section>
 
         {/* Saved candidate assessment, with fallback for older records */}
-        {session.assessment != null ? (
+        {session.assessment?.contract_version === 2 ? (
+          <AwarenessResult result={session} admin />
+        ) : session.assessment != null ? (
           <CandidateAssessmentResult
             result={
               urgent

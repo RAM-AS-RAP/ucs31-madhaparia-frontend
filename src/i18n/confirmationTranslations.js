@@ -25,7 +25,7 @@ const messages = {
     selected: 'Selected',
     notSelected: 'Not selected',
     selectionHelp:
-      'Select a symptom to include it, or select it again to remove it. At least one symptom must remain selected.',
+      'Review what is present, denied, uncertain or about another person. Removing a selection is not the same as explicitly denying a symptom. Safety warnings are assessed separately.',
     noSelection:
       'Please confirm at least one symptom or return to the previous step and revise your description.',
     confirmError:
@@ -42,7 +42,7 @@ const messages = {
     complete: 'Confirmation complete',
     completeTitle: 'Your symptoms have been confirmed.',
     completeMessage:
-      'Only the symptoms you selected will be used in the next stage of the assessment.',
+      'Your selections and explicit corrections have been recorded. Denied, uncertain and other-person reports remain distinct; safety warnings are checked separately.',
     yourSelection: 'Your selection',
     confirmedTitle: 'Confirmed symptoms',
     confirmedCount: 'confirmed',
@@ -52,7 +52,7 @@ const messages = {
     next: 'Next step',
     predictionTitle: 'Generate your health-awareness result',
     predictionMessage:
-      'Provide your age and sex in the next step to continue to the preliminary single-condition prediction.',
+      'Provide your age and sex in the next step for a research symptom assessment. You may also supply duration. A specific disease may not be identifiable.',
     continue: 'Continue to prediction',
     reviewAgain: 'Review selections again',
     dashboard: 'Return to dashboard',
@@ -85,7 +85,7 @@ const messages = {
     selected: 'Imechaguliwa',
     notSelected: 'Haijachaguliwa',
     selectionHelp:
-      'Bonyeza dalili ili kuichagua au uibonyeze tena ili kuiondoa. Angalau dalili moja lazima ibaki imechaguliwa.',
+      'Hakiki dalili zilizopo, zilizokanushwa, zisizo na uhakika au za mtu mwingine. Kuondoa chaguo si kukataa dalili moja kwa moja. Dalili za hatari hukaguliwa kando.',
     noSelection:
       'Tafadhali thibitisha angalau dalili moja au rudi kwenye hatua iliyotangulia kurekebisha maelezo yako.',
     confirmError:
@@ -102,7 +102,7 @@ const messages = {
     complete: 'Uthibitisho umekamilika',
     completeTitle: 'Dalili zako zimethibitishwa.',
     completeMessage:
-      'Ni dalili ulizochagua pekee zitakazotumika katika hatua inayofuata ya tathmini.',
+      'Chaguo na marekebisho yako yamehifadhiwa. Taarifa zilizokanushwa, zisizo na uhakika na za mtu mwingine hubaki tofauti; hatari hukaguliwa kando.',
     yourSelection: 'Ulichochagua',
     confirmedTitle: 'Dalili zilizothibitishwa',
     confirmedCount: 'zimethibitishwa',
@@ -112,7 +112,7 @@ const messages = {
     next: 'Hatua inayofuata',
     predictionTitle: 'Pata matokeo ya uelewa wa afya',
     predictionMessage:
-      'Katika hatua inayofuata, weka umri na jinsi yako ili kuendelea na utabiri wa awali wa hali moja ya ugonjwa.',
+      'Weka umri na jinsi yako kwa tathmini ya utafiti ya dalili. Unaweza kuongeza muda wa dalili. Huenda ugonjwa maalumu usitambuliwe.',
     continue: 'Endelea kwenye utabiri',
     reviewAgain: 'Hakiki uchaguzi wako tena',
     dashboard: 'Rudi kwenye dashibodi',

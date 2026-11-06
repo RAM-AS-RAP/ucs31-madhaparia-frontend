@@ -8,6 +8,10 @@ export async function createPrediction({
   sex,
   text,
   confirmedCodes,
+  corrections,
+  durations,
+  language,
+  covid_test,
 }) {
   const response = await api.post(
     '/predict',
@@ -16,6 +20,10 @@ export async function createPrediction({
       sex,
       text,
       confirmed_codes: confirmedCodes,
+      ...(corrections ? { corrections } : {}),
+      ...(durations ? { durations } : {}),
+      ...(language ? { language } : {}),
+      ...(covid_test ? { covid_test } : {}),
     },
   )
 

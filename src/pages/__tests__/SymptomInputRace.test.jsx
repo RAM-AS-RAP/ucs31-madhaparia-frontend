@@ -8,16 +8,14 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import SymptomInputPage from '../SymptomInputPage'
-import api from '../../services/api'
+import { mapSymptoms } from '../../services/symptoms'
 
-vi.mock('../../services/api', async (importOriginal) => {
+vi.mock('../../services/symptoms', async (importOriginal) => {
   const actual = await importOriginal()
 
   return {
     ...actual,
-    default: {
-      post: vi.fn(),
-    },
+    mapSymptoms: vi.fn(),
   }
 })
 
@@ -97,7 +95,7 @@ describe('symptom recognition request isolation', () => {
 
   it('ignores an older response after the description changes', async () => {
     const oldRequest = deferred()
-    api.post.mockReturnValueOnce(oldRequest.promise)
+    mapSymptoms.mockReturnValueOnce(oldRequest.promise)
 
     renderPage()
     submitDescription(OLD_TEXT)
@@ -116,9 +114,7 @@ describe('symptom recognition request isolation', () => {
     ).toBeEnabled()
 
     await act(async () => {
-      oldRequest.resolve({
-        data: mappingFor(OLD_TEXT, 'cough', 'Cough'),
-      })
+      oldRequest.resolve(mappingFor(OLD_TEXT, 'cough', 'Cough'))
     })
 
     expect(screen.getByLabelText('Symptom description'))
@@ -136,7 +132,7 @@ describe('symptom recognition request isolation', () => {
     const oldRequest = deferred()
     const newRequest = deferred()
 
-    api.post
+    mapSymptoms
       .mockReturnValueOnce(oldRequest.promise)
       .mockReturnValueOnce(newRequest.promise)
 
@@ -144,12 +140,10 @@ describe('symptom recognition request isolation', () => {
     submitDescription(OLD_TEXT)
     submitDescription(NEW_TEXT)
 
-    expect(api.post).toHaveBeenCalledTimes(2)
+    expect(mapSymptoms).toHaveBeenCalledTimes(2)
 
     await act(async () => {
-      newRequest.resolve({
-        data: mappingFor(NEW_TEXT, 'fever', 'Fever'),
-      })
+      newRequest.resolve(mappingFor(NEW_TEXT, 'fever', 'Fever'))
     })
 
     expect(
@@ -157,9 +151,7 @@ describe('symptom recognition request isolation', () => {
     ).toBeInTheDocument()
 
     await act(async () => {
-      oldRequest.resolve({
-        data: mappingFor(OLD_TEXT, 'cough', 'Cough'),
-      })
+      oldRequest.resolve(mappingFor(OLD_TEXT, 'cough', 'Cough'))
     })
 
     expect(
@@ -178,7 +170,7 @@ describe('symptom recognition request isolation', () => {
     const oldRequest = deferred()
     const newRequest = deferred()
 
-    api.post
+    mapSymptoms
       .mockReturnValueOnce(oldRequest.promise)
       .mockReturnValueOnce(newRequest.promise)
 
@@ -202,9 +194,7 @@ describe('symptom recognition request isolation', () => {
     ).toBeDisabled()
 
     await act(async () => {
-      newRequest.resolve({
-        data: mappingFor(NEW_TEXT, 'fever', 'Fever'),
-      })
+      newRequest.resolve(mappingFor(NEW_TEXT, 'fever', 'Fever'))
     })
 
     expect(
@@ -216,7 +206,7 @@ describe('symptom recognition request isolation', () => {
 
   it('does not restore cached mapping after the page is unmounted', async () => {
     const oldRequest = deferred()
-    api.post.mockReturnValueOnce(oldRequest.promise)
+    mapSymptoms.mockReturnValueOnce(oldRequest.promise)
 
     const view = renderPage()
     submitDescription(OLD_TEXT)
@@ -224,9 +214,7 @@ describe('symptom recognition request isolation', () => {
     view.unmount()
 
     await act(async () => {
-      oldRequest.resolve({
-        data: mappingFor(OLD_TEXT, 'cough', 'Cough'),
-      })
+      oldRequest.resolve(mappingFor(OLD_TEXT, 'cough', 'Cough'))
     })
 
     expect(savedMapping()).toBeNull()
@@ -234,7 +222,7 @@ describe('symptom recognition request isolation', () => {
 
   it('ignores a response belonging to a previous authentication token', async () => {
     const oldRequest = deferred()
-    api.post.mockReturnValueOnce(oldRequest.promise)
+    mapSymptoms.mockReturnValueOnce(oldRequest.promise)
 
     renderPage()
     submitDescription(OLD_TEXT)
@@ -242,9 +230,7 @@ describe('symptom recognition request isolation', () => {
     sessionStorage.setItem(TOKEN_KEY, 'synthetic-token-B')
 
     await act(async () => {
-      oldRequest.resolve({
-        data: mappingFor(OLD_TEXT, 'cough', 'Cough'),
-      })
+      oldRequest.resolve(mappingFor(OLD_TEXT, 'cough', 'Cough'))
     })
 
     expect(savedMapping()).toBeNull()
@@ -256,9 +242,7 @@ describe('symptom recognition request isolation', () => {
   })
 
   it('clears all previous assessment data immediately when text is edited', async () => {
-    api.post.mockResolvedValueOnce({
-      data: mappingFor(OLD_TEXT, 'cough', 'Cough'),
-    })
+    mapSymptoms.mockResolvedValueOnce(mappingFor(OLD_TEXT, 'cough', 'Cough'))
 
     renderPage()
     submitDescription(OLD_TEXT)

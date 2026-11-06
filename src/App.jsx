@@ -23,6 +23,12 @@ import PredictionPage from './pages/PredictionPage'
 import PatientHistoryPage from './pages/PatientHistoryPage'
 import PatientHistoryDetailPage from './pages/PatientHistoryDetailPage'
 
+// Invalidate only transient assessment caches, never authentication or saved history.
+if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('respiracare_assessment_release') !== 'awareness-2') {
+  for (const key of ['respiracare_symptom_mapping', 'respiracare_symptom_confirmation', 'respiracare_prediction_result', 'respiracare_candidate_followup_v1']) sessionStorage.removeItem(key)
+  sessionStorage.setItem('respiracare_assessment_release', 'awareness-2')
+}
+
 // Load administrator pages only when needed.
 const AdminDashboardPage = lazy(
   () => import('./pages/AdminDashboardPage'),

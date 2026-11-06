@@ -14,16 +14,19 @@ import { getApiErrorMessage } from '../services/api'
 import { useConfirmationText } from '../i18n/confirmationTranslations'
 import UrgentReviewSaveStatus from '../components/UrgentReviewSaveStatus'
 import { useUrgentReviewSave } from '../hooks/useUrgentReviewSave'
+import { useLanguage } from '../context/useLanguage'
 
 function SymptomConfirmationPage() {
   const t = useConfirmationText()
+  const { language } = useLanguage()
+  const [corrections, setCorrections] = useState({})
     const urgentReview = useUrgentReviewSave()
 
   const mapping = getSavedSymptomMapping()
   const recognised = mapping?.recognised_symptoms || []
 
   const [selectedCodes, setSelectedCodes] = useState(
-    () => recognised.map((symptom) => symptom.code),
+    () => recognised.filter((s) => (!s.status || s.status === 'present') && s.reported_subject !== 'other_person').map((s) => s.code),
   )
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -50,7 +53,7 @@ function SymptomConfirmationPage() {
   async function handleConfirmation() {
     setError('')
 
-    if (selectedCodes.length === 0) {
+    if (selectedCodes.length === 0 && !mapping.mapping_version) {
       setError(t('noSelection'))
       return
     }
@@ -63,6 +66,7 @@ function SymptomConfirmationPage() {
       const confirmation = await confirmSymptoms(
         mapping.input_text,
         selectedCodes,
+        ...(Object.keys(corrections).length ? [Object.values(corrections)] : []),
       )
 
       setResult(confirmation)
@@ -72,6 +76,7 @@ function SymptomConfirmationPage() {
         void urgentReview.save(
           mapping.input_text,
           confirmation.confirmed_codes ?? selectedCodes,
+          confirmation.corrections,
         )
       }
     } catch (requestError) {
@@ -197,9 +202,9 @@ function SymptomConfirmationPage() {
                 )
 
                 return (
+                  <div key={symptom.code}>
                   <button
                     type="button"
-                    key={symptom.code}
                     className={`sym33-selection-row${
                       selected ? ' is-selected' : ''
                     }${
@@ -241,6 +246,25 @@ function SymptomConfirmationPage() {
                         : t('notSelected')}
                     </span>
                   </button>
+                  {mapping.mapping_version && (
+                    <label className="sym33-selection-description" style={{ display: 'block', padding: 12 }}>
+                      {language === 'sw' ? 'Maana ya taarifa: ' : 'Meaning of this report: '}
+                      <select aria-label={`Meaning of ${symptom.display_name}`} value={corrections[symptom.code]?.subject === 'other_person' ? 'other_person' : corrections[symptom.code]?.status || (symptom.reported_subject === 'other_person' ? 'other_person' : symptom.status)} disabled={loading}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          setCorrections((old) => ({ ...old, [symptom.code]: { code: symptom.code, status: value === 'other_person' ? 'unknown' : value, subject: value === 'other_person' ? 'other_person' : 'patient_or_unspecified' } }))
+                          setSelectedCodes((old) => value === 'present' ? [...new Set([...old, symptom.code])] : old.filter((c) => c !== symptom.code))
+                          setError(''); clearSymptomConfirmation(); clearPredictionResult()
+                        }}>
+                        <option value="present">{language === 'sw' ? 'Ninayo sasa' : 'Present for me now'}</option>
+                        <option value="absent">{language === 'sw' ? 'Sina sasa' : 'Not present now'}</option>
+                        <option value="unknown">{language === 'sw' ? 'Sina uhakika' : 'Not sure / unclear'}</option>
+                        <option value="other_person">{language === 'sw' ? 'Mtu mwingine' : 'Another person'}</option>
+                      </select>
+                      {symptom.context_only && <span>{language === 'sw' ? ' Muktadha tu; si kipengele cha utambuzi.' : ' Context only; not a trained disease feature.'}</span>}
+                    </label>
+                  )}
+                  </div>
                 )
               })}
             </div>
@@ -309,7 +333,7 @@ function SymptomConfirmationPage() {
                   {t('complete')}
                 </p>
 
-                <h2>{t('completeTitle')}</h2>
+                <h2>{result.mapping_version ? (language === 'sw' ? 'Taarifa yako imehakikiwa.' : 'Your report has been reviewed.') : t('completeTitle')}</h2>
                 <p>{t('completeMessage')}</p>
               </div>
             )}
@@ -321,6 +345,7 @@ function SymptomConfirmationPage() {
                   void urgentReview.save(
                     mapping.input_text,
                     result.confirmed_codes ?? selectedCodes,
+                    result.corrections,
                   )
                 }}
               />

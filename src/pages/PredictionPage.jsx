@@ -19,9 +19,12 @@ import { getApiErrorMessage } from '../services/api'
 import PredictionFeedback from '../components/PredictionFeedback'
 import { usePredictionText } from '../i18n/predictionTranslations'
 import CandidateAssessmentResult from '../components/CandidateAssessmentResult'
+import AwarenessResult from '../components/AwarenessResult'
+import { useLanguage } from '../context/useLanguage'
 
 function PredictionPage() {
   const t = usePredictionText()
+  const { language } = useLanguage()
 
   const mapping = getSavedSymptomMapping()
   const confirmation = getSavedSymptomConfirmation()
@@ -30,6 +33,14 @@ function PredictionPage() {
   const [sex, setSex] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [durationCode, setDurationCode] = useState('')
+  const [durationEntries, setDurationEntries] = useState({})
+  const durationDays = durationEntries[durationCode]?.amount ?? ''
+  const durationUnit = durationEntries[durationCode]?.unit ?? 'days'
+  const durationText = durationEntries[durationCode]?.text ?? ''
+  function updateDuration(field, value) {
+    setDurationEntries((old) => ({ ...old, [durationCode]: { ...old[durationCode], [field]: value } }))
+  }
 
   // Restore only a result belonging to the current symptoms.
   const [result, setResult] = useState(() => {
@@ -117,7 +128,7 @@ function PredictionPage() {
       return
     }
 
-    if (confirmedCodes.length === 0) {
+    if (confirmedCodes.length === 0 && !confirmation.mapping_version) {
       setError(t('errorSymptoms'))
       return
     }
@@ -132,6 +143,15 @@ function PredictionPage() {
         sex,
         text: mapping.input_text,
         confirmedCodes,
+        ...(confirmation.mapping_version || durationCode ? {
+          corrections: confirmation.corrections || [],
+          durations: Object.entries(durationEntries)
+            .filter(([, entry]) => entry.unit === 'unknown' || (entry.amount !== undefined && entry.amount !== '') || entry.text?.trim())
+            .map(([code, entry]) => entry.unit === 'unknown'
+              ? { code, unknown: true, text: entry.text?.trim() || null }
+              : { code, amount: entry.amount === undefined || entry.amount === '' ? null : Number(entry.amount), unit: entry.unit || 'days', text: entry.text?.trim() || null }),
+          language,
+        } : {}),
       })
 
       // Red-flag cases must never display disease predictions.
@@ -349,6 +369,27 @@ function PredictionPage() {
                     </div>
                   </div>
 
+                  <fieldset className="pred34-field" style={{ marginTop: 20 }}>
+                    <legend>{language === 'sw' ? 'Muda wa dalili (si lazima)' : 'Symptom duration (optional)'}</legend>
+                    <label htmlFor="duration-symptom">{language === 'sw' ? 'Dalili' : 'Symptom'}</label>
+                    <select id="duration-symptom" className="form-select" value={durationCode} onChange={(e) => setDurationCode(e.target.value)}>
+                      <option value="">{language === 'sw' ? 'Sina uhakika / haijatajwa' : 'Not sure / not supplied'}</option>
+                      {confirmedSymptoms.map((s) => <option key={s.code} value={s.code}>{s.display_name}</option>)}
+                    </select>
+                    <label htmlFor="duration-unit">{language === 'sw' ? 'Kipimo cha muda' : 'Duration unit'}</label>
+                    <select id="duration-unit" className="form-select" value={durationUnit} disabled={!durationCode} onChange={(e) => updateDuration('unit', e.target.value)}>
+                      <option value="days">{language === 'sw' ? 'Siku' : 'Days'}</option>
+                      <option value="weeks">{language === 'sw' ? 'Wiki' : 'Weeks'}</option>
+                      <option value="months">{language === 'sw' ? 'Miezi (takriban)' : 'Months (approximate)'}</option>
+                      <option value="unknown">{language === 'sw' ? 'Sina uhakika' : 'Not sure'}</option>
+                    </select>
+                    <label htmlFor="duration-days">{language === 'sw' ? 'Idadi, ikiwa inajulikana' : 'Duration amount, if known'}</label>
+                    <input id="duration-days" className="form-control" type="number" min="0" max={durationUnit === 'weeks' ? 521 : durationUnit === 'months' ? 120 : 3650} step="1" value={durationDays} disabled={!durationCode || durationUnit === 'unknown'} onChange={(e) => updateDuration('amount', e.target.value)} />
+                    <label htmlFor="duration-text">{language === 'sw' ? 'Au eleza muda kwa maneno' : 'Or describe the duration in words'}</label>
+                    <input id="duration-text" className="form-control" maxLength={100} value={durationText} disabled={!durationCode} onChange={(e) => updateDuration('text', e.target.value)} />
+                    <p>{language === 'sw' ? 'Unaweza kuchagua dalili nyingine; muda ulioandika unabaki. Muda hutumika kwa ushauri, si kubadilisha alama za modeli hii.' : 'Choose another symptom to record a different duration; previous entries are retained. Duration informs guidance, not this model’s scores. You can leave it unknown.'}</p>
+                  </fieldset>
+
                   <div className="pred34-input-note">
                     <strong>{t('whyRequired')}</strong>
                     <p>{t('requiredExplanation')}</p>
@@ -431,7 +472,9 @@ function PredictionPage() {
         {/* Prediction or urgent safety result */}
         {result && (
           <div className="pred34-results">
-            {result.assessment?.contract_version === 1 ? (
+            {result.assessment?.contract_version === 2 ? (
+              <AwarenessResult result={result} />
+            ) : result.assessment?.contract_version === 1 ? (
               <CandidateAssessmentResult
                 result={result}
                 confirmedSymptoms={confirmedSymptoms}

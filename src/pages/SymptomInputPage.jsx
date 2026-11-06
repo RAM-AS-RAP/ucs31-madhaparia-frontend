@@ -468,7 +468,7 @@ function SymptomInputPage() {
               </section>
             )}
 
-            {recognised.length > 0 && (
+            {(recognised.length > 0 || mapping.mapping_version) && (
               <div className="sym33-next">
                 <div>
                   <p className="sym33-section-kicker">

@@ -89,6 +89,19 @@ describe('Prediction API integration', () => {
     )
   })
 
+  it('forwards reported COVID test context to the API', async () => {
+    api.post.mockResolvedValueOnce({ data: v1Response })
+    const covid_test = { result: 'positive', test_type: 'pcr' }
+    await createPrediction({ ...request, covid_test })
+    expect(api.post).toHaveBeenCalledWith('/predict', {
+      age: request.age,
+      sex: request.sex,
+      text: request.text,
+      confirmed_codes: request.confirmedCodes,
+      covid_test,
+    })
+  })
+
   it('supports a V1 single prediction response', async () => {
     api.post.mockResolvedValueOnce({
       data: v1Response,
