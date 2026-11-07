@@ -513,7 +513,7 @@ function PatientHistoryDetailPage() {
 
         {/* Medical disclaimer */}
         <div className="hist35-bottom-note">
-          <div>
+          {session.assessment?.contract_version !== 2 && <div>
             <strong>
               {t('importantDisclaimer')}
             </strong>
@@ -522,7 +522,7 @@ function PatientHistoryDetailPage() {
               {session.disclaimer ||
                 t('historicalDisclaimer')}
             </p>
-          </div>
+          </div>}
 
           <Link to="/dashboard">
             {t('returnDashboard')}

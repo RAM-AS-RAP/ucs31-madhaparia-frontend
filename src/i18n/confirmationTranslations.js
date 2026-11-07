@@ -25,7 +25,7 @@ const messages = {
     selected: 'Selected',
     notSelected: 'Not selected',
     selectionHelp:
-      'Review what is present, denied, uncertain or about another person. Removing a selection is not the same as explicitly denying a symptom. Safety warnings are assessed separately.',
+      'Select only symptoms you have now. Use “Edit this symptom” if we misunderstood a report.',
     noSelection:
       'Please confirm at least one symptom or return to the previous step and revise your description.',
     confirmError:
@@ -85,7 +85,7 @@ const messages = {
     selected: 'Imechaguliwa',
     notSelected: 'Haijachaguliwa',
     selectionHelp:
-      'Hakiki dalili zilizopo, zilizokanushwa, zisizo na uhakika au za mtu mwingine. Kuondoa chaguo si kukataa dalili moja kwa moja. Dalili za hatari hukaguliwa kando.',
+      'Chagua dalili ulizo nazo sasa. Tumia “Rekebisha dalili hii” ikiwa tulielewa taarifa vibaya.',
     noSelection:
       'Tafadhali thibitisha angalau dalili moja au rudi kwenye hatua iliyotangulia kurekebisha maelezo yako.',
     confirmError:

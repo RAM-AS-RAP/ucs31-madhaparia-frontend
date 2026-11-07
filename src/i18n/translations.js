@@ -3,6 +3,7 @@ export const messages = {
   en: {
     // Navigation
     'nav.home': 'Home',
+    'nav.about': 'About & safety',
     'nav.settings': 'Settings',
     'nav.dashboard': 'Dashboard',
     'nav.admin': 'Admin',
@@ -28,6 +29,7 @@ export const messages = {
       'Respiratory health awareness supported by intelligent symptom analysis.',
     'footer.explore': 'Explore',
     'footer.exploreApp': 'Explore RespiraCare',
+    'footer.about': 'About & safety information',
     'footer.account': 'Account overview',
     'footer.signin': 'Sign in',
     'footer.createAccount': 'Create an account',
@@ -182,6 +184,7 @@ export const messages = {
   sw: {
     // Navigation
     'nav.home': 'Mwanzo',
+    'nav.about': 'Kuhusu na usalama',
     'nav.settings': 'Mipangilio',
     'nav.dashboard': 'Dashibodi',
     'nav.admin': 'Usimamizi',
@@ -207,6 +210,7 @@ export const messages = {
       'Uelewa wa afya ya mfumo wa upumuaji kwa msaada wa uchanganuzi wa dalili.',
     'footer.explore': 'Gundua',
     'footer.exploreApp': 'Gundua RespiraCare',
+    'footer.about': 'Kuhusu na taarifa za usalama',
     'footer.account': 'Muhtasari wa akaunti',
     'footer.signin': 'Ingia',
     'footer.createAccount': 'Fungua akaunti',

@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -159,6 +160,37 @@ describe('Symptom confirmation workflow', () => {
     )
 
     expect(api.post).not.toHaveBeenCalled()
+  })
+
+  it('keeps report corrections optional and submits an explicit correction when chosen', async () => {
+    sessionStorage.setItem('respiracare_symptom_mapping', JSON.stringify({
+      ...mapping,
+      mapping_version: 'v3',
+      recognised_symptoms: [
+        { ...mapping.recognised_symptoms[0], status: 'present', reported_subject: 'patient_or_unspecified' },
+        { ...mapping.recognised_symptoms[1], status: 'absent', reported_subject: 'patient_or_unspecified' },
+      ],
+    }))
+    api.post.mockResolvedValueOnce({ data: {
+      safety_status: 'continue', confirmed_codes: ['fever', 'cough'],
+      confirmed_symptoms: mapping.recognised_symptoms, rejected_symptoms: [],
+    } })
+
+    renderConfirmationPage()
+    expect(screen.queryByRole('combobox', { name: /Meaning of/ })).not.toBeInTheDocument()
+    const editControls = screen.getAllByText('Edit this symptom')
+    expect(editControls).toHaveLength(2)
+    fireEvent.click(editControls[1])
+    fireEvent.click(within(screen.getByRole('group', { name: 'Report about Cough' }))
+      .getByRole('radio', { name: 'I have this now' }))
+    clickConfirm()
+
+    await screen.findByText('Confirmation complete')
+    expect(api.post).toHaveBeenCalledWith('/symptoms/confirm', {
+      text: mapping.input_text,
+      confirmed_codes: ['fever', 'cough'],
+      corrections: [{ code: 'cough', status: 'present', subject: 'patient_or_unspecified' }],
+    })
   })
 
   it('shows urgent guidance before saving finishes, then links to the saved review', async () => {

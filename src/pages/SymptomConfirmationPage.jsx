@@ -20,7 +20,7 @@ function SymptomConfirmationPage() {
   const t = useConfirmationText()
   const { language } = useLanguage()
   const [corrections, setCorrections] = useState({})
-    const urgentReview = useUrgentReviewSave()
+  const urgentReview = useUrgentReviewSave()
 
   const mapping = getSavedSymptomMapping()
   const recognised = mapping?.recognised_symptoms || []
@@ -43,11 +43,30 @@ function SymptomConfirmationPage() {
     clearSymptomConfirmation()
     clearPredictionResult()
 
-    setSelectedCodes((current) =>
-      current.includes(code)
-        ? current.filter((item) => item !== code)
-        : [...current, code],
-    )
+    if (!selectedCodes.includes(code) && mapping.mapping_version) {
+      const symptom = recognised.find((item) => item.code === code)
+      const currentStatus = corrections[code]?.status || symptom?.status
+      if (currentStatus !== 'present' || corrections[code]?.subject === 'other_person' || symptom?.reported_subject === 'other_person') {
+        setCorrections((old) => ({ ...old, [code]: { code, status: 'present', subject: 'patient_or_unspecified' } }))
+      }
+    }
+    setSelectedCodes((current) => current.includes(code)
+      ? current.filter((item) => item !== code)
+      : [...current, code])
+  }
+
+  function correctSymptom(code, value) {
+    setCorrections((old) => ({ ...old, [code]: {
+      code,
+      status: value === 'other_person' ? 'unknown' : value,
+      subject: value === 'other_person' ? 'other_person' : 'patient_or_unspecified',
+    } }))
+    setSelectedCodes((old) => value === 'present'
+      ? [...new Set([...old, code])]
+      : old.filter((item) => item !== code))
+    setError('')
+    clearSymptomConfirmation()
+    clearPredictionResult()
   }
 
   async function handleConfirmation() {
@@ -247,22 +266,31 @@ function SymptomConfirmationPage() {
                     </span>
                   </button>
                   {mapping.mapping_version && (
-                    <label className="sym33-selection-description" style={{ display: 'block', padding: 12 }}>
-                      {language === 'sw' ? 'Maana ya taarifa: ' : 'Meaning of this report: '}
-                      <select aria-label={`Meaning of ${symptom.display_name}`} value={corrections[symptom.code]?.subject === 'other_person' ? 'other_person' : corrections[symptom.code]?.status || (symptom.reported_subject === 'other_person' ? 'other_person' : symptom.status)} disabled={loading}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          setCorrections((old) => ({ ...old, [symptom.code]: { code: symptom.code, status: value === 'other_person' ? 'unknown' : value, subject: value === 'other_person' ? 'other_person' : 'patient_or_unspecified' } }))
-                          setSelectedCodes((old) => value === 'present' ? [...new Set([...old, symptom.code])] : old.filter((c) => c !== symptom.code))
-                          setError(''); clearSymptomConfirmation(); clearPredictionResult()
-                        }}>
-                        <option value="present">{language === 'sw' ? 'Ninayo sasa' : 'Present for me now'}</option>
-                        <option value="absent">{language === 'sw' ? 'Sina sasa' : 'Not present now'}</option>
-                        <option value="unknown">{language === 'sw' ? 'Sina uhakika' : 'Not sure / unclear'}</option>
-                        <option value="other_person">{language === 'sw' ? 'Mtu mwingine' : 'Another person'}</option>
-                      </select>
-                      {symptom.context_only && <span>{language === 'sw' ? ' Muktadha tu; si kipengele cha utambuzi.' : ' Context only; not a trained disease feature.'}</span>}
-                    </label>
+                    <details className="sym33-correction">
+                      <summary>{language === 'sw' ? 'Rekebisha dalili hii' : 'Edit this symptom'}</summary>
+                      <fieldset disabled={loading}>
+                        <legend>{language === 'sw' ? `Taarifa ya ${symptom.display_name}` : `Report about ${symptom.display_name}`}</legend>
+                        {[
+                          ['present', language === 'sw' ? 'Ninayo sasa' : 'I have this now'],
+                          ['absent', language === 'sw' ? 'Sina sasa' : 'I do not have this now'],
+                          ['unknown', language === 'sw' ? 'Sina uhakika' : 'I am not sure'],
+                          ['other_person', language === 'sw' ? 'Ni ya mtu mwingine' : 'This is about another person'],
+                        ].map(([value, label]) => (
+                          <label key={value}>
+                            <input
+                              type="radio"
+                              name={`symptom-report-${symptom.code}`}
+                              value={value}
+                              checked={(corrections[symptom.code]?.subject === 'other_person'
+                                ? 'other_person'
+                                : corrections[symptom.code]?.status || (symptom.reported_subject === 'other_person' ? 'other_person' : symptom.status)) === value}
+                              onChange={() => correctSymptom(symptom.code, value)}
+                            />
+                            <span>{label}</span>
+                          </label>
+                        ))}
+                      </fieldset>
+                    </details>
                   )}
                   </div>
                 )

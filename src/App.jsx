@@ -10,6 +10,7 @@ import AppLayout from './layouts/AppLayout'
 
 import AccessDeniedPage from './pages/AccessDeniedPage'
 import HomePage from './pages/HomePage'
+import AboutPage from './pages/AboutPage'
 import LoginPage from './pages/LoginPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -64,6 +65,8 @@ function App() {
           path="/"
           element={<HomePage />}
         />
+
+        <Route path="/about" element={<AboutPage />} />
 
         <Route
           path="/login"

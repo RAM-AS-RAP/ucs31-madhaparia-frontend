@@ -91,6 +91,11 @@ function AppLayout() {
       end: true,
     },
     {
+      to: '/about',
+      label: t('nav.about'),
+      end: true,
+    },
+    {
       to: '/settings',
       label: t('nav.settings'),
       end: true,
@@ -403,6 +408,10 @@ function AppLayout() {
               >
                 <Link to="/">
                   {t('footer.exploreApp')}
+                </Link>
+
+                <Link to="/about">
+                  {t('footer.about')}
                 </Link>
 
                 {isAuthenticated ? (

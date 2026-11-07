@@ -252,7 +252,7 @@ function PredictionPage() {
         {/* Assessment form */}
         {!result && (
           <div className="row g-4 pred34-workspace">
-            <div className="col-12 col-lg-8">
+            <div className="col-12">
               <section
                 className="pred34-panel"
                 aria-labelledby="pred34-form-title"
@@ -369,6 +369,8 @@ function PredictionPage() {
                     </div>
                   </div>
 
+                  <details className="pred34-optional-detail pred34-duration-detail">
+                    <summary>{language === 'sw' ? 'Ongeza muda wa dalili (si lazima)' : 'Add symptom duration (optional)'}</summary>
                   <fieldset className="pred34-field" style={{ marginTop: 20 }}>
                     <legend>{language === 'sw' ? 'Muda wa dalili (si lazima)' : 'Symptom duration (optional)'}</legend>
                     <label htmlFor="duration-symptom">{language === 'sw' ? 'Dalili' : 'Symptom'}</label>
@@ -387,13 +389,14 @@ function PredictionPage() {
                     <input id="duration-days" className="form-control" type="number" min="0" max={durationUnit === 'weeks' ? 521 : durationUnit === 'months' ? 120 : 3650} step="1" value={durationDays} disabled={!durationCode || durationUnit === 'unknown'} onChange={(e) => updateDuration('amount', e.target.value)} />
                     <label htmlFor="duration-text">{language === 'sw' ? 'Au eleza muda kwa maneno' : 'Or describe the duration in words'}</label>
                     <input id="duration-text" className="form-control" maxLength={100} value={durationText} disabled={!durationCode} onChange={(e) => updateDuration('text', e.target.value)} />
-                    <p>{language === 'sw' ? 'Unaweza kuchagua dalili nyingine; muda ulioandika unabaki. Muda hutumika kwa ushauri, si kubadilisha alama za modeli hii.' : 'Choose another symptom to record a different duration; previous entries are retained. Duration informs guidance, not this model’s scores. You can leave it unknown.'}</p>
+                    <p>{language === 'sw' ? 'Muda unaweza kusaidia ushauri, lakini haubadilishi alama ya ulinganisho.' : 'Duration may inform guidance, but it does not change the comparison score.'}</p>
                   </fieldset>
+                  </details>
 
-                  <div className="pred34-input-note">
-                    <strong>{t('whyRequired')}</strong>
+                  <details className="pred34-input-note pred34-optional-detail">
+                    <summary>{t('whyRequired')}</summary>
                     <p>{t('requiredExplanation')}</p>
-                  </div>
+                  </details>
 
                   {error && (
                     <div
@@ -432,40 +435,6 @@ function PredictionPage() {
               </section>
             </div>
 
-            {/* What happens next */}
-            <div className="col-12 col-lg-4">
-              <aside className="pred34-aside">
-                <p className="pred34-kicker">
-                  {t('before')}
-                </p>
-
-                <h2>{t('whatNext')}</h2>
-
-                {[
-                  ['step1Title', 'step1Text'],
-                  ['step2Title', 'step2Text'],
-                  ['step3Title', 'step3Text'],
-                ].map(([title, description], index) => (
-                  <div
-                    className="pred34-aside-step"
-                    key={title}
-                  >
-                    <span>
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-
-                    <div>
-                      <strong>{t(title)}</strong>
-                      <p>{t(description)}</p>
-                    </div>
-                  </div>
-                ))}
-
-                <p className="pred34-aside-footnote">
-                  {t('asideNote')}
-                </p>
-              </aside>
-            </div>
           </div>
         )}
 
@@ -666,13 +635,13 @@ function PredictionPage() {
             )}
 
             {/* Medical disclaimer */}
-            <section
+            {result.assessment?.contract_version !== 2 && <section
               className="pred34-disclaimer"
               aria-label={t('disclaimerLabel')}
             >
               <strong>{t('important')}</strong>
               <p>{result.disclaimer}</p>
-            </section>
+            </section>}
 
             {/* Existing prediction feedback */}
             <div className="pred34-feedback">

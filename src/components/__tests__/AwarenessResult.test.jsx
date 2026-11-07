@@ -58,7 +58,7 @@ describe('Awareness release results', () => {
     render(<AwarenessResult result={withTest} />)
     expect(screen.getByText(/Reported COVID test/)).toBeInTheDocument()
     expect(screen.getByText(/Positive \(pcr\)/)).toBeInTheDocument()
-    expect(screen.getByText(/reported context only, not a model prediction/)).toBeInTheDocument()
+    expect(screen.getByText(/information you provided/)).toBeInTheDocument()
     expect(screen.queryByText(/90%/)).not.toBeInTheDocument()
     expect(screen.queryByLabelText('Your test result')).not.toBeInTheDocument()
   })
@@ -82,25 +82,37 @@ describe('Awareness release results', () => {
   it('shows an eligible research pattern as FLU(influenza), without a personal probability', () => {
     const eligible = { ...result, status: 'research_pattern', assessment: { ...result.assessment,
       covid_testing_recommended: false, flu_scope: 'Influenza scope',
-      research_pattern: { condition: 'Influenza', display_name: 'FLU(influenza)', description: 'A research-pattern comparison.' } } }
+      research_pattern: { condition: 'Influenza', display_name: 'FLU(influenza)', description: 'A research-pattern comparison.', comparison_score_percent: 83.21 } } }
     render(<AwarenessResult result={eligible} />)
     expect(screen.getByRole('heading', { name: 'FLU(influenza)', exact: true })).toBeInTheDocument()
-    expect(screen.getByText('Tentative research pattern — not a diagnosis')).toBeInTheDocument()
-    expect(screen.queryByText(/90%/)).not.toBeInTheDocument()
+    expect(screen.getByText('Possible symptom pattern')).toBeInTheDocument()
+    expect(screen.getByText('83.21%')).toBeInTheDocument()
+    expect(screen.getByText('Symptom comparison score')).toBeInTheDocument()
+    expect(screen.getByText(/not your chance of having this illness/)).toBeInTheDocument()
+    expect(screen.queryByText('v3_partial_evidence')).not.toBeInTheDocument()
     expect(getCandidateHistoryDisplay(eligible).label).toBe('Research comparison')
     expect(screen.getByText('What does FLU(influenza) mean?')).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: /COVID/ })).not.toBeInTheDocument()
   })
 
-  it('uses the original result introduction, condition/sidebar columns and separate guidance without a score meter', () => {
+  it('keeps the patient result concise and reserves technical details for administrators', () => {
     const eligible = { ...result, status: 'research_pattern', assessment: { ...result.assessment,
-      research_pattern: { condition: 'Influenza', display_name: 'FLU(influenza)', description: 'Research comparison.' } } }
+      research_pattern: { condition: 'Influenza', display_name: 'FLU(influenza)', description: 'Research comparison.', comparison_score_percent: 83.21 } } }
     const { container } = render(<AwarenessResult result={eligible} />)
     expect(container.querySelector('.pred34-result-intro h2')).toHaveTextContent('Your health-awareness result')
-    expect(container.querySelector('.row.g-4 > .col-12.col-lg-8 .pred34-condition-top h3')).toHaveTextContent('FLU(influenza)')
-    expect(container.querySelector('.row.g-4 > .col-12.col-lg-4 .pred34-confidence-note')).toBeInTheDocument()
+    expect(container.querySelector('.pred34-condition-top h3')).toHaveTextContent('FLU(influenza)')
+    expect(container.querySelector('.pred34-confidence-note')).not.toBeInTheDocument()
     expect(container.querySelector('.pred34-guidance h3')).toHaveTextContent('What to do next')
-    expect(container.querySelector('.pred34-confidence-value')).not.toBeInTheDocument()
+    expect(container.querySelector('.pred34-confidence-value')).toHaveTextContent('83.21%')
     expect(container.querySelector('.pred34-confidence-track')).not.toBeInTheDocument()
+  })
+
+  it('never shows a score for a withheld or urgent outcome', () => {
+    const withPattern = { ...result, assessment: { ...result.assessment,
+      research_pattern: { condition: 'Influenza', display_name: 'FLU(influenza)', comparison_score_percent: 83.21 } } }
+    const { rerender } = render(<AwarenessResult result={withPattern} />)
+    expect(screen.queryByText('83.21%')).not.toBeInTheDocument()
+    rerender(<AwarenessResult result={{ ...withPattern, status: 'urgent_review' }} />)
+    expect(screen.queryByText('83.21%')).not.toBeInTheDocument()
   })
 })
