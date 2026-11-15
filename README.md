@@ -8,6 +8,23 @@ RespiraCare is a health-awareness web application that allows users to enter res
 
 The application is intended for **health-awareness and educational purposes only**. It does not provide a medical diagnosis.
 
+## RespiraCare Web Application Preview
+
+<picture>
+  <source media="(prefers-reduced-motion: reduce)" srcset="docs/media/respiracare-preview.png">
+  <img src="docs/media/respiracare-preview.gif" width="100%" alt="Animated RespiraCare web application showcase featuring bilingual symptom entry, symptom confirmation, respiratory awareness results, prediction history, administrator monitoring and responsive layouts.">
+</picture>
+
+[View Static Preview](docs/media/respiracare-preview.png)
+
+This preview follows the implemented patient and administrator interfaces. Public screens were captured from the live website; protected screens were captured from the local frontend using documented, fictional API responses. The sample assessment is illustrative, not a live model prediction. [Capture details](docs/media/README.md).
+
+## Live Web Application
+
+[Open RespiraCare](https://krishna-respira-care.onrender.com/)
+
+RespiraCare is a responsive web application accessible through modern desktop, tablet and mobile browsers.
+
 ---
 
 ## Features
