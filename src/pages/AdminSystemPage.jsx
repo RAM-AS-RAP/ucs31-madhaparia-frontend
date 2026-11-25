@@ -24,12 +24,13 @@ function MetricTable({ values }) {
 function ModelPanel({ data }) {
   const t = useAdminSystemText()
   const model = data.model
+  const isV3 = model?.version === 'v3_partial_evidence'
   return <div className="s73-model">
     <article className="s73-model-hero">
       <span className={`s73-badge ${data.state === 'ready' ? 'is-good' : 'is-warning'}`}>{t(data.state)}</span>
       <p className="s73-kicker">{t('activeModel')}</p>
-      <h2>{model?.name || t(data.state)}</h2>
-      {model && <><p className="s73-version">{t('version')} {model.version}</p>
+      <h2>{isV3 ? t('v3ModelName') : model?.name || t(data.state)}</h2>
+      {model && <><p className="s73-version">{t('version')} {isV3 ? 'V3' : model.version}</p>
         <div className="s73-stats">{[['features', model.feature_count], ['conditions', model.class_count], ['training', model.training_samples], ['validation', model.validation_samples], ['test', model.test_samples]].map(([key, value]) =>
           <div key={key}><strong>{Number(value).toLocaleString()}</strong><span>{t(key)}</span></div>)}</div></>}
     </article>

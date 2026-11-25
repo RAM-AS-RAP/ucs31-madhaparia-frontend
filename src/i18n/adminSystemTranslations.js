@@ -40,6 +40,7 @@ const messages = {
   runtime_unavailable: ['Model runtime unavailable or inconsistent', 'Mfumo wa modeli haupatikani au haulingani'],
   unsupported_version: ['Unsupported active version', 'Toleo linalotumika halitumiki'],
   activeModel: ['Active research model', 'Modeli ya utafiti inayotumika'], features: ['Features', 'Vipengele'], conditions: ['Conditions', 'Magonjwa'],
+  v3ModelName: ['V3 random forest model', 'Modeli ya Random Forest V3'],
   policyEvaluation: ['Recorded selection-policy evaluation', 'Tathmini iliyorekodiwa ya sera ya uteuzi'],
   training: ['Training samples', 'Sampuli za mafunzo'], validation: ['Validation', 'Uthibitishaji'], test: ['Test', 'Jaribio'],
   metrics: ['Recorded evaluation', 'Tathmini zilizorekodiwa'], metric: ['Metric / scope', 'Kipimo / wigo'], value: ['Recorded value', 'Thamani iliyorekodiwa'],

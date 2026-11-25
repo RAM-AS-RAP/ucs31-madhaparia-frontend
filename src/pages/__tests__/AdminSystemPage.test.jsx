@@ -42,7 +42,7 @@ beforeEach(() => {
 })
 
 describe('administrator system management', () => {
-  it('shows the active research model and its selection-policy evidence without calling V3 a Random Forest', async () => {
+  it('shows the requested V3 display name and version with its selection-policy evidence', async () => {
     getSystemSection.mockResolvedValue({ state: 'ready', model: { ...model.model,
       name: 'Partial-evidence likelihood research', version: 'v3_partial_evidence',
       validation_metrics: {}, test_metrics: {}, selection_evaluation: {
@@ -51,7 +51,10 @@ describe('administrator system management', () => {
       },
     } })
     show()
-    await screen.findByRole('heading', { name: 'Partial-evidence likelihood research' })
+    await screen.findByRole('heading', { name: 'V3 random forest model' })
+    expect(screen.getByText('Version V3')).toBeInTheDocument()
+    expect(screen.queryByText('Partial-evidence likelihood research')).not.toBeInTheDocument()
+    expect(screen.queryByText(/v3_partial_evidence/)).not.toBeInTheDocument()
     expect(screen.getByText('Active research model')).toBeInTheDocument()
     expect(screen.queryByText('Active Random Forest')).not.toBeInTheDocument()
     expect(screen.getByText('Recorded selection-policy evaluation')).toBeInTheDocument()
